@@ -7,6 +7,11 @@ import { gifBox } from "./ui/media.js";
 import { SESSION_DURATIONS } from "@shared/domain/profile.js";
 import { EQUIPMENT_CATEGORIES, defaultLocations } from "@shared/domain/locations.js";
 import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
+import { catalogToAppView } from "@shared/data/exercises/exerciseCatalog.js";
+import { ChestLibraryService } from "@shared/services/exercises/ChestLibraryService.js";
+import { FavoriteService } from "@shared/services/favorites/FavoriteService.js";
+import { bootChestLibrary, handleChestAction } from "./pages/exercises/index.js";
+import { renderExerciseDetail, handleDetailAction } from "./pages/exercises/detail.js";
 
   const S = store.get();
   const root = () => document.getElementById("app");
@@ -35,7 +40,8 @@ import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
     play: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
     plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
     check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m5 12 5 5 9-10"/></svg>',
-    star: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 2.7 6.4L21 10l-4.5 4.2L17.6 21 12 17.8 6.4 21l1.1-6.8L3 10l6.3-.6z"/></svg>'
+    star: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 2.7 6.4L21 10l-4.5 4.2L17.6 21 12 17.8 6.4 21l1.1-6.8L3 10l6.3-.6z"/></svg>',
+    search: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>'
   };
 
   function $(sel, el) { return (el || document).querySelector(sel); }
@@ -69,6 +75,7 @@ import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
     if (!S.favorites) S.favorites = [];
     if (!S.favoriteWorkouts) S.favoriteWorkouts = [];
     if (!S.feedback) S.feedback = {};
+    if (!S.analytics) S.analytics = [];
     if (!S.bodyMeasures) S.bodyMeasures = { height: null, weight: null, weightGoal: null };
     if (!S.connectedApps) S.connectedApps = { appleHealth: "disconnected", strava: "disconnected" };
     if (!S.settings) S.settings = { restDefault: 90, sound: true, language: "pt-BR", reminders: false };
@@ -172,10 +179,44 @@ import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
     return false;
   }
 
+  function pageCtx() {
+    const id = route().a;
+    return {
+      root,
+      nav,
+      icons: I,
+      exTab,
+      history: S.history,
+      liked: S.feedback[id],
+      similar: ChestLibraryService.all().filter((x) => x.id !== id && x.category === "peito"),
+      resolveView(viewId) { return D.byId[viewId]; },
+      registerCatalog: registerChestCatalog,
+      setTab(tab) { exTab = tab; }
+    };
+  }
+
+  function registerChestCatalog() {
+    ChestLibraryService.all().forEach((ex) => {
+      const view = catalogToAppView(ex);
+      if (!view) return;
+      D.byId[ex.id] = view;
+      if (ex.sourceId) D.byId[ex.sourceId] = view;
+      if (!D.exercises.some((item) => item.id === view.id)) D.exercises.push(view);
+    });
+  }
+
   function render() {
     if (guarded()) return;
     ensureDomain();
     const r = route();
+    if (r.name === "library" && r.a === "peito") {
+      bootChestLibrary(pageCtx());
+      return;
+    }
+    if (r.name === "exercicios") {
+      exercise();
+      return;
+    }
     const map = {
       splash: splash, login: login, onboarding: onboarding, home: home, plan: home,
       workouts: workouts, library: library, exercise: exercise, progress: progress,
@@ -452,68 +493,29 @@ import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
       if (route().name === "library") library();
     } catch (err) {
       if (lib.loadedFor !== key) return;
-      lib.data = [];
+      const cached = D.exercises.filter((ex) => {
+        if (filters.bodyPart && ex.bodyPartRaw && ex.bodyPartRaw !== filters.bodyPart) return false;
+        if (filters.equipment && ex.eq !== filters.equipment && ex.equipment !== filters.equipment) return false;
+        if (filters.q) {
+          const hay = ((ex.name || "") + " " + (ex.originalName || "")).toLowerCase();
+          if (hay.indexOf(filters.q.toLowerCase()) < 0) return false;
+        }
+        return true;
+      });
+      lib.data = cached.slice(0, lib.page * 20);
+      lib.pagination = { page: lib.page, limit: 20, total: cached.length, totalPages: Math.max(1, Math.ceil(cached.length / 20)) };
       if (route().name === "library") library();
     }
   }
 
   function exercise() {
     const id = route().a;
-    const e = D.byId[id];
-    if (!e) {
-      root().innerHTML = `<div class="screen rise">${top("Exercício", "#/library")}<p class="muted">Carregando...</p></div>${nav("library")}`;
-      LF_API.getById(id).then((res) => {
-        if (res && res.data) D.mergeCatalog([res.data]);
-        if (route().name === "exercise" && route().a === id) exercise();
-      }).catch(() => go("#/library"));
-      return;
-    }
-    const liked = S.feedback[e.id];
-    const fav = (S.favorites || []).includes(e.id);
-    const similar = D.exercises.filter((x) => x.muscle === e.muscle && x.id !== e.id).slice(0, 6);
-    const historyFor = (S.history || []).filter((h) => h.name && e.name && h.name.toLowerCase().indexOf(e.name.toLowerCase()) >= 0);
-    root().innerHTML = `<div class="screen rise">
-      <div class="topbar">
-        <button class="back-btn" data-go="#/library">${I.back}</button>
-        <h1 class="page-title grow">${e.name}</h1>
-        <button class="icon-btn" data-act="fav-ex" data-id="${e.id}">${fav ? "★" : "☆"}</button>
-      </div>
-      ${gifBox(e, "gif-lg")}
-      <p class="kicker mt-12">${e.bodyPart || muscleLabel(e.muscle)} · ${e.equipment || ""}</p>
-      <h2 style="margin:4px 0 8px">${e.name}</h2>
-      <p class="tiny mb-8">Como você gostaria que recomendássemos este exercício?</p>
-      <div class="feedback-row">
-        <button class="${liked === "liked" ? "on" : ""}" data-act="ex-fb" data-v="liked">👍</button>
-        <button class="${liked === "disliked" ? "on" : ""}" data-act="ex-fb" data-v="disliked">👎</button>
-      </div>
-      <div class="ex-tabs">
-        <button class="${exTab === "muscle" ? "on" : ""}" data-act="ex-tab" data-v="muscle">Músculo</button>
-        <button class="${exTab === "instructions" ? "on" : ""}" data-act="ex-tab" data-v="instructions">Instruções</button>
-        <button class="${exTab === "equipment" ? "on" : ""}" data-act="ex-tab" data-v="equipment">Equipamento</button>
-        <button class="${exTab === "analytics" ? "on" : ""}" data-act="ex-tab" data-v="analytics">Analytics</button>
-      </div>
-      ${exTab === "muscle" ? `
-        <p class="section-title">Primário</p>
-        <div class="card mb-12"><b>${e.target || e.bodyPart || muscleLabel(e.muscle)}</b></div>
-        <p class="section-title">Secundário</p>
-        ${(e.secondary && e.secondary.length) ? e.secondary.map((m) => `<div class="card mb-8"><b>${m}</b></div>`).join("") : `<p class="muted">Sem músculos secundários.</p>`}
-      ` : ""}
-      ${exTab === "instructions" ? `
-        <ol class="muted" style="padding-left:18px;display:flex;flex-direction:column;gap:8px">
-          ${(e.steps && e.steps.length) ? e.steps.map((s) => `<li>${s}</li>`).join("") : "<li>Sem instruções neste exercício.</li>"}
-        </ol>
-      ` : ""}
-      ${exTab === "equipment" ? `<div class="card"><b>${e.equipment || "Não informado"}</b><p class="tiny mt-8">Fonte ExerciseDB · equipments</p></div>` : ""}
-      ${exTab === "analytics" ? `
-        ${historyFor.length ? `<p class="muted">${historyFor.length} registros neste aparelho.</p>` : `<div class="empty">Ainda não há dados</div>`}
-      ` : ""}
-      <p class="section-title">Exercícios similares</p>
-      <div class="list mb-12">${similar.map((x) => `<button class="item" data-go="#/exercise/${x.id}">
-        ${gifBox(x, "gif-thumb")}<div><h4>${x.name}</h4><p>${x.equipment}</p></div>
-      </button>`).join("") || `<p class="muted">Sem similares no catálogo carregado.</p>`}</div>
-      <button class="btn btn-ghost btn-block mb-8" data-act="replace-from-detail" data-id="${e.id}">Substituir</button>
-      <button class="btn btn-red btn-block" data-act="start-one" data-id="${e.id}">Treinar este exercício</button>
-    </div>${nav("library")}`;
+    if (renderExerciseDetail(pageCtx(), id)) return;
+    root().innerHTML = `<div class="screen rise">${top("Exercício", "#/library")}<p class="muted">Carregando...</p></div>${nav("library")}`;
+    LF_API.getById(id).then((res) => {
+      if (res && res.data) D.mergeCatalog([res.data]);
+      if ((route().name === "exercise" || route().name === "exercicios") && route().a === id) exercise();
+    }).catch(() => go("#/library"));
   }
 
   function progress() {
@@ -1075,6 +1077,8 @@ import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
       lib.loadedFor = "";
       library();
     }
+    if (handleChestAction(act, t, pageCtx())) return;
+    if ((route().name === "exercise" || route().name === "exercicios") && handleDetailAction(act, t, pageCtx())) return;
     if (act === "ex-tab") { exTab = t.dataset.v; exercise(); }
     if (act === "ex-fb") {
       const id = route().a;
@@ -1087,13 +1091,13 @@ import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
       const alt = D.exercises.find((x) => x && e && x.muscle === e.muscle && x.id !== e.id);
       if (alt) go("#/exercise/" + alt.id);
     }
-    if (act === "fav-ex") {
-      const id = t.dataset.id;
-      const i = S.favorites.indexOf(id);
-      if (i >= 0) S.favorites.splice(i, 1);
-      else S.favorites.push(id);
-      persist();
-      exercise();
+    if (act === "fav-ex" || act === "fav-card") {
+      ev.preventDefault();
+      ev.stopPropagation();
+      FavoriteService.toggle(t.dataset.id);
+      if (route().name === "library" && route().a === "peito") bootChestLibrary(pageCtx());
+      else if (route().name === "exercise" || route().name === "exercicios") exercise();
+      else if (route().name === "library") library();
     }
     if (act === "add-saved-plan") {
       const c = S.custom.find((x) => x.id === t.dataset.id);
@@ -1155,7 +1159,8 @@ import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
       if (c) buildLive(c.name, c.items);
     }
     if (act === "start-one") {
-      const e = D.byId[t.dataset.id];
+      const e = D.byId[t.dataset.id] || catalogToAppView(ChestLibraryService.get(t.dataset.id));
+      if (!e) return;
       buildLive(e.name, [{ id: e.id, sets: e.sets, reps: e.reps, kg: e.kg, rest: e.rest }]);
     }
     if (act === "start-program") {
@@ -1177,6 +1182,10 @@ import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
       library();
     }
     if (act === "f-muscle-art") {
+      if (t.dataset.v === "peito") {
+        go("#/library/peito");
+        return;
+      }
       const art = muscleArt(t.dataset.v);
       filters.bodyPart = (art && art.bodyPart) || "";
       filters.targetMuscle = (art && art.targetMuscle) || "";
@@ -1367,8 +1376,14 @@ import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
     } catch (e) {}
     await refreshFilters();
     await hydrateCatalog();
+    try {
+      await ChestLibraryService.hydrate();
+      registerChestCatalog();
+    } catch (e) {
+      registerChestCatalog();
+    }
     if (syncUi.running) startSyncPoll();
-    if (route().name === "library" || route().name === "sync" || route().name === "home") render();
+    if (route().name === "library" || route().name === "sync" || route().name === "home" || route().name === "exercicios" || route().name === "exercise") render();
   }
 
   function init() {
@@ -1376,6 +1391,7 @@ import { muscleArt, MUSCLE_ART } from "@shared/domain/muscle-art.js";
     root().addEventListener("click", onClick);
     root().addEventListener("change", onInput);
     root().addEventListener("input", onInput);
+    registerChestCatalog();
     if (!location.hash) location.hash = S.session ? "#/home" : "#/splash";
     else render();
     bootFromApi();

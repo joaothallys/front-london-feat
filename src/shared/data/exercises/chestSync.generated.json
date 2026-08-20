@@ -1,0 +1,391 @@
+{
+  "updatedAt": "2026-08-20T14:09:10.224Z",
+  "total": 47,
+  "matched": 41,
+  "unmatched": [
+    "supino-reto-pausa-barra",
+    "flexao-braco-fechada",
+    "supino-reto-halteres-solo",
+    "voador-inclinado-maquina",
+    "flexao-braco-elastico",
+    "flexao-braco-rotacao-tronco"
+  ],
+  "exercises": [
+    {
+      "id": "crucifixo-peitoral-maquina",
+      "displayName": "Crucifixo Peitoral Máquina",
+      "sourceId": "v3xmPAR",
+      "sourceName": "lever seated fly",
+      "gifUrl": "https://static.exercisedb.dev/media/v3xmPAR.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-inclinado-halteres",
+      "displayName": "Supino Inclinado com Halteres",
+      "sourceId": "ns0SIbU",
+      "sourceName": "dumbbell incline bench press",
+      "gifUrl": "https://static.exercisedb.dev/media/ns0SIbU.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-reto-maquina",
+      "displayName": "Supino Reto Máquina",
+      "sourceId": "DOoWcnA",
+      "sourceName": "lever chest press",
+      "gifUrl": "https://static.exercisedb.dev/media/DOoWcnA.gif",
+      "matched": true
+    },
+    {
+      "id": "crucifixo-polia-alta",
+      "displayName": "Crucifixo na Polia Alta",
+      "sourceId": "j7XMAyn",
+      "sourceName": "cable upper chest crossovers",
+      "gifUrl": "https://static.exercisedb.dev/media/j7XMAyn.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-inclinado-maquina",
+      "displayName": "Supino Inclinado Máquina",
+      "sourceId": "jHAnWmT",
+      "sourceName": "lever incline chest press",
+      "gifUrl": "https://static.exercisedb.dev/media/jHAnWmT.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-reto-barra",
+      "displayName": "Supino Reto com Barra",
+      "sourceId": "EIeI8Vf",
+      "sourceName": "barbell bench press",
+      "gifUrl": "https://static.exercisedb.dev/media/EIeI8Vf.gif",
+      "matched": true
+    },
+    {
+      "id": "crucifixo-peitoral-halteres",
+      "displayName": "Crucifixo Peitoral com Halteres",
+      "sourceId": "yz9nUhF",
+      "sourceName": "dumbbell fly",
+      "gifUrl": "https://static.exercisedb.dev/media/yz9nUhF.gif",
+      "matched": true
+    },
+    {
+      "id": "crucifixo-polia-baixa",
+      "displayName": "Crucifixo Polia Baixa",
+      "sourceId": "FVmZVhk",
+      "sourceName": "cable low fly",
+      "gifUrl": "https://static.exercisedb.dev/media/FVmZVhk.gif",
+      "matched": true
+    },
+    {
+      "id": "crucifixo-supino-declinado-polia-media",
+      "displayName": "Crucifixo Supino Declinado Polia Média",
+      "sourceId": "7saC5zz",
+      "sourceName": "cable decline fly",
+      "gifUrl": "https://static.exercisedb.dev/media/7saC5zz.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-declinado-maquina",
+      "displayName": "Supino Declinado Máquina",
+      "sourceId": "vsVoPHt",
+      "sourceName": "lever decline chest press",
+      "gifUrl": "https://static.exercisedb.dev/media/vsVoPHt.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-declinado-barra",
+      "displayName": "Supino Declinado com Barra",
+      "sourceId": "GrO65fd",
+      "sourceName": "barbell decline bench press",
+      "gifUrl": "https://static.exercisedb.dev/media/GrO65fd.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-declinado-halteres",
+      "displayName": "Supino Declinado com Halteres",
+      "sourceId": "DwhEmmE",
+      "sourceName": "dumbbell decline bench press",
+      "gifUrl": "https://static.exercisedb.dev/media/DwhEmmE.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-inclinado-barra",
+      "displayName": "Supino Inclinado com Barra",
+      "sourceId": "3TZduzM",
+      "sourceName": "barbell incline bench press",
+      "gifUrl": "https://static.exercisedb.dev/media/3TZduzM.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-reto-halteres-banco",
+      "displayName": "Supino Reto com Halteres no Banco",
+      "sourceId": "SpYC0Kp",
+      "sourceName": "dumbbell bench press",
+      "gifUrl": "https://static.exercisedb.dev/media/SpYC0Kp.gif",
+      "matched": true
+    },
+    {
+      "id": "pullover-halteres",
+      "displayName": "Pullover com Halteres",
+      "sourceId": "9XjtHvS",
+      "sourceName": "dumbbell pullover",
+      "gifUrl": "https://static.exercisedb.dev/media/9XjtHvS.gif",
+      "matched": true
+    },
+    {
+      "id": "flexao-braco",
+      "displayName": "Flexão de Braço",
+      "sourceId": "I4hDWkc",
+      "sourceName": "push-up",
+      "gifUrl": "https://static.exercisedb.dev/media/I4hDWkc.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-fechado-halteres",
+      "displayName": "Supino Fechado com Halteres",
+      "sourceId": "7gdLIXa",
+      "sourceName": "dumbbell lying hammer press",
+      "gifUrl": "https://static.exercisedb.dev/media/7gdLIXa.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-reto-deitado-maquina",
+      "displayName": "Supino Reto Deitado na Máquina",
+      "sourceId": "wDN97Ca",
+      "sourceName": "machine inner chest press",
+      "gifUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-reto-pausa-barra",
+      "displayName": "Supino Reto com Pausa na Barra",
+      "sourceId": "",
+      "sourceName": "",
+      "gifUrl": "",
+      "matched": false
+    },
+    {
+      "id": "paralelas",
+      "displayName": "Paralelas",
+      "sourceId": "9WTm7dq",
+      "sourceName": "chest dip",
+      "gifUrl": "https://static.exercisedb.dev/media/9WTm7dq.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-inclinado-smith",
+      "displayName": "Supino Inclinado Smith",
+      "sourceId": "5v7KYld",
+      "sourceName": "smith incline bench press",
+      "gifUrl": "https://static.exercisedb.dev/media/5v7KYld.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-reto-halteres-pegada-neutra",
+      "displayName": "Supino Reto com Halteres (Pegada Neutra)",
+      "sourceId": "7gdLIXa",
+      "sourceName": "dumbbell lying hammer press",
+      "gifUrl": "https://static.exercisedb.dev/media/7gdLIXa.gif",
+      "matched": true
+    },
+    {
+      "id": "crucifixo-peitoral-inclinado-halteres",
+      "displayName": "Crucifixo Peitoral Inclinado com Halteres",
+      "sourceId": "ESOd5Pl",
+      "sourceName": "dumbbell incline fly",
+      "gifUrl": "https://static.exercisedb.dev/media/ESOd5Pl.gif",
+      "matched": true
+    },
+    {
+      "id": "flexao-braco-declinada",
+      "displayName": "Flexão de Braço Declinada",
+      "sourceId": "i5cEhka",
+      "sourceName": "decline push-up",
+      "gifUrl": "https://static.exercisedb.dev/media/i5cEhka.gif",
+      "matched": true
+    },
+    {
+      "id": "flexao-braco-fechada",
+      "displayName": "Flexão de Braço Fechada",
+      "sourceId": "",
+      "sourceName": "",
+      "gifUrl": "",
+      "matched": false
+    },
+    {
+      "id": "flexao-braco-inclinada-caixa",
+      "displayName": "Flexão de Braço Inclinada na Caixa",
+      "sourceId": "F7vjXqT",
+      "sourceName": "incline push-up (on box)",
+      "gifUrl": "https://static.exercisedb.dev/media/F7vjXqT.gif",
+      "matched": true
+    },
+    {
+      "id": "flexao-ombro-bosu",
+      "displayName": "Flexão de Ombro no Bosu",
+      "sourceId": "wVompEp",
+      "sourceName": "push up on bosu ball",
+      "gifUrl": "https://static.exercisedb.dev/media/wVompEp.gif",
+      "matched": true
+    },
+    {
+      "id": "flexao-braco-ajoelhado",
+      "displayName": "Flexão de Braço Ajoelhado",
+      "sourceId": "ZOuKWir",
+      "sourceName": "kneeling push-up (male)",
+      "gifUrl": "https://static.exercisedb.dev/media/ZOuKWir.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-alternado-chao-kettlebell",
+      "displayName": "Supino Alternado no Chão com Kettlebell",
+      "sourceId": "7w6i0vE",
+      "sourceName": "kettlebell alternating press on floor",
+      "gifUrl": "https://static.exercisedb.dev/media/7w6i0vE.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-reto-halteres-solo",
+      "displayName": "Supino Reto com Halteres no Solo",
+      "sourceId": "",
+      "sourceName": "",
+      "gifUrl": "",
+      "matched": false
+    },
+    {
+      "id": "voador-inclinado-maquina",
+      "displayName": "Voador Inclinado na Máquina",
+      "sourceId": "",
+      "sourceName": "",
+      "gifUrl": "",
+      "matched": false
+    },
+    {
+      "id": "voador-em-pe",
+      "displayName": "Voador em Pé",
+      "sourceId": "WbNq5Xu",
+      "sourceName": "lever standing chest press",
+      "gifUrl": "https://static.exercisedb.dev/media/WbNq5Xu.gif",
+      "matched": true
+    },
+    {
+      "id": "crucifixo-deitado-polia",
+      "displayName": "Crucifixo Deitado na Polia",
+      "sourceId": "lJJ7Yq8",
+      "sourceName": "cable lying fly",
+      "gifUrl": "https://static.exercisedb.dev/media/lJJ7Yq8.gif",
+      "matched": true
+    },
+    {
+      "id": "flexao-braco-elastico",
+      "displayName": "Flexão de Braço com Elástico",
+      "sourceId": "",
+      "sourceName": "",
+      "gifUrl": "",
+      "matched": false
+    },
+    {
+      "id": "flexao-braco-palmas",
+      "displayName": "Flexão de Braço com Palmas",
+      "sourceId": "wigSg76",
+      "sourceName": "clap push up",
+      "gifUrl": "https://static.exercisedb.dev/media/wigSg76.gif",
+      "matched": true
+    },
+    {
+      "id": "flexao-braco-rotacao-tronco",
+      "displayName": "Flexão de Braço com Rotação de Tronco",
+      "sourceId": "",
+      "sourceName": "",
+      "gifUrl": "",
+      "matched": false
+    },
+    {
+      "id": "supino-declinado-smith",
+      "displayName": "Supino Declinado Smith",
+      "sourceId": "ETZfAbZ",
+      "sourceName": "smith decline bench press",
+      "gifUrl": "https://static.exercisedb.dev/media/ETZfAbZ.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-reto-polia",
+      "displayName": "Supino Reto na Polia",
+      "sourceId": "7xI5MXA",
+      "sourceName": "cable bench press",
+      "gifUrl": "https://static.exercisedb.dev/media/7xI5MXA.gif",
+      "matched": true
+    },
+    {
+      "id": "flexao-braco-unilateral",
+      "displayName": "Flexão de Braço Unilateral",
+      "sourceId": "MUic5zN",
+      "sourceName": "single arm push-up",
+      "gifUrl": "https://static.exercisedb.dev/media/MUic5zN.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-reto-unilateral-halteres",
+      "displayName": "Supino Reto Unilateral com Halteres",
+      "sourceId": "zGSIWQi",
+      "sourceName": "dumbbell lying one arm press",
+      "gifUrl": "https://static.exercisedb.dev/media/zGSIWQi.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-reto-smith",
+      "displayName": "Supino Reto Smith",
+      "sourceId": "trqKQv2",
+      "sourceName": "smith bench press",
+      "gifUrl": "https://static.exercisedb.dev/media/trqKQv2.gif",
+      "matched": true
+    },
+    {
+      "id": "supino-em-pe-elastico",
+      "displayName": "Supino em Pé com Elástico",
+      "sourceId": "c16nYGA",
+      "sourceName": "band one arm twisting chest press",
+      "gifUrl": "https://static.exercisedb.dev/media/c16nYGA.gif",
+      "matched": true
+    },
+    {
+      "id": "voador-inclinado-polia",
+      "displayName": "Voador Inclinado na Polia",
+      "sourceId": "tBWXbIT",
+      "sourceName": "cable incline fly",
+      "gifUrl": "https://static.exercisedb.dev/media/tBWXbIT.gif",
+      "matched": true
+    },
+    {
+      "id": "burpee-com-salto",
+      "displayName": "Burpee com Salto",
+      "sourceId": "dK9394r",
+      "sourceName": "burpee",
+      "gifUrl": "https://static.exercisedb.dev/media/dK9394r.gif",
+      "matched": true
+    },
+    {
+      "id": "alongamento-horizontal-flexao-sentado-inclinando",
+      "displayName": "Alongamento Horizontal e Flexão Sentado Inclinando",
+      "sourceId": "RoV1Rfa",
+      "sourceName": "assisted seated pectoralis major stretch with stability ball",
+      "gifUrl": "https://static.exercisedb.dev/media/RoV1Rfa.gif",
+      "matched": true
+    },
+    {
+      "id": "alongamento-peitoral-acima-cabeca",
+      "displayName": "Alongamento de Peitoral Acima da Cabeça",
+      "sourceId": "QoHIhPl",
+      "sourceName": "behind head chest stretch",
+      "gifUrl": "https://static.exercisedb.dev/media/QoHIhPl.gif",
+      "matched": true
+    },
+    {
+      "id": "crossover-na-polia",
+      "displayName": "Crossover na Polia",
+      "sourceId": "0CXGHya",
+      "sourceName": "cable cross-over variation",
+      "gifUrl": "https://static.exercisedb.dev/media/0CXGHya.gif",
+      "matched": true
+    }
+  ]
+}

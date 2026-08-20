@@ -36,14 +36,28 @@ export function onGifError(img) {
   if (!img || img.dataset.fallbackTried === "1") return;
   img.dataset.fallbackTried = "1";
   const box = img.parentNode;
-  if (box) box.classList.add("gif-fallback");
+  if (box) {
+    box.classList.add("gif-fallback");
+    box.classList.add("lf-placeholder");
+  }
   const name = img.getAttribute("data-q") || img.alt || "";
   lookup(name).then((url) => {
-    if (!url || !img.isConnected) return;
+    if (!url || !img.isConnected) {
+      if (img) img.removeAttribute("src");
+      return;
+    }
     img.onload = () => {
-      if (box) box.classList.remove("gif-fallback");
+      if (box) {
+        box.classList.remove("gif-fallback");
+        box.classList.remove("lf-placeholder");
+      }
+    };
+    img.onerror = () => {
+      img.removeAttribute("src");
     };
     img.src = url;
+  }).catch(() => {
+    if (img) img.removeAttribute("src");
   });
 }
 

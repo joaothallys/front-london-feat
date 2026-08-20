@@ -18,8 +18,17 @@ export const MUSCLE_ART = [
 
 const ALIASES = {
   chest: "peito",
+  peitoral: "peito",
+  pectorals: "peito",
   back: "costas",
   shoulders: "ombros",
+  ombro: "ombros",
+  delts: "ombros",
+  deltoides: "ombros",
+  deltoide: "ombros",
+  "deltoide anterior": "ombros",
+  "deltóide": "ombros",
+  "deltóide anterior": "ombros",
   "upper arms": "biceps",
   "lower arms": "antebracos",
   waist: "abdomen",
@@ -29,6 +38,10 @@ const ALIASES = {
   panturrilhas: "panturrilha",
   bracos: "biceps",
   pernas: "quadriceps",
+  tricep: "triceps",
+  "tríceps": "triceps",
+  bicep: "biceps",
+  "bíceps": "biceps"
 };
 
 export function muscleArt(id) {
@@ -39,4 +52,16 @@ export function muscleArt(id) {
     ...item,
     url: "/assets/muscles/" + item.file
   };
+}
+
+export function resolveMuscleArt(name) {
+  const raw = String(name || "").trim();
+  const art = muscleArt(raw) || muscleArt(raw.toLowerCase());
+  if (art) return art;
+  const folded = raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const byLabel = MUSCLE_ART.find((item) => {
+    const label = item.label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return label === folded || folded.indexOf(label) >= 0 || label.indexOf(folded) >= 0;
+  });
+  return byLabel ? muscleArt(byLabel.id) : muscleArt("peito");
 }

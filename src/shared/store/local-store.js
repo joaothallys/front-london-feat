@@ -23,6 +23,7 @@ function blank() {
     favorites: [],
     favoriteWorkouts: [],
     feedback: {},
+    analytics: [],
     bodyMeasures: { height: null, weight: null, weightGoal: null },
     connectedApps: { appleHealth: "disconnected", strava: "disconnected" },
     planDay: 0
