@@ -20,6 +20,7 @@ import { GifPreview } from "../../src/components/GifPreview.js";
 import { HapticPressable } from "../../src/components/HapticPressable.js";
 import { useAppState } from "../../src/state/AppState.js";
 import { useLive } from "../../src/state/LiveSession.js";
+import { ensure } from "@shared/services/exercises/LondonExercise.js";
 import { exerciseOf, mediaUrl } from "../../src/catalog.js";
 import { colors } from "../../src/theme.js";
 import { warmGif } from "../../src/media/GifCache.js";
@@ -41,6 +42,16 @@ export default function Home() {
     if (!SessionService.hasToken()) return;
     SessionService.syncActivePlan(state).then(() => refresh()).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const gender = state.profile && state.profile.gender;
+    const missing = items.filter((it) => {
+      const e = exerciseOf(it.id);
+      return e && e._stub;
+    });
+    if (!missing.length) return;
+    Promise.all(missing.map((it) => ensure(it.id, gender))).then(() => refresh()).catch(() => {});
+  }, [items]);
 
   useEffect(() => {
     items.slice(0, 2).forEach((it) => {

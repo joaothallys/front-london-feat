@@ -1,5 +1,5 @@
 import { api } from "../../api/client.js";
-import { EXERCISEDB_OSS_BASE, normalizeRemoteExercise } from "./ExerciseDBTypes.js";
+import { normalizeRemoteExercise } from "./ExerciseDBTypes.js";
 
 const memory = new Map();
 const TTL = 10 * 60 * 1000;
@@ -17,23 +17,6 @@ function readCache(key) {
     return null;
   }
   return hit.value;
-}
-
-async function getJson(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("HTTP " + res.status);
-  return res.json();
-}
-
-async function fromOss(params) {
-  const q = new URLSearchParams();
-  if (params.search) q.set("search", params.search);
-  if (params.bodyPart) q.set("bodyPart", params.bodyPart);
-  if (params.equipment) q.set("equipment", params.equipment);
-  q.set("limit", String(params.limit || 100));
-  q.set("offset", String(params.offset || 0));
-  const json = await getJson(EXERCISEDB_OSS_BASE + "/exercises?" + q.toString());
-  return (json.data || []).map(normalizeRemoteExercise);
 }
 
 async function fromBackend(params) {
@@ -65,11 +48,7 @@ export const ExerciseDBService = {
     try {
       return cached(key, await fromBackend(params || {}));
     } catch (err) {
-      try {
-        return cached(key, await fromOss(params || {}));
-      } catch (fallbackErr) {
-        return [];
-      }
+      return [];
     }
   },
 
@@ -94,13 +73,11 @@ export const ExerciseDBService = {
       const rows = await fromBackend({ id });
       return cached(key, rows[0] || null);
     } catch (err) {
-      const rows = await fromOss({ search: id, limit: 10 });
-      const found = rows.find((row) => row.sourceId === id) || rows[0] || null;
-      return cached(key, found);
+      return cached(key, null);
     }
   },
 
-  gifUrl(sourceId) {
-    return sourceId ? "https://static.exercisedb.dev/media/" + sourceId + ".gif" : "";
+  gifUrl() {
+    return "";
   }
 };

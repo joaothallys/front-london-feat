@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useRef } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { colors } from "../theme.js";
 
 const ITEM_H = 40;
@@ -27,14 +28,13 @@ function nearestIndex(values, value) {
   return best;
 }
 
-function format(value) {
-  return Number.isInteger(value) ? String(value) : String(value);
-}
-
 export function NumberWheel({ value, min, max, step = 1, onChange }) {
   const values = useMemo(() => range(min, max, step), [min, max, step]);
+  const [cur, setCur] = useState(Number(value) || 0);
+  const onChangeRef = useRef(onChange);
   const ref = useRef(null);
   const pad = ITEM_H * Math.floor(VISIBLE / 2);
+  onChangeRef.current = onChange;
 
   useEffect(() => {
     const i = nearestIndex(values, Number(value) || 0);
@@ -45,10 +45,21 @@ export function NumberWheel({ value, min, max, step = 1, onChange }) {
     });
   }, []);
 
+  function apply(next) {
+    setCur(next);
+    if (onChangeRef.current) onChangeRef.current(next);
+  }
+
   function commit(y) {
     const i = Math.max(0, Math.min(values.length - 1, Math.round(y / ITEM_H)));
     const next = values[i];
-    if (next !== value) onChange(next);
+    if (next !== cur) apply(next);
+  }
+
+  function pick(i) {
+    const next = values[i];
+    if (ref.current) ref.current.scrollTo({ y: i * ITEM_H, animated: true });
+    if (next !== cur) apply(next);
   }
 
   return (
@@ -58,16 +69,18 @@ export function NumberWheel({ value, min, max, step = 1, onChange }) {
         ref={ref}
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_H}
+        snapToAlignment="start"
         decelerationRate="fast"
         nestedScrollEnabled
+        scrollEventThrottle={16}
         contentContainerStyle={{ paddingVertical: pad }}
         onMomentumScrollEnd={(ev) => commit(ev.nativeEvent.contentOffset.y)}
         onScrollEndDrag={(ev) => commit(ev.nativeEvent.contentOffset.y)}
       >
-        {values.map((n) => (
-          <View key={String(n)} style={styles.item}>
-            <Text style={[styles.txt, Math.abs(n - value) < 0.001 && styles.txtOn]}>{format(n)}</Text>
-          </View>
+        {values.map((n, i) => (
+          <Pressable key={String(n)} style={styles.item} onPress={() => pick(i)}>
+            <Text style={[styles.txt, Math.abs(n - cur) < 0.001 && styles.txtOn]}>{String(n)}</Text>
+          </Pressable>
         ))}
       </ScrollView>
     </View>

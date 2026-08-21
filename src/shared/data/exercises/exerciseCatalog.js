@@ -142,6 +142,7 @@ export function getCatalogByCategory(category) {
   if (category === "ombros") return shoulderCatalog.slice();
   if (category === "biceps") return bicepsCatalog.slice();
   if (category === "peito") return chestCatalog.slice();
+  if (category === "triceps" || category === "gluteos" || category === "pernas") return [];
   return allCatalog.slice();
 }
 

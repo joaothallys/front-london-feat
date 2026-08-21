@@ -6,6 +6,7 @@ import { translateBody, translateEquipment, translateInstructions, translateMusc
     { id: "ombros", label: "Ombros", body: "shoulders" },
     { id: "biceps", label: "Bíceps", body: "upper arms" },
     { id: "triceps", label: "Tríceps", body: "upper arms" },
+    { id: "pernas", label: "Pernas", body: "upper legs" },
     { id: "quadriceps", label: "Quadríceps", body: "upper legs" },
     { id: "posterior", label: "Posterior", body: "upper legs" },
     { id: "gluteos", label: "Glúteos", body: "upper legs" },

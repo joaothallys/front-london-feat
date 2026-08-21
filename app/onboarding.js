@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
-import { Button, Field, Kicker, Screen, Title } from "../src/components/ui.js";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Button, Field } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
 import { colors } from "../src/theme.js";
 
@@ -48,56 +49,64 @@ export default function Onboarding() {
   }
 
   return (
-    <Screen noNav>
-      <View style={styles.dots}>
-        {[0, 1, 2, 3, 4].map((i) => <View key={i} style={[styles.dot, i <= step && styles.dotOn]} />)}
+    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+      <View style={styles.header}>
+        <View style={styles.dots}>
+          {[0, 1, 2, 3, 4].map((i) => <View key={i} style={[styles.dot, i <= step && styles.dotOn]} />)}
+        </View>
+        <Text style={styles.kicker}>Plano com IA</Text>
       </View>
-      <Kicker>Plano com IA</Kicker>
-      {step === 0 ? (
-        <>
-          <Title>Como podemos te chamar?</Title>
-          <Field label="Nome" value={name} onChangeText={setName} autoCapitalize="words" />
-        </>
-      ) : null}
-      {step === 1 ? (
-        <>
-          <Title>Você é homem ou mulher?</Title>
-          {GENDERS.map(([v, t, d]) => (
-            <Choice key={v} title={t} desc={d} on={gender === v} onPress={() => setGender(v)} />
-          ))}
-        </>
-      ) : null}
-      {step === 2 ? (
-        <>
-          <Title>Qual é o seu objetivo?</Title>
-          {GOALS.map(([v, t, d]) => (
-            <Choice key={v} title={t} desc={d} on={goal === v} onPress={() => setGoal(v)} />
-          ))}
-        </>
-      ) : null}
-      {step === 3 ? (
-        <>
-          <Title>Qual é o seu nível?</Title>
-          {LEVELS.map(([v, t, d]) => (
-            <Choice key={v} title={t} desc={d} on={level === v} onPress={() => setLevel(v)} />
-          ))}
-        </>
-      ) : null}
-      {step === 4 ? (
-        <>
-          <Title>Quantos dias por semana?</Title>
-          {DAYS.map(([v, t, d]) => (
-            <Choice key={v} title={t} desc={d} on={days === v} onPress={() => setDays(v)} />
-          ))}
-        </>
-      ) : null}
-      <Button
-        label={step === 4 ? "Gerar meu plano" : "Continuar"}
-        disabled={step === 1 && !gender}
-        onPress={() => (step < 4 ? setStep(step + 1) : finish())}
-      />
-      {step ? <Button ghost label="Voltar" onPress={() => setStep(step - 1)} /> : null}
-    </Screen>
+
+      <View style={styles.mid}>
+        {step === 0 ? (
+          <>
+            <Text style={styles.question}>Como podemos te chamar?</Text>
+            <Field label="Nome" value={name} onChangeText={setName} autoCapitalize="words" />
+          </>
+        ) : null}
+        {step === 1 ? (
+          <>
+            <Text style={styles.question}>Você é homem ou mulher?</Text>
+            {GENDERS.map(([v, t, d]) => (
+              <Choice key={v} title={t} desc={d} on={gender === v} onPress={() => setGender(v)} />
+            ))}
+          </>
+        ) : null}
+        {step === 2 ? (
+          <>
+            <Text style={styles.question}>Qual é o seu objetivo?</Text>
+            {GOALS.map(([v, t, d]) => (
+              <Choice key={v} title={t} desc={d} on={goal === v} onPress={() => setGoal(v)} />
+            ))}
+          </>
+        ) : null}
+        {step === 3 ? (
+          <>
+            <Text style={styles.question}>Qual é o seu nível?</Text>
+            {LEVELS.map(([v, t, d]) => (
+              <Choice key={v} title={t} desc={d} on={level === v} onPress={() => setLevel(v)} />
+            ))}
+          </>
+        ) : null}
+        {step === 4 ? (
+          <>
+            <Text style={styles.question}>Quantos dias por semana?</Text>
+            {DAYS.map(([v, t, d]) => (
+              <Choice key={v} title={t} desc={d} on={days === v} onPress={() => setDays(v)} />
+            ))}
+          </>
+        ) : null}
+      </View>
+
+      <View style={styles.footer}>
+        <Button
+          label={step === 4 ? "Gerar meu plano" : "Continuar"}
+          disabled={step === 1 && !gender}
+          onPress={() => (step < 4 ? setStep(step + 1) : finish())}
+        />
+        {step ? <Button ghost label="Voltar" onPress={() => setStep(step - 1)} /> : null}
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -111,10 +120,24 @@ function Choice({ title, desc, on, onPress }) {
 }
 
 const styles = StyleSheet.create({
-  dots: { flexDirection: "row", gap: 6, marginBottom: 16 },
+  safe: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: 20 },
+  header: { paddingTop: 12, alignItems: "center" },
+  dots: { flexDirection: "row", gap: 6, marginBottom: 18 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.line },
   dotOn: { backgroundColor: colors.red },
-  choice: { backgroundColor: colors.surface, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: colors.line, marginBottom: 8 },
+  kicker: { color: colors.red, fontSize: 12, fontWeight: "700", letterSpacing: 1.4, textTransform: "uppercase" },
+  mid: { flex: 1, justifyContent: "center", paddingVertical: 24 },
+  question: {
+    color: colors.text,
+    fontSize: 26,
+    fontWeight: "800",
+    letterSpacing: 0.4,
+    textAlign: "center",
+    marginBottom: 28,
+    lineHeight: 34
+  },
+  footer: { paddingBottom: 8 },
+  choice: { backgroundColor: colors.surface, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: colors.line, marginBottom: 10 },
   choiceOn: { borderColor: colors.red, backgroundColor: colors.redSoft },
   choiceT: { color: colors.text, fontWeight: "800", fontSize: 16 },
   choiceD: { color: colors.muted, marginTop: 4 }

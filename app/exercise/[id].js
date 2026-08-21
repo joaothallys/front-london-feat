@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
 import { ChestLibraryService } from "@shared/services/exercises/ChestLibraryService.js";
+import { ensure } from "@shared/services/exercises/LondonExercise.js";
+import { fetchExerciseMedia, pickDetailUrl } from "@shared/services/media/LondonMediaService.js";
 import { FavoriteService } from "@shared/services/favorites/FavoriteService.js";
 import { FeedbackService } from "@shared/services/feedback/FeedbackService.js";
 import { Button, Chip, Screen, Section, TopBar } from "../../src/components/ui.js";
@@ -13,23 +15,44 @@ import { colors } from "../../src/theme.js";
 
 export default function ExerciseDetail() {
   const { id } = useLocalSearchParams();
-  const { refresh } = useAppState();
+  const { state, refresh } = useAppState();
   const { start } = useLive();
   const [tab, setTab] = useState("muscle");
+  const [view, setView] = useState(() => exerciseOf(id));
+  const [uri, setUri] = useState(() => mediaUrl(exerciseOf(id)));
   const catalog = ChestLibraryService.get(id);
-  const view = exerciseOf(id);
+
+  useEffect(() => {
+    let live = true;
+    const gender = state.profile && state.profile.gender;
+    ensure(id, gender).then((next) => {
+      if (!live || !next) return;
+      setView(next);
+      const fallback = mediaUrl(next);
+      const q = next.originalName || next.sourceName || "";
+      if (!q) {
+        setUri(fallback);
+        return;
+      }
+      fetchExerciseMedia(q, gender).then((media) => {
+        if (!live) return;
+        setUri(pickDetailUrl(media, fallback));
+      });
+    });
+    return () => { live = false; };
+  }, [id]);
+
   if (!catalog && !view) {
     return <Screen><TopBar title="Exercício" back /><Text style={{ color: colors.muted }}>Não encontrado.</Text></Screen>;
   }
-  const name = catalog ? catalog.displayName : view.name;
-  const uri = mediaUrl(view || catalog);
+  const name = (view && view.name) || (catalog && catalog.displayName) || String(id);
   const steps = catalog && catalog.instructions ? catalog.instructions.map((s) => s.text || s) : (view && view.steps) || [];
   const tips = (catalog && catalog.importantTips) || [];
   const fav = FavoriteService.has(id);
   const fb = FeedbackService.get(id);
 
   function begin() {
-    const e = view || { id, sets: 3, reps: 12, kg: 12, rest: 60, name };
+    const e = view || { id, sets: 3, reps: 12, kg: 0, rest: 60, name };
     const live = start(name, [{ id: e.id, sets: e.sets, reps: e.reps, kg: e.kg, rest: e.rest }], { sourceType: "single", sourceId: e.id });
     if (live) router.push("/session");
   }
@@ -50,7 +73,7 @@ export default function ExerciseDetail() {
       {tab === "muscle" ? (
         <>
           <Section>Músculo principal</Section>
-          <Text style={styles.p}>{(catalog && catalog.primaryMuscle) || (view && view.bodyPart)}</Text>
+          <Text style={styles.p}>{(catalog && catalog.primaryMuscle) || (view && (view.bodyPart || view.muscle))}</Text>
           <Section>Secundários</Section>
           <Text style={styles.p}>{(catalog ? catalog.secondaryMuscles : view && view.secondary || []).join(", ") || "—"}</Text>
         </>

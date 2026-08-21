@@ -1,11 +1,21 @@
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { store } from "@shared/store/local-store.js";
-import { Button, Field, Screen, Title } from "../src/components/ui.js";
+import { Button, Field } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
 import { colors } from "../src/theme.js";
+
+function maskPhone(value) {
+  const d = String(value || "").replace(/\D/g, "").slice(0, 11);
+  if (!d) return "";
+  if (d.length <= 2) return "(" + d;
+  if (d.length <= 6) return "(" + d.slice(0, 2) + ") " + d.slice(2);
+  if (d.length <= 10) return "(" + d.slice(0, 2) + ") " + d.slice(2, 6) + "-" + d.slice(6);
+  return "(" + d.slice(0, 2) + ") " + d.slice(2, 7) + "-" + d.slice(7);
+}
 
 export default function Login() {
   const { state, refresh } = useAppState();
@@ -30,7 +40,7 @@ export default function Login() {
     }
     setBusy(true);
     try {
-      if (isReg) await SessionService.register({ email: email.trim(), password, name: name.trim(), phone: phone.trim() });
+      if (isReg) await SessionService.register({ email: email.trim(), password, name: name.trim(), phone: phone.replace(/\D/g, "") });
       else await SessionService.login(email.trim(), password);
       await SessionService.hydrate(state);
       store.login({ userId: state.session && state.session.userId });
@@ -44,26 +54,52 @@ export default function Login() {
   }
 
   return (
-    <Screen noNav>
-      <View style={styles.center}>
-        <Image source={require("../assets/logo.png")} style={styles.logo} />
-        <Title>{isReg ? "Criar conta" : "Entrar"}</Title>
-        <Text style={styles.muted}>Academia London Fitness</Text>
-      </View>
-      {isReg ? <Field label="Nome" value={name} onChangeText={setName} autoCapitalize="words" placeholder="Seu nome" /> : null}
-      <Field label="E-mail" value={email} onChangeText={setEmail} keyboardType="email-address" placeholder="seu@email.com" />
-      <Field label="Senha" value={password} onChangeText={setPassword} secureTextEntry placeholder={isReg ? "Mínimo 6 caracteres" : ""} />
-      {isReg ? <Field label="Telefone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="11999999999" /> : null}
-      {error ? <Text style={styles.err}>{error}</Text> : null}
-      <Button label={busy ? "Aguarde..." : (isReg ? "Cadastrar" : "Entrar")} onPress={submit} disabled={busy} />
-      <Button ghost label={isReg ? "Já tenho conta" : "Criar conta"} onPress={() => { setMode(isReg ? "login" : "register"); setError(""); }} />
-    </Screen>
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets
+      >
+          <View style={styles.center}>
+            <Image source={require("../assets/logo.png")} style={styles.logo} />
+            <Text style={styles.h}>{isReg ? "Criar conta" : "Entrar"}</Text>
+            <Text style={styles.muted}>{isReg ? "Cadastre-se na Academia London Fitness" : "Use o e-mail e a senha da sua conta"}</Text>
+          </View>
+
+          <View style={styles.tabs}>
+            <Pressable style={[styles.tab, !isReg && styles.tabOn]} onPress={() => { setMode("login"); setError(""); }}>
+              <Text style={[styles.tabTxt, !isReg && styles.tabTxtOn]}>Entrar</Text>
+            </Pressable>
+            <Pressable style={[styles.tab, isReg && styles.tabOn]} onPress={() => { setMode("register"); setError(""); }}>
+              <Text style={[styles.tabTxt, isReg && styles.tabTxtOn]}>Criar conta</Text>
+            </Pressable>
+          </View>
+
+          {isReg ? <Field label="Nome" value={name} onChangeText={setName} autoCapitalize="words" placeholder="Seu nome" /> : null}
+          <Field label="E-mail" value={email} onChangeText={setEmail} keyboardType="email-address" placeholder="seu@email.com" autoComplete="email" />
+          <Field label="Senha" value={password} onChangeText={setPassword} secureTextEntry placeholder={isReg ? "Mínimo 6 caracteres" : "Sua senha"} autoComplete={isReg ? "new-password" : "password"} />
+          {isReg ? <Field label="Telefone" value={phone} onChangeText={(v) => setPhone(maskPhone(v))} keyboardType="phone-pad" placeholder="(11) 99999-9999" maxLength={16} /> : null}
+          {error ? <Text style={styles.err}>{error}</Text> : null}
+          <Button label={busy ? "Aguarde..." : (isReg ? "Cadastrar" : "Entrar")} onPress={submit} disabled={busy} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { alignItems: "center", marginVertical: 20 },
-  logo: { width: 110, height: 110, borderRadius: 55, marginBottom: 12 },
-  muted: { color: colors.muted, marginTop: 6, marginBottom: 16 },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  flex: { flex: 1 },
+  scroll: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
+  center: { alignItems: "center", marginTop: 8, marginBottom: 20 },
+  logo: { width: 96, height: 96, borderRadius: 48, marginBottom: 12 },
+  h: { color: colors.text, fontSize: 26, fontWeight: "800" },
+  muted: { color: colors.muted, marginTop: 6, textAlign: "center" },
+  tabs: { flexDirection: "row", gap: 8, marginBottom: 16 },
+  tab: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, alignItems: "center" },
+  tabOn: { backgroundColor: colors.redSoft, borderColor: colors.red },
+  tabTxt: { color: colors.muted, fontWeight: "700", fontSize: 15 },
+  tabTxtOn: { color: colors.text },
   err: { color: colors.red, marginBottom: 10, fontSize: 13 }
 });

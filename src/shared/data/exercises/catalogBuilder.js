@@ -4,7 +4,10 @@ const META = {
   peito: { primaryMuscle: "Peito", bodyPartRaw: "chest", targetRaw: "pectorals" },
   costas: { primaryMuscle: "Costas", bodyPartRaw: "back", targetRaw: "lats" },
   ombros: { primaryMuscle: "Ombros", bodyPartRaw: "shoulders", targetRaw: "delts" },
-  biceps: { primaryMuscle: "Bíceps", bodyPartRaw: "upper arms", targetRaw: "biceps" }
+  biceps: { primaryMuscle: "Bíceps", bodyPartRaw: "upper arms", targetRaw: "biceps" },
+  triceps: { primaryMuscle: "Tríceps", bodyPartRaw: "upper arms", targetRaw: "triceps" },
+  gluteos: { primaryMuscle: "Glúteos", bodyPartRaw: "upper legs", targetRaw: "glutes" },
+  pernas: { primaryMuscle: "Pernas", bodyPartRaw: "upper legs", targetRaw: "quadriceps" }
 };
 
 export function gif(id) {
@@ -79,5 +82,8 @@ export const CATEGORY_META = {
   peito: { id: "peito", title: "Peito", bodyPart: "chest" },
   costas: { id: "costas", title: "Costas", bodyPart: "back" },
   ombros: { id: "ombros", title: "Ombros", bodyPart: "shoulders" },
-  biceps: { id: "biceps", title: "Bíceps", bodyPart: "upper arms", targetMuscle: "biceps" }
+  biceps: { id: "biceps", title: "Bíceps", bodyPart: "upper arms", targetMuscle: "biceps" },
+  triceps: { id: "triceps", title: "Tríceps", bodyPart: "upper arms", targetMuscle: "triceps" },
+  gluteos: { id: "gluteos", title: "Glúteos", bodyPart: "upper legs", targetMuscle: "glutes" },
+  pernas: { id: "pernas", title: "Pernas", bodyPart: "upper legs" }
 };

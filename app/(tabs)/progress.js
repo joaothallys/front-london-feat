@@ -23,6 +23,7 @@ const MUSCLE = {
   ombros: "Ombros",
   biceps: "Bíceps",
   triceps: "Tríceps",
+  gluteos: "Glúteos",
   pernas: "Pernas",
   panturrilha: "Panturrilha",
   abdomen: "Abdômen",

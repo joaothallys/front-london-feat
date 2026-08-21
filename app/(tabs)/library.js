@@ -10,7 +10,7 @@ import { useAppState } from "../../src/state/AppState.js";
 import { D, exerciseOf } from "../../src/catalog.js";
 import { colors } from "../../src/theme.js";
 
-const LIBRARY = ["peito", "costas", "ombros", "biceps"];
+const LIBRARY = ["peito", "costas", "ombros", "biceps", "triceps", "gluteos", "pernas"];
 
 export default function Library() {
   const { state } = useAppState();

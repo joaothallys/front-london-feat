@@ -41,10 +41,13 @@ export function unwrap(json) {
   return json;
 }
 
-function errorFrom(json, status) {
+function errorFrom(json, status, headers) {
   const err = new Error((json && (json.error || json.message)) || ("HTTP " + status));
   err.status = status;
   err.body = json;
+  err.requestId = (json && json.requestId)
+    || (headers && headers.get && (headers.get("X-Request-Id") || headers.get("x-request-id")))
+    || "";
   return err;
 }
 
@@ -119,7 +122,7 @@ async function request(path, opts, retry) {
     const ok = await refreshAccess();
     if (ok) return request(path, Object.assign({}, opts, { timeoutMs }), true);
   }
-  if (!res.ok) throw errorFrom(json, res.status);
+  if (!res.ok) throw errorFrom(json, res.status, res.headers);
   return json;
 }
 
@@ -178,8 +181,10 @@ export const api = {
   search(term, page, limit) {
     return request("/api/exercises/search" + qstr({ q: term || "", page, limit })).then(catalogPayload);
   },
-  getById(id) {
-    return request("/api/exercises/" + encodeURIComponent(id));
+  getById(id, opts) {
+    return request("/api/exercises/" + encodeURIComponent(id) + qstr({
+      gender: opts && opts.gender
+    }));
   },
   filters() {
     return request("/api/exercises/filters").then((json) => {
@@ -199,6 +204,18 @@ export const api = {
   },
   mediaFallback(name) {
     return request("/api/media/fallback" + qstr({ q: name || "" }));
+  },
+  media: {
+    exercise(params) {
+      const src = params || {};
+      return request("/api/media/exercise" + qstr({ q: src.q || "", gender: src.gender || "" }));
+    },
+    fallback(q) {
+      return request("/api/media/fallback" + qstr({ q: q || "" }));
+    },
+    muscles() {
+      return request("/api/media/muscles");
+    }
   },
 
   auth: {

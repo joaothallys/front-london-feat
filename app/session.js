@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { router } from "expo-router";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -74,8 +75,17 @@ export default function Session() {
   }
 
   function patchSet(i, patch) {
-    Object.assign(item.sets[i], patch);
-    setLive({ ...live });
+    const next = {
+      ...live,
+      items: live.items.map((it, ii) => {
+        if (ii !== live.index) return it;
+        return {
+          ...it,
+          sets: it.sets.map((row, ri) => (ri === i ? { ...row, ...patch } : row))
+        };
+      })
+    };
+    setLive(next);
   }
 
   function addSet(type) {
@@ -156,42 +166,45 @@ export default function Session() {
         <HapticPressable onPress={() => addSet("S")}><Text style={styles.link}>+ Super</Text></HapticPressable>
       </View>
       <Button label={live.index === live.items.length - 1 ? "Concluir treino" : "Próximo aparelho"} onPress={next} />
-      {edit && item.sets[edit.index] ? (
-        <Pressable style={styles.sheetBg} onPress={() => setEdit(null)}>
-          <Pressable style={styles.sheet} onPress={() => {}}>
+      <Modal visible={!!(edit && item.sets[edit.index])} transparent animationType="slide" onRequestClose={() => setEdit(null)}>
+        <GestureHandlerRootView style={styles.sheetBg}>
+          <Pressable style={styles.sheetDim} onPress={() => setEdit(null)} />
+          <View style={styles.sheet}>
             <View style={styles.sheetTop}>
-              <Text style={styles.sheetTitle}>Série {edit.index + 1}</Text>
+              <Text style={styles.sheetTitle}>Série {edit ? edit.index + 1 : ""}</Text>
               <HapticPressable onPress={() => setEdit(null)}>
                 <Text style={styles.sheetDone}>Pronto</Text>
               </HapticPressable>
             </View>
-            <View style={styles.wheels}>
-              <View style={styles.wheelCol}>
-                <Text style={[styles.wheelLbl, edit.field === "kg" && styles.wheelLblOn]}>kg</Text>
-                <NumberWheel
-                  key={"kg-" + edit.index}
-                  value={item.sets[edit.index].kg}
-                  min={0}
-                  max={200}
-                  step={0.5}
-                  onChange={(kg) => patchSet(edit.index, { kg })}
-                />
+            {edit && item.sets[edit.index] ? (
+              <View style={styles.wheels}>
+                <View style={styles.wheelCol}>
+                  <Text style={[styles.wheelLbl, edit.field === "kg" && styles.wheelLblOn]}>kg</Text>
+                  <NumberWheel
+                    key={"kg-" + edit.index}
+                    value={item.sets[edit.index].kg}
+                    min={0}
+                    max={200}
+                    step={0.5}
+                    onChange={(kg) => patchSet(edit.index, { kg })}
+                  />
+                </View>
+                <View style={styles.wheelCol}>
+                  <Text style={[styles.wheelLbl, edit.field === "reps" && styles.wheelLblOn]}>Reps</Text>
+                  <NumberWheel
+                    key={"reps-" + edit.index}
+                    value={item.sets[edit.index].reps}
+                    min={1}
+                    max={40}
+                    step={1}
+                    onChange={(reps) => patchSet(edit.index, { reps })}
+                  />
+                </View>
               </View>
-              <View style={styles.wheelCol}>
-                <Text style={[styles.wheelLbl, edit.field === "reps" && styles.wheelLblOn]}>Reps</Text>
-                <NumberWheel
-                  key={"reps-" + edit.index}
-                  value={item.sets[edit.index].reps}
-                  min={1}
-                  max={40}
-                  step={1}
-                  onChange={(reps) => patchSet(edit.index, { reps })}
-                />
-              </View>
-            </View>
-          </Pressable>
-        </Pressable>
-      ) : null}
+            ) : null}
+          </View>
+        </GestureHandlerRootView>
+      </Modal>
       {live.rest ? (
         <View style={styles.rest}>
           <Text style={styles.kicker}>Descanso</Text>
@@ -226,7 +239,8 @@ const styles = StyleSheet.create({
   checkT: { color: colors.text, fontWeight: "800" },
   row: { flexDirection: "row", gap: 16, marginVertical: 12 },
   link: { color: colors.muted2, fontWeight: "700" },
-  sheetBg: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "flex-end" },
+  sheetBg: { flex: 1, justifyContent: "flex-end" },
+  sheetDim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.55)" },
   sheet: { backgroundColor: colors.bg2, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 28, borderTopWidth: 1, borderColor: colors.line },
   sheetTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 },
   sheetTitle: { color: colors.text, fontWeight: "800", fontSize: 16 },

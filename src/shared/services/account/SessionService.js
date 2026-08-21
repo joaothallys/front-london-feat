@@ -43,7 +43,10 @@ function focusForApi(list) {
 }
 
 function knownExercise(id) {
-  return !!(id && (ChestLibraryService.get(id) || (D.byId && D.byId[id])));
+  if (!id) return false;
+  if (ChestLibraryService.get(id) || (D.byId && D.byId[id])) return true;
+  if (/^exr_/.test(id) || /^[A-Za-z0-9]{6,10}$/.test(id)) return false;
+  return /^[a-z0-9]+(?:-[a-z0-9]+)+$/.test(id);
 }
 
 function isIaUnavailable(err) {
@@ -378,18 +381,26 @@ export const SessionService = {
       equipment,
       focus
     });
-    const generated = await api.plans.generate({
-      source: "ia",
-      name: "Plano " + (onboard.goal || "hipertrofia"),
-      gender: genderForGenerate(onboard.gender || state.profile.gender),
-      goal: onboard.goal,
-      level: onboard.level,
-      environment: state.profile.environment || "academia",
-      daysPerWeek: days,
-      sessionDurationMin: state.profile.sessionDuration || 60,
-      equipment,
-      focus
-    });
+    let generated;
+    try {
+      generated = await api.plans.generate({
+        source: "ia",
+        name: "Plano " + (onboard.goal || "hipertrofia"),
+        gender: genderForGenerate(onboard.gender || state.profile.gender),
+        goal: onboard.goal,
+        level: onboard.level,
+        environment: state.profile.environment || "academia",
+        daysPerWeek: days,
+        sessionDurationMin: state.profile.sessionDuration || 60,
+        equipment,
+        focus
+      });
+    } catch (err) {
+      if (err && (err.requestId || (err.body && err.body.requestId))) {
+        console.warn("[plans/generate]", (err.body && err.body.error) || err.message, err.requestId || err.body.requestId);
+      }
+      throw err;
+    }
     const plan = mapPlan(unwrap(generated));
     if (!plan || !plan.split || !plan.split.length) {
       const empty = new Error("ia_unavailable");

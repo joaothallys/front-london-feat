@@ -8,12 +8,13 @@ export const MUSCLE_ART = [
   { id: "antebracos", file: "antebracos.svg", label: "Antebraços", bodyPart: "lower arms", targetMuscle: "" },
   { id: "abdomen", file: "abdomen.svg", label: "Abdômen", bodyPart: "waist", targetMuscle: "" },
   { id: "obliquos", file: "obliquos.svg", label: "Oblíquos", bodyPart: "", targetMuscle: "abs" },
+  { id: "pernas", file: "pernas.png", label: "Pernas", bodyPart: "upper legs", targetMuscle: "" },
   { id: "quadriceps", file: "quadriceps.svg", label: "Quadríceps", bodyPart: "", targetMuscle: "quadriceps" },
-  { id: "posterior", file: "posteriores.svg", label: "Posteriores", bodyPart: "", targetMuscle: "hamstrings" },
+  { id: "posterior", file: "posterior.svg", label: "Posteriores", bodyPart: "", targetMuscle: "hamstrings" },
   { id: "gluteos", file: "gluteos.svg", label: "Glúteos", bodyPart: "", targetMuscle: "glutes" },
   { id: "abdutores", file: "abdutores.svg", label: "Abdutores", bodyPart: "", targetMuscle: "abductors" },
   { id: "adutores", file: "adutores.svg", label: "Adutores", bodyPart: "", targetMuscle: "adductors" },
-  { id: "panturrilha", file: "panturrilhas.svg", label: "Panturrilhas", bodyPart: "", targetMuscle: "calves" }
+  { id: "panturrilha", file: "panturrilha.svg", label: "Panturrilhas", bodyPart: "", targetMuscle: "calves" }
 ];
 
 const ALIASES = {
@@ -48,7 +49,11 @@ const ALIASES = {
   posteriores: "posterior",
   panturrilhas: "panturrilha",
   bracos: "biceps",
-  pernas: "quadriceps",
+  pernas: "pernas",
+  legs: "pernas",
+  glutes: "gluteos",
+  "glúteos": "gluteos",
+  "gluteus maximus": "gluteos",
   tricep: "triceps",
   "tríceps": "triceps",
   bicep: "biceps",
@@ -61,7 +66,7 @@ export function muscleArt(id) {
   if (!item) return null;
   return {
     ...item,
-    url: "/assets/muscles/" + item.file
+    url: "/assets/muscles/homem/" + item.file
   };
 }
 
