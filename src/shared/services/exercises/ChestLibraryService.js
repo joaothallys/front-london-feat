@@ -1,5 +1,6 @@
 import { ACADEMIA_EQUIPMENT } from "../../types/exercise.js";
-import { getChestCatalog, getCatalogExercise, catalogToAppView } from "../../data/exercises/exerciseCatalog.js";
+import { getAllCatalog, getCatalogByCategory, getCatalogExercise, catalogToAppView } from "../../data/exercises/exerciseCatalog.js";
+import { CATEGORY_META } from "../../data/exercises/catalogBuilder.js";
 import { ExerciseDBService } from "../exercisedb/ExerciseDBService.js";
 import { ExerciseDBMapper } from "../exercisedb/ExerciseDBMapper.js";
 import { ExerciseCache } from "../cache/ExerciseCache.js";
@@ -24,8 +25,8 @@ function applyMedia(exercise) {
 
 function fromCache() {
   const cached = ExerciseCache.allExercises();
-  if (!cached.length) return getChestCatalog().map(applyMedia);
-  const local = getChestCatalog();
+  if (!cached.length) return getAllCatalog().map(applyMedia);
+  const local = getAllCatalog();
   return local.map((exercise) => {
     const hit = cached.find((row) => row.id === exercise.id);
     if (!hit) return applyMedia(exercise);
@@ -61,10 +62,12 @@ export const ChestLibraryService = {
   },
 
   async hydrate() {
-    if (ready && hydrated.length) return hydrated;
+    if (ready && hydrated.length === getAllCatalog().length) return hydrated;
     const base = fromCache();
     try {
-      const remotes = await ExerciseDBService.byMuscle("chest");
+      const metas = Object.keys(CATEGORY_META).map((key) => CATEGORY_META[key]);
+      const pages = await Promise.all(metas.map((meta) => loadBodyPart(meta)));
+      const remotes = pages.flat();
       hydrated = base.map((exercise) => {
         const remote = exercise.sourceId
           ? remotes.find((row) => row.sourceId === exercise.sourceId)
@@ -85,6 +88,7 @@ export const ChestLibraryService = {
     const level = (opts && opts.level) || "todos";
     const equipment = (opts && opts.equipment) || "todos";
     return (list || this.all()).filter((ex) => {
+      if (opts && opts.category && ex.category !== opts.category) return false;
       if (!ex.isActive) return false;
       if (level !== "todos" && ex.level !== level) return false;
       if (equipment === "academia" && ACADEMIA_EQUIPMENT.indexOf(ex.equipmentId) < 0) return false;
@@ -95,6 +99,7 @@ export const ChestLibraryService = {
         ex.sourceName,
         ex.equipment,
         ex.primaryMuscle,
+        (ex.secondaryMuscles || []).join(" "),
         (ex.aliases || []).join(" ")
       ].join(" "));
       return hay.indexOf(q) >= 0;
@@ -115,6 +120,27 @@ export const ChestLibraryService = {
   },
 
   similar(id, limit) {
-    return findSimilarExercises(this.get(id), this.all(), limit || 3);
+    const exercise = this.get(id);
+    const pool = this.all().filter((item) => !exercise || item.category === exercise.category);
+    return findSimilarExercises(exercise, pool, limit || 3);
+  },
+
+  byCategory(category) {
+    return getCatalogByCategory(category).map(applyMedia);
   }
 };
+
+async function loadBodyPart(meta) {
+  const rows = [];
+  for (let page = 1; page <= 5; page += 1) {
+    const batch = await ExerciseDBService.list({
+      bodyPart: meta.bodyPart || "",
+      targetMuscle: meta.targetMuscle || "",
+      page,
+      limit: 100
+    });
+    rows.push(...batch);
+    if (batch.length < 100) break;
+  }
+  return rows;
+}

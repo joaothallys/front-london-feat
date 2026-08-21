@@ -1,3 +1,5 @@
+import { storageGet, storageSet } from "../../platform/storage.js";
+
 const KEY = "london-fitness-exercise-cache";
 
 function blank() {
@@ -6,7 +8,7 @@ function blank() {
 
 function load() {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = storageGet(KEY);
     if (!raw) return blank();
     return Object.assign(blank(), JSON.parse(raw));
   } catch (err) {
@@ -16,7 +18,7 @@ function load() {
 
 function save(state) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(state));
+    storageSet(KEY, JSON.stringify(state));
   } catch (err) {}
 }
 
@@ -71,5 +73,13 @@ export const ExerciseCache = {
 
   getMedia(exerciseId) {
     return state.media[exerciseId] || null;
+  },
+
+  rehydrate() {
+    const next = load();
+    state.exercises = next.exercises || {};
+    state.media = next.media || {};
+    state.updatedAt = next.updatedAt || 0;
+    return state;
   }
 };

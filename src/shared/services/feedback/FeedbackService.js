@@ -1,4 +1,6 @@
 import { store } from "../../store/local-store.js";
+import { api } from "../../api/client.js";
+import { SessionService } from "../account/SessionService.js";
 
 function normalize(raw, id) {
   if (!raw) return null;
@@ -30,6 +32,7 @@ export const FeedbackService = {
     };
     state.feedback[id] = entry;
     store.persist();
+    if (SessionService.hasToken()) api.feedback.set(id, feedback).catch(() => {});
     return entry;
   }
 };

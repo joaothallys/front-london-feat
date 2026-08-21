@@ -1,6 +1,8 @@
 import { catalog } from "../catalog/index.js";
 import { blankProfile } from "../domain/profile.js";
 import { defaultLocations } from "../domain/locations.js";
+import { clearTokens } from "../api/client.js";
+import { storageGet, storageSet, storageRemove } from "../platform/storage.js";
 
 const KEY = "london-fitness-v2";
 
@@ -66,16 +68,16 @@ function seed(state) {
 
 function load() {
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return seed(blank());
+    const raw = storageGet(KEY);
+    if (!raw) return blank();
     return Object.assign(blank(), JSON.parse(raw));
   } catch (e) {
-    return seed(blank());
+    return blank();
   }
 }
 
 function save(state) {
-  localStorage.setItem(KEY, JSON.stringify(state));
+  storageSet(KEY, JSON.stringify(state));
 }
 
 const state = load();
@@ -83,8 +85,14 @@ const state = load();
 export const store = {
   get: () => state,
   persist() { save(state); },
-  login() {
-    state.session = { at: Date.now() };
+  rehydrate() {
+    const next = load();
+    Object.keys(state).forEach((key) => { delete state[key]; });
+    Object.assign(state, next);
+    return state;
+  },
+  login(session) {
+    state.session = Object.assign({ at: Date.now() }, session || {});
     save(state);
   },
   logout() {
@@ -92,8 +100,11 @@ export const store = {
     save(state);
   },
   reset() {
-    localStorage.removeItem(KEY);
-    location.hash = "#/splash";
-    location.reload();
+    clearTokens();
+    storageRemove(KEY);
+    if (typeof location !== "undefined" && location.reload) {
+      location.hash = "#/splash";
+      location.reload();
+    }
   }
 };

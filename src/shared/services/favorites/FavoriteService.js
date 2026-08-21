@@ -1,5 +1,7 @@
 import { store } from "../../store/local-store.js";
 import { ExerciseAnalytics } from "../analytics/ExerciseAnalytics.js";
+import { api } from "../../api/client.js";
+import { SessionService } from "../account/SessionService.js";
 
 function ids() {
   const state = store.get();
@@ -24,6 +26,10 @@ export const FavoriteService = {
     else list.push(id);
     store.persist();
     ExerciseAnalytics.track("exercise_favorite", id);
-    return list.indexOf(id) >= 0;
+    const on = list.indexOf(id) >= 0;
+    if (SessionService.hasToken()) {
+      (on ? api.favorites.add(id) : api.favorites.remove(id)).catch(() => {});
+    }
+    return on;
   }
 };

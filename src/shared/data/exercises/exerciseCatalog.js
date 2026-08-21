@@ -1,5 +1,8 @@
 import { chestExerciseIds } from "./chestExercises.js";
 import { exerciseAliases } from "./exerciseAliases.js";
+import { backCatalog } from "./backCatalog.js";
+import { shoulderCatalog } from "./shoulderCatalog.js";
+import { bicepsCatalog } from "./bicepsCatalog.js";
 
 function gif(id) {
   return id ? { type: "gif", source: "exercisedb", url: "https://static.exercisedb.dev/media/" + id + ".gif" } : null;
@@ -121,51 +124,36 @@ export const chestCatalog = [
   row({ id: "crossover-na-polia", displayName: "Crossover na Polia", sourceName: "cable cross-over variation", sourceId: "0CXGHya", equipment: "Polia", equipmentId: "polia", level: "intermediario" })
 ];
 
+export { backCatalog } from "./backCatalog.js";
+export { shoulderCatalog } from "./shoulderCatalog.js";
+export { bicepsCatalog } from "./bicepsCatalog.js";
+export { catalogToAppView } from "./catalogBuilder.js";
+
+const allCatalog = chestCatalog.concat(backCatalog, shoulderCatalog, bicepsCatalog);
 const byId = {};
-chestCatalog.forEach((ex) => { byId[ex.id] = ex; });
+allCatalog.forEach((ex) => { byId[ex.id] = ex; });
 
 export function getChestCatalog() {
   return chestCatalog.slice();
 }
 
+export function getCatalogByCategory(category) {
+  if (category === "costas") return backCatalog.slice();
+  if (category === "ombros") return shoulderCatalog.slice();
+  if (category === "biceps") return bicepsCatalog.slice();
+  if (category === "peito") return chestCatalog.slice();
+  return allCatalog.slice();
+}
+
+export function getAllCatalog() {
+  return allCatalog.slice();
+}
+
 export function getCatalogExercise(id) {
   if (byId[id]) return byId[id];
   const key = String(id || "").toLowerCase();
-  return chestCatalog.find((ex) => {
+  return allCatalog.find((ex) => {
     if (ex.sourceId === id) return true;
     return (ex.aliases || []).some((alias) => String(alias).toLowerCase() === key);
   }) || null;
-}
-
-export function catalogToAppView(ex) {
-  if (!ex) return null;
-  return {
-    id: ex.id,
-    externalId: ex.sourceId || ex.id,
-    name: ex.displayName,
-    originalName: ex.sourceName,
-    localizedName: ex.displayName,
-    muscle: "peito",
-    secondary: ex.secondaryMuscles || [],
-    eq: ex.equipmentId,
-    equipment: ex.equipment,
-    bodyPart: "Peito",
-    bodyPartRaw: "chest",
-    target: ex.primaryMuscle,
-    targetRaw: "pectorals",
-    gifUrl: ex.media && ex.media.url,
-    gif: ex.media && ex.media.url,
-    videoUrl: ex.media && ex.media.type === "video" ? ex.media.url : null,
-    steps: (ex.instructions || []).map((step) => step.text),
-    source: ex.source,
-    level: ex.level,
-    description: ex.description,
-    importantTips: ex.importantTips || [],
-    aliases: ex.aliases || [],
-    popularity: ex.popularity,
-    sets: 3,
-    reps: 12,
-    kg: 12,
-    rest: 60
-  };
 }

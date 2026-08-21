@@ -1,4 +1,6 @@
 import { store } from "../../store/local-store.js";
+import { api } from "../../api/client.js";
+import { SessionService } from "../account/SessionService.js";
 
 const MAX = 200;
 
@@ -21,6 +23,9 @@ export const ExerciseAnalytics = {
     list.push(item);
     if (list.length > MAX) list.splice(0, list.length - MAX);
     store.persist();
+    if (SessionService.hasToken()) {
+      api.analytics.track({ event, exerciseId: exerciseId || "", payload: extra || {} }).catch(() => {});
+    }
     return item;
   },
 

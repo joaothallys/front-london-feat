@@ -4,11 +4,22 @@ function fold(text) {
 
 function family(name) {
   const n = fold(name);
-  if (n.indexOf("crucifixo") >= 0 || n.indexOf("voador") >= 0 || n.indexOf("crossover") >= 0) return "fly";
+  if (n.indexOf("crucifixo") >= 0 || n.indexOf("voador") >= 0 || n.indexOf("crossover") >= 0 || n.indexOf("face pull") >= 0) return "fly";
   if (n.indexOf("supino") >= 0) return "press";
-  if (n.indexOf("flexao") >= 0) return "pushup";
+  if (n.indexOf("flexao") >= 0 || n.indexOf("pike") >= 0 || n.indexOf("handstand") >= 0) return "pushup";
   if (n.indexOf("pullover") >= 0) return "pullover";
   if (n.indexOf("alongamento") >= 0) return "stretch";
+  if (n.indexOf("remada") >= 0) return "remada";
+  if (n.indexOf("puxada") >= 0 || n.indexOf("pulldown") >= 0 || n.indexOf("puxador") >= 0 || n.indexOf("barra fixa") >= 0 || n.indexOf("muscle-up") >= 0) return "puxada";
+  if (n.indexOf("desenvolvimento") >= 0 || n.indexOf("militar") >= 0 || n.indexOf("arnold") >= 0 || n.indexOf("cuban") >= 0 || n.indexOf("thruster") >= 0) return "desenvolvimento";
+  if (n.indexOf("elevacao lateral") >= 0 || n.indexOf("machine lateral") >= 0) return "elevacao-lateral";
+  if (n.indexOf("elevacao frontal") >= 0) return "elevacao-frontal";
+  if (n.indexOf("elevacao") >= 0) return "elevacao";
+  if (n.indexOf("rotacao") >= 0) return "rotacao";
+  if (n.indexOf("encolhimento") >= 0) return "shrug";
+  if (n.indexOf("scott") >= 0) return "scott";
+  if (n.indexOf("martelo") >= 0) return "martelo";
+  if (n.indexOf("rosca") >= 0 || n.indexOf("biceps") >= 0) return "rosca";
   return "";
 }
 

@@ -1,6 +1,9 @@
 export { catalog } from "./catalog/index.js";
 export { api } from "./api/client.js";
 export { store } from "./store/local-store.js";
+export { SessionService } from "./services/account/SessionService.js";
+export { setApiBaseUrl } from "./platform/env.js";
+export { setStorageBackend, seedStorageCache } from "./platform/storage.js";
 export { ChestLibraryService } from "./services/exercises/ChestLibraryService.js";
 export { ExerciseDBService } from "./services/exercisedb/ExerciseDBService.js";
 export { resolveExerciseMedia } from "./services/media/MediaResolver.js";
