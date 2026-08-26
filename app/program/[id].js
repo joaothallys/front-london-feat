@@ -7,9 +7,10 @@ import { Button, Card, Screen, TopBar } from "../../src/components/ui.js";
 import { useAppState } from "../../src/state/AppState.js";
 import { useLive } from "../../src/state/LiveSession.js";
 import { D, exerciseOf } from "../../src/catalog.js";
-import { colors } from "../../src/theme.js";
+import { useTheme } from "../../src/theme.js";
 
 export default function Program() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams();
   const { state, refresh } = useAppState();
   const { start } = useLive();

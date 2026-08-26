@@ -3,6 +3,7 @@ import { api, unwrap } from "@shared/api/client.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { store } from "@shared/store/local-store.js";
 import { D, exerciseOf } from "../catalog.js";
+import { computeWorkoutStats } from "../workout/stats.js";
 
 const Ctx = createContext(null);
 
@@ -101,21 +102,25 @@ export function LiveSessionProvider({ children }) {
     return built;
   }, []);
 
-  const finish = useCallback(async () => {
+  const finish = useCallback(async (extras) => {
     if (!live) return null;
     const S = store.get();
-    const muscles = musclesOf(live);
+    const stats = computeWorkoutStats(live, extras && extras.durationMin);
+    const muscles = stats.muscles.length ? stats.muscles : musclesOf(live);
     muscles.forEach((m) => { S.recovery[m] = Date.now(); });
-    const duration = Math.max(1, Math.round((Date.now() - live.startedAt) / 60000));
     let rec = {
       id: "local-" + Date.now(),
       date: new Date().toISOString(),
       name: live.name,
-      duration,
-      volume: 0,
-      calories: 0,
-      exercises: live.items.length,
-      sets: live.items.reduce((n, it) => n + (it.sets || []).length, 0)
+      duration: stats.duration,
+      volume: stats.volume,
+      calories: stats.calories,
+      exercises: stats.exerciseCount,
+      sets: stats.totalSets,
+      totalReps: stats.reps,
+      muscles: stats.muscleLabels,
+      lines: stats.lines,
+      photo: (extras && extras.photo) || null
     };
 
     if (SessionService.hasToken()) {
@@ -123,14 +128,23 @@ export function LiveSessionProvider({ children }) {
         name: live.name,
         sourceType: (live.meta && live.meta.sourceType) || "custom",
         sourceId: (live.meta && live.meta.sourceId) || null,
-        durationMin: duration,
+        durationMin: stats.duration,
         muscles,
         saveAsWorkout: false,
         exercises: completeExercises(live)
       };
       if (live.apiId) body.sessionId = live.apiId;
       const data = unwrap(await api.sessions.finish(body)) || {};
-      rec = SessionService.mapHistory(data);
+      const mapped = SessionService.mapHistory(data);
+      rec = Object.assign({}, rec, mapped, {
+        volume: mapped.volume || rec.volume,
+        calories: mapped.calories || rec.calories,
+        duration: mapped.duration || rec.duration,
+        photo: rec.photo,
+        totalReps: rec.totalReps,
+        muscles: rec.muscles,
+        lines: rec.lines
+      });
     }
 
     S.history = [rec].concat((S.history || []).filter((row) => row.id !== rec.id));

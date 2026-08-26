@@ -12,6 +12,7 @@ import { translateBody, translateEquipment, translateInstructions, translateMusc
     { id: "gluteos", label: "Glúteos", body: "upper legs" },
     { id: "panturrilha", label: "Panturrilha", body: "lower legs" },
     { id: "abdomen", label: "Abdômen", body: "waist" },
+    { id: "trapezio", label: "Trapézio", body: "back" },
     { id: "cardio", label: "Cardio", body: "cardio" }
   ];
 

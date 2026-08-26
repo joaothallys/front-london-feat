@@ -11,9 +11,11 @@ import { Button, Chip, Screen, Section, TopBar } from "../../src/components/ui.j
 import { useLive } from "../../src/state/LiveSession.js";
 import { useAppState } from "../../src/state/AppState.js";
 import { exerciseOf, mediaUrl } from "../../src/catalog.js";
-import { colors } from "../../src/theme.js";
+import { useStyles, useTheme } from "../../src/theme.js";
 
 export default function ExerciseDetail() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { id } = useLocalSearchParams();
   const { state, refresh } = useAppState();
   const { start } = useLive();
@@ -28,7 +30,7 @@ export default function ExerciseDetail() {
     ensure(id, gender).then((next) => {
       if (!live || !next) return;
       setView(next);
-      const fallback = mediaUrl(next);
+      const fallback = mediaUrl(next, { preferGif: true });
       const q = next.originalName || next.sourceName || "";
       if (!q) {
         setUri(fallback);
@@ -48,6 +50,14 @@ export default function ExerciseDetail() {
   const name = (view && view.name) || (catalog && catalog.displayName) || String(id);
   const steps = catalog && catalog.instructions ? catalog.instructions.map((s) => s.text || s) : (view && view.steps) || [];
   const tips = (catalog && catalog.importantTips) || [];
+  const startPos = (catalog && catalog.startingPosition) || (view && view.startingPosition) || "";
+  const errors = (catalog && catalog.commonErrors) || (view && view.commonErrors) || [];
+  const description = (catalog && catalog.description) || (view && view.description) || "";
+  const equipment = (catalog && catalog.equipment) || (view && view.equipment) || "";
+  const typeRaw = (catalog && catalog.exerciseType) || (view && view.exerciseType) || "";
+  const type = { isolamento: "Isolamento", composto: "Composto" }[typeRaw] || typeRaw;
+  const levelRaw = (catalog && catalog.level) || (view && view.level) || "";
+  const level = { iniciante: "Iniciante", intermediario: "Intermediário", avancado: "Avançado" }[levelRaw] || levelRaw;
   const fav = FavoriteService.has(id);
   const fb = FeedbackService.get(id);
 
@@ -60,7 +70,15 @@ export default function ExerciseDetail() {
   return (
     <Screen>
       <TopBar title={name} back />
-      {uri ? <Image source={{ uri }} style={styles.gif} contentFit="contain" /> : null}
+      {uri ? (
+        <Image
+          source={{ uri }}
+          style={styles.gif}
+          contentFit="contain"
+          cachePolicy="memory-disk"
+          autoplay
+        />
+      ) : null}
       <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 12 }}>
         <Chip label={fav ? "Favorito" : "Favoritar"} on={fav} onPress={() => { FavoriteService.toggle(id); refresh(); }} />
         <Chip label="Gostei" on={fb === "positive"} onPress={() => { FeedbackService.set(id, "positive"); refresh(); }} />
@@ -76,10 +94,18 @@ export default function ExerciseDetail() {
           <Text style={styles.p}>{(catalog && catalog.primaryMuscle) || (view && (view.bodyPart || view.muscle))}</Text>
           <Section>Secundários</Section>
           <Text style={styles.p}>{(catalog ? catalog.secondaryMuscles : view && view.secondary || []).join(", ") || "—"}</Text>
+          {equipment ? <><Section>Equipamento</Section><Text style={styles.p}>{equipment}</Text></> : null}
+          {type ? <><Section>Tipo de exercício</Section><Text style={styles.p}>{type}</Text></> : null}
+          {level ? <><Section>Nível</Section><Text style={styles.p}>{level}</Text></> : null}
         </>
       ) : (
         <>
+          {description ? <><Section>Descrição</Section><Text style={styles.p}>{description}</Text></> : null}
+          {startPos ? <><Section>Posição inicial</Section><Text style={styles.p}>{startPos}</Text></> : null}
+          {steps.length ? <Section>Execução</Section> : null}
           {steps.map((s, i) => <Text key={i} style={styles.p}>{i + 1}. {s}</Text>)}
+          {errors.length ? <Section>Erros comuns</Section> : null}
+          {errors.map((t, i) => <Text key={i} style={styles.p}>• {t.text || t}</Text>)}
           {tips.length ? <Section>Dicas</Section> : null}
           {tips.map((t, i) => <Text key={i} style={styles.p}>• {t.text || t}</Text>)}
         </>
@@ -89,7 +115,9 @@ export default function ExerciseDetail() {
   );
 }
 
-const styles = StyleSheet.create({
-  gif: { width: "100%", height: 240, backgroundColor: colors.surface, borderRadius: 16 },
-  p: { color: colors.muted2, lineHeight: 22, marginBottom: 8 }
-});
+function styleFactory(c) {
+  return {
+  gif: { width: "100%", height: 240, backgroundColor: c.surface, borderRadius: 16 },
+  p: { color: c.muted2, lineHeight: 22, marginBottom: 8 }
+};
+}

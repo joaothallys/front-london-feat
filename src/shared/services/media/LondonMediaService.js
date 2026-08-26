@@ -11,28 +11,23 @@ export function isV2MediaDown(err) {
   return err && (err.status === 503 || code === "exercisedb_v2_unsubscribed" || code === "exercisedb_v2_unavailable");
 }
 
-export function pickThumbUrl(media, fallback) {
-  if (!media) return fallback || "";
+function stillOf(media) {
+  if (!media) return "";
   const sizes = media.imageUrls || {};
-  return media.imageUrl
-    || sizes["480p"]
-    || sizes["360p"]
-    || sizes["720p"]
-    || media.gifUrl
-    || fallback
-    || "";
+  return media.imageUrl || sizes["480p"] || sizes["360p"] || sizes["720p"] || sizes["1080p"] || "";
+}
+
+function gifOf(media) {
+  if (!media) return "";
+  return media.gifUrl || media.gif || (media.type === "gif" ? media.url : "") || "";
+}
+
+export function pickThumbUrl(media, fallback) {
+  return stillOf(media) || gifOf(media) || fallback || "";
 }
 
 export function pickDetailUrl(media, fallback) {
-  if (!media) return fallback || "";
-  const sizes = media.imageUrls || {};
-  return media.imageUrl
-    || sizes["720p"]
-    || sizes["1080p"]
-    || sizes["480p"]
-    || media.gifUrl
-    || fallback
-    || "";
+  return gifOf(media) || fallback || stillOf(media) || "";
 }
 
 export async function fetchExerciseMedia(query, gender) {

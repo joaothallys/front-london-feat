@@ -15,7 +15,7 @@ import { MuscleArt } from "../src/components/MuscleArt.js";
 import { useAppState } from "../src/state/AppState.js";
 import { addExercisesToDay } from "../src/plan.js";
 import { mediaUrl } from "../src/catalog.js";
-import { colors } from "../src/theme.js";
+import { useStyles, useTheme } from "../src/theme.js";
 
 const TABS = [
   ["todos", "Todos"],
@@ -36,6 +36,8 @@ function loadRows(tab, q, muscle) {
 }
 
 export default function AddExercise() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { replace } = useLocalSearchParams();
   const replaceIndex = replace != null && replace !== "" ? Number(replace) : null;
   const { state, refresh } = useAppState();
@@ -193,28 +195,30 @@ export default function AddExercise() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+function styleFactory(c) {
+  return {
+  safe: { flex: 1, backgroundColor: c.bg },
   top: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, marginBottom: 8 },
-  back: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" },
-  title: { flex: 1, textAlign: "center", color: colors.text, fontSize: 18, fontWeight: "800", marginRight: 40 },
-  search: { flexDirection: "row", alignItems: "center", gap: 8, marginHorizontal: 16, backgroundColor: colors.surface, borderRadius: 14, paddingHorizontal: 12, height: 44 },
-  input: { flex: 1, color: colors.text, fontSize: 16 },
-  tabs: { flexDirection: "row", margin: 16, backgroundColor: colors.surface, borderRadius: 999, padding: 4 },
+  back: { width: 40, height: 40, borderRadius: 20, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" },
+  title: { flex: 1, textAlign: "center", color: c.text, fontSize: 18, fontWeight: "800", marginRight: 40 },
+  search: { flexDirection: "row", alignItems: "center", gap: 8, marginHorizontal: 16, backgroundColor: c.surface, borderRadius: 14, paddingHorizontal: 12, height: 44 },
+  input: { flex: 1, color: c.text, fontSize: 16 },
+  tabs: { flexDirection: "row", margin: 16, backgroundColor: c.surface, borderRadius: 999, padding: 4 },
   tab: { flex: 1, alignItems: "center", paddingVertical: 8, borderRadius: 999 },
-  tabOn: { backgroundColor: colors.surface3 },
-  tabTxt: { color: colors.muted, fontWeight: "800", fontSize: 11, letterSpacing: 0.4, textTransform: "uppercase" },
-  tabTxtOn: { color: colors.text },
+  tabOn: { backgroundColor: c.surface3 },
+  tabTxt: { color: c.muted, fontWeight: "800", fontSize: 11, letterSpacing: 0.4, textTransform: "uppercase" },
+  tabTxtOn: { color: c.text },
   list: { paddingHorizontal: 16, paddingBottom: 24 },
   countRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
-  count: { color: colors.muted, fontSize: 12 },
-  sort: { color: colors.muted, fontSize: 12 },
+  count: { color: c.muted, fontSize: 12 },
+  sort: { color: c.muted, fontSize: 12 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
-  muscleRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
-  exName: { flex: 1, color: colors.text, fontSize: 16, fontWeight: "700" },
-  check: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, borderColor: colors.muted, alignItems: "center", justifyContent: "center" },
-  checkOn: { backgroundColor: colors.red, borderColor: colors.red },
-  empty: { color: colors.muted, textAlign: "center", marginTop: 32 },
-  cta: { position: "absolute", left: 16, right: 16, bottom: 18, height: 52, borderRadius: 26, backgroundColor: colors.red, alignItems: "center", justifyContent: "center" },
+  muscleRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.line },
+  exName: { flex: 1, color: c.text, fontSize: 16, fontWeight: "700" },
+  check: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, borderColor: c.muted, alignItems: "center", justifyContent: "center" },
+  checkOn: { backgroundColor: c.red, borderColor: c.red },
+  empty: { color: c.muted, textAlign: "center", marginTop: 32 },
+  cta: { position: "absolute", left: 16, right: 16, bottom: 18, height: 52, borderRadius: 26, backgroundColor: c.red, alignItems: "center", justifyContent: "center" },
   ctaTxt: { color: "#fff", fontWeight: "900", letterSpacing: 0.6, textTransform: "uppercase" }
-});
+};
+}

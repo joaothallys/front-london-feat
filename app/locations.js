@@ -5,10 +5,11 @@ import { api, unwrap } from "@shared/api/client.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { Button, Card, Chip, Screen, TopBar } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
-import { colors } from "../src/theme.js";
+import { useTheme } from "../src/theme.js";
 import { Text } from "react-native";
 
 export default function Locations() {
+  const { colors } = useTheme();
   const { state, refresh } = useAppState();
 
   async function add() {

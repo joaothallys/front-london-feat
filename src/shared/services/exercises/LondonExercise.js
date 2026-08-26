@@ -22,6 +22,7 @@ function guessMuscle(id) {
   if (/triceps|pulley|testa|frances/.test(s)) return "triceps";
   if (/leg|agacha|extensor|flexor|hack|avanco|passada|panturr/.test(s)) return "pernas";
   if (/rosca|biceps/.test(s)) return "biceps";
+  if (/trapez|encolh/.test(s)) return "trapezio";
   if (/supino|crucifixo|flexao|crossover|peito/.test(s)) return "peito";
   if (/puxad|remada|barra-fixa|pullover/.test(s)) return "costas";
   if (/desenvolv|elevacao|ombro|face-pull/.test(s)) return "ombros";

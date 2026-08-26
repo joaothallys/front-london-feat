@@ -1,15 +1,17 @@
 import React, { useCallback, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useLocalSearchParams, useFocusEffect } from "expo-router";
 import { api, unwrap } from "@shared/api/client.js";
 import { Empty, Screen, TopBar } from "../../src/components/ui.js";
+import { useAppState } from "../../src/state/AppState.js";
 import { exerciseOf } from "../../src/catalog.js";
-import { colors } from "../../src/theme.js";
+import { useStyles } from "../../src/theme.js";
 
 function asList(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value;
   if (Array.isArray(value.exercises)) return value.exercises;
+  if (Array.isArray(value.lines)) return value.lines;
   if (Array.isArray(value.data)) return value.data;
   return [];
 }
@@ -20,15 +22,19 @@ function nameOf(id) {
 }
 
 export default function HistoryDetail() {
+  const styles = useStyles(styleFactory);
   const { id } = useLocalSearchParams();
-  const [row, setRow] = useState(null);
+  const { state } = useAppState();
+  const local = (state.history || []).find((row) => String(row.id) === String(id)) || null;
+  const [row, setRow] = useState(local);
 
   const load = useCallback(async () => {
     if (!id) return;
     try {
-      setRow(unwrap(await api.history.get(id)) || null);
+      const remote = unwrap(await api.history.get(id));
+      setRow(remote || local || null);
     } catch (err) {
-      setRow(null);
+      setRow(local || null);
     }
   }, [id]);
 
@@ -40,24 +46,32 @@ export default function HistoryDetail() {
       <TopBar title={(row && row.name) || "Treino"} back />
       {row ? (
         <Text style={styles.meta}>
-          {(row.durationMin || 0) + " min · " + Math.round(row.volumeKg || 0) + " kg · " + (row.calories || 0) + " kcal"}
+          {(row.durationMin || row.duration || 0) + " min · " + Math.round(row.volumeKg || row.volume || 0) + " kg · " + (row.calories || 0) + " kcal"}
         </Text>
       ) : null}
-      {exercises.length ? exercises.map((ex, i) => (
-        <View key={(ex.exerciseId || i) + "-" + i} style={styles.card}>
-          <Text style={styles.name}>{nameOf(ex.exerciseId)}</Text>
-          {(ex.sets || []).filter((s) => s.type !== "W").map((s, si) => (
-            <Text key={si} style={styles.set}>{s.type}  ·  {s.kg} kg × {s.reps}</Text>
-          ))}
-        </View>
-      )) : <Empty>Não foi possível abrir este treino.</Empty>}
+      {exercises.length ? exercises.map((ex, i) => {
+        const title = ex.name || nameOf(ex.exerciseId || ex.id);
+        const sets = ex.sets;
+        return (
+          <View key={(ex.exerciseId || ex.id || i) + "-" + i} style={styles.card}>
+            <Text style={styles.name}>{title}</Text>
+            {Array.isArray(sets) ? sets.filter((s) => s && s.type !== "W").map((s, si) => (
+              <Text key={si} style={styles.set}>{(s.type || "N") + "  ·  " + (s.kg || 0) + " kg × " + (s.reps || 0)}</Text>
+            )) : (
+              <Text style={styles.set}>{ex.detail || ((ex.sets || 0) + " séries")}</Text>
+            )}
+          </View>
+        );
+      }) : <Empty>Não foi possível abrir este treino.</Empty>}
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  meta: { color: colors.muted, marginBottom: 12 },
-  card: { backgroundColor: colors.surface, borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: colors.line },
-  name: { color: colors.text, fontWeight: "800", marginBottom: 8 },
-  set: { color: colors.muted2, marginTop: 4 }
-});
+function styleFactory(c) {
+  return {
+    meta: { color: c.muted, marginBottom: 12 },
+    card: { backgroundColor: c.surface, borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: c.line },
+    name: { color: c.text, fontWeight: "800", marginBottom: 8 },
+    set: { color: c.muted2, marginTop: 4 }
+  };
+}

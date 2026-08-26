@@ -58,6 +58,23 @@ export function updateDayItem(state, index, patch) {
   persistPlan(state);
 }
 
+export function reorderDayItems(state, from, to) {
+  const day = ensureDay(state);
+  const items = day.items || [];
+  if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length) return;
+  const next = items.slice();
+  const [row] = next.splice(from, 1);
+  next.splice(to, 0, row);
+  day.items = next;
+  persistPlan(state);
+}
+
+export function applyLoadToDay(state, patch) {
+  const day = ensureDay(state);
+  day.items = (day.items || []).map((it) => Object.assign({}, it, patch));
+  persistPlan(state);
+}
+
 export function persistPlan(state) {
   if (SessionService.hasToken() && state.plan && state.plan.id) {
     api.plans.update(state.plan.id, {

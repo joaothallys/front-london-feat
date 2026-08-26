@@ -23,16 +23,13 @@ export function exerciseOf(id) {
   return isLondonId(id) ? stubView(id) : null;
 }
 
-export function mediaUrl(ex) {
+export function mediaUrl(ex, opts) {
   if (!ex) return "";
   const sizes = ex.imageUrls || {};
-  return ex.imageUrl
-    || sizes["480p"]
-    || sizes["360p"]
-    || ex.gifUrl
-    || ex.gif
-    || (ex.media && ex.media.url)
-    || "";
+  const gif = ex.gifUrl || ex.gif || (ex.media && ex.media.type !== "image" ? ex.media.url : "") || "";
+  const still = ex.imageUrl || sizes["480p"] || sizes["360p"] || "";
+  if (opts && opts.preferGif) return gif || still || (ex.media && ex.media.url) || "";
+  return still || gif || (ex.media && ex.media.url) || "";
 }
 
 export { D };

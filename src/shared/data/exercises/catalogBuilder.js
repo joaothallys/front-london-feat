@@ -7,7 +7,8 @@ const META = {
   biceps: { primaryMuscle: "Bíceps", bodyPartRaw: "upper arms", targetRaw: "biceps" },
   triceps: { primaryMuscle: "Tríceps", bodyPartRaw: "upper arms", targetRaw: "triceps" },
   gluteos: { primaryMuscle: "Glúteos", bodyPartRaw: "upper legs", targetRaw: "glutes" },
-  pernas: { primaryMuscle: "Pernas", bodyPartRaw: "upper legs", targetRaw: "quadriceps" }
+  pernas: { primaryMuscle: "Pernas", bodyPartRaw: "upper legs", targetRaw: "quadriceps" },
+  trapezio: { primaryMuscle: "Trapézio", bodyPartRaw: "back", targetRaw: "traps" }
 };
 
 export function gif(id) {
@@ -28,9 +29,12 @@ export function buildRow(order, spec) {
     secondaryMuscles: spec.secondaryMuscles || [],
     equipment: spec.equipment,
     equipmentId: spec.equipmentId,
+    exerciseType: spec.exerciseType || "isolamento",
     level: spec.level,
     description: spec.description || "",
     instructions: spec.instructions || [],
+    startingPosition: spec.startingPosition || "",
+    commonErrors: spec.commonErrors || [],
     importantTips: spec.importantTips || [],
     aliases: exerciseAliases[spec.id] || [],
     popularity: popularity > 0 ? popularity : 0,
@@ -56,6 +60,7 @@ export function catalogToAppView(ex) {
     secondary: ex.secondaryMuscles || [],
     eq: ex.equipmentId,
     equipment: ex.equipment,
+    exerciseType: ex.exerciseType || "isolamento",
     bodyPart: ex.primaryMuscle,
     bodyPartRaw: ex.bodyPartRaw || meta.bodyPartRaw,
     target: ex.primaryMuscle,
@@ -67,6 +72,8 @@ export function catalogToAppView(ex) {
     source: ex.source,
     level: ex.level,
     description: ex.description,
+    startingPosition: ex.startingPosition || "",
+    commonErrors: ex.commonErrors || [],
     importantTips: ex.importantTips || [],
     aliases: ex.aliases || [],
     popularity: ex.popularity,
@@ -85,5 +92,6 @@ export const CATEGORY_META = {
   biceps: { id: "biceps", title: "Bíceps", bodyPart: "upper arms", targetMuscle: "biceps" },
   triceps: { id: "triceps", title: "Tríceps", bodyPart: "upper arms", targetMuscle: "triceps" },
   gluteos: { id: "gluteos", title: "Glúteos", bodyPart: "upper legs", targetMuscle: "glutes" },
-  pernas: { id: "pernas", title: "Pernas", bodyPart: "upper legs" }
+  pernas: { id: "pernas", title: "Pernas", bodyPart: "upper legs" },
+  trapezio: { id: "trapezio", title: "Trapézio", bodyPart: "back", targetMuscle: "traps" }
 };

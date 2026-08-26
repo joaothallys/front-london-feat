@@ -355,8 +355,49 @@ export const SessionService = {
       state.plan = D.generatePlan({ goal, level, days });
     } catch (err) {
       const fallback = (D.programs || []).find((p) => p.id === "hipertrofia") || (D.programs || [])[0];
-      state.plan = fallback ? JSON.parse(JSON.stringify(fallback)) : { name: "Meu plano", source: "ia", split: [] };
+      state.plan = fallback ? JSON.parse(JSON.stringify(fallback)) : { name: "Meu plano", source: "local", split: [] };
     }
+    if (state.plan) {
+      state.plan.source = "local";
+      state.plan.iaFailed = true;
+    }
+    state.onboardingDone = true;
+    return state.plan;
+  },
+
+  generatePayload(state, onboard) {
+    const days = Number((onboard && onboard.days) || state.profile.days) || 4;
+    const goal = (onboard && onboard.goal) || state.profile.goal || "hipertrofia";
+    return {
+      source: "ia",
+      name: "Plano " + goal,
+      gender: genderForGenerate((onboard && onboard.gender) || state.profile.gender),
+      goal,
+      level: (onboard && onboard.level) || state.profile.level || "intermediario",
+      environment: state.profile.environment || "academia",
+      daysPerWeek: days,
+      sessionDurationMin: state.profile.sessionDuration || 60,
+      equipment: equipmentForApi(state.profile.equipment),
+      focus: focusForApi(state.profile.focusMuscles)
+    };
+  },
+
+  async generateIaPlan(state, onboard) {
+    if (!this.hasToken()) {
+      const err = new Error("no_token");
+      err.status = 401;
+      throw err;
+    }
+    const generated = await api.plans.generate(this.generatePayload(state, onboard));
+    const plan = mapPlan(unwrap(generated));
+    if (!plan || !plan.split || !plan.split.length) {
+      const empty = new Error("ia_unavailable");
+      empty.status = 502;
+      empty.body = { error: "ia_unavailable" };
+      throw empty;
+    }
+    state.plan = plan;
+    state.plan.iaFailed = false;
     state.onboardingDone = true;
     return state.plan;
   },
@@ -381,35 +422,13 @@ export const SessionService = {
       equipment,
       focus
     });
-    let generated;
     try {
-      generated = await api.plans.generate({
-        source: "ia",
-        name: "Plano " + (onboard.goal || "hipertrofia"),
-        gender: genderForGenerate(onboard.gender || state.profile.gender),
-        goal: onboard.goal,
-        level: onboard.level,
-        environment: state.profile.environment || "academia",
-        daysPerWeek: days,
-        sessionDurationMin: state.profile.sessionDuration || 60,
-        equipment,
-        focus
-      });
+      return await this.generateIaPlan(state, onboard);
     } catch (err) {
-      if (err && (err.requestId || (err.body && err.body.requestId))) {
-        console.warn("[plans/generate]", (err.body && err.body.error) || err.message, err.requestId || err.body.requestId);
-      }
+      const requestId = (err && (err.requestId || (err.body && err.body.requestId))) || "";
+      if (requestId) console.warn("[plans/generate]", (err.body && err.body.error) || err.message, requestId);
       throw err;
     }
-    const plan = mapPlan(unwrap(generated));
-    if (!plan || !plan.split || !plan.split.length) {
-      const empty = new Error("ia_unavailable");
-      empty.status = 502;
-      throw empty;
-    }
-    state.plan = plan;
-    state.onboardingDone = true;
-    return state.plan;
   },
 
   async syncActivePlan(state) {

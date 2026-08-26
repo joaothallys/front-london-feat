@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
-import { colors } from "../theme.js";
+import { useStyles, useTheme } from "../theme.js";
 import { mediaUrl } from "../catalog.js";
 import { cachedGif, warmGif } from "../media/GifCache.js";
 import { MuscleArt } from "./MuscleArt.js";
@@ -9,6 +9,8 @@ import { HapticPressable } from "./HapticPressable.js";
 import { Skeleton } from "./Skeleton.js";
 
 export function ExerciseThumb({ exercise, size = 64, onPress, showMuscle = true, animate = false }) {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const id = exercise && (exercise.id || exercise.sourceId);
   const remote = mediaUrl(exercise);
   const [uri, setUri] = useState(() => cachedGif(id) || remote || "");
@@ -64,7 +66,8 @@ export function ExerciseThumb({ exercise, size = 64, onPress, showMuscle = true,
   return <HapticPressable onPress={onPress}>{box}</HapticPressable>;
 }
 
-const styles = StyleSheet.create({
+function styleFactory(c) {
+  return {
   box: { borderRadius: 12, overflow: "hidden", backgroundColor: "#fff" },
   img: { width: "100%", height: "100%", backgroundColor: "#fff" },
   ph: { flex: 1, backgroundColor: "#e8e8e8" },
@@ -77,6 +80,7 @@ const styles = StyleSheet.create({
     height: 26,
     borderRadius: 8,
     overflow: "hidden",
-    backgroundColor: colors.surface
+    backgroundColor: c.surface
   }
-});
+};
+}

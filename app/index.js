@@ -4,9 +4,11 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
-import { colors } from "../src/theme.js";
+import { useStyles, useTheme } from "../src/theme.js";
 
 export default function Splash() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { state } = useAppState();
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.82)).current;
@@ -40,11 +42,13 @@ export default function Splash() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#000000", padding: 24, justifyContent: "space-between" },
+function styleFactory(c) {
+  return {
+  safe: { flex: 1, backgroundColor: c.bg, padding: 24, justifyContent: "space-between" },
   center: { alignItems: "center", marginTop: 48 },
   logo: { width: 140, height: 140, borderRadius: 32, marginBottom: 20 },
-  h1: { color: colors.text, fontSize: 40, fontWeight: "800", textAlign: "center", letterSpacing: 1, lineHeight: 44 },
-  red: { color: colors.red },
-  p: { color: colors.muted, textAlign: "center", marginTop: 16, fontSize: 15, lineHeight: 22 }
-});
+  h1: { color: c.text, fontSize: 40, fontWeight: "800", textAlign: "center", letterSpacing: 1, lineHeight: 44 },
+  red: { color: c.red },
+  p: { color: c.muted, textAlign: "center", marginTop: 16, fontSize: 15, lineHeight: 22 }
+};
+}

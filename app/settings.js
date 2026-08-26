@@ -4,11 +4,18 @@ import { SessionService } from "@shared/services/account/SessionService.js";
 import { store } from "@shared/store/local-store.js";
 import { Button, Chip, Screen, Section, TopBar } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
-import { colors } from "../src/theme.js";
+import { useTheme } from "../src/theme.js";
 import { router } from "expo-router";
+
+const THEMES = [
+  ["system", "Sistema"],
+  ["light", "Claro"],
+  ["dark", "Escuro"]
+];
 
 export default function Settings() {
   const { state, refresh } = useAppState();
+  const { colors, preference, setPreference } = useTheme();
   function sync() {
     if (SessionService.hasToken()) SessionService.pushProfile(state).catch(() => {});
     refresh();
@@ -16,6 +23,15 @@ export default function Settings() {
   return (
     <Screen>
       <TopBar title="Ajustes" back />
+      <Section>Aparência</Section>
+      {THEMES.map(([id, label]) => (
+        <Chip
+          key={id}
+          label={label}
+          on={preference === id}
+          onPress={() => setPreference(id)}
+        />
+      ))}
       <Section>Sons</Section>
       <Chip label={state.profile.sound ? "Ligado" : "Desligado"} on={state.profile.sound} onPress={() => { state.profile.sound = !state.profile.sound; sync(); }} />
       <Section>Descanso padrão</Section>

@@ -19,7 +19,7 @@ function blank() {
     custom: [],
     history: [],
     recovery: {},
-    settings: { restDefault: 90, sound: true, language: "pt-BR", reminders: false },
+    settings: { restDefault: 90, sound: true, language: "pt-BR", reminders: false, theme: "system" },
     locations: defaultLocations(),
     activeLocationId: "loc-academia",
     favorites: [],
@@ -70,7 +70,9 @@ function load() {
   try {
     const raw = storageGet(KEY);
     if (!raw) return blank();
-    return Object.assign(blank(), JSON.parse(raw));
+    const next = Object.assign(blank(), JSON.parse(raw));
+    next.settings = Object.assign({}, blank().settings, next.settings || {});
+    return next;
   } catch (e) {
     return blank();
   }

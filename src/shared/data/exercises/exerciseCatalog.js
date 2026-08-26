@@ -3,6 +3,8 @@ import { exerciseAliases } from "./exerciseAliases.js";
 import { backCatalog } from "./backCatalog.js";
 import { shoulderCatalog } from "./shoulderCatalog.js";
 import { bicepsCatalog } from "./bicepsCatalog.js";
+import { trapezioCatalog } from "./trapezioCatalog.js";
+import { tricepsCatalog } from "./tricepsCatalog.js";
 
 function gif(id) {
   return id ? { type: "gif", source: "exercisedb", url: "https://static.exercisedb.dev/media/" + id + ".gif" } : null;
@@ -127,9 +129,11 @@ export const chestCatalog = [
 export { backCatalog } from "./backCatalog.js";
 export { shoulderCatalog } from "./shoulderCatalog.js";
 export { bicepsCatalog } from "./bicepsCatalog.js";
+export { trapezioCatalog } from "./trapezioCatalog.js";
+export { tricepsCatalog } from "./tricepsCatalog.js";
 export { catalogToAppView } from "./catalogBuilder.js";
 
-const allCatalog = chestCatalog.concat(backCatalog, shoulderCatalog, bicepsCatalog);
+const allCatalog = chestCatalog.concat(backCatalog, shoulderCatalog, bicepsCatalog, trapezioCatalog, tricepsCatalog);
 const byId = {};
 allCatalog.forEach((ex) => { byId[ex.id] = ex; });
 
@@ -142,7 +146,9 @@ export function getCatalogByCategory(category) {
   if (category === "ombros") return shoulderCatalog.slice();
   if (category === "biceps") return bicepsCatalog.slice();
   if (category === "peito") return chestCatalog.slice();
-  if (category === "triceps" || category === "gluteos" || category === "pernas") return [];
+  if (category === "trapezio") return trapezioCatalog.slice();
+  if (category === "triceps") return tricepsCatalog.slice();
+  if (category === "gluteos" || category === "pernas") return [];
   return allCatalog.slice();
 }
 

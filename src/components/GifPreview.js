@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
-import { colors } from "../theme.js";
+import { useStyles, useTheme } from "../theme.js";
 import { cachedGif, warmGif } from "../media/GifCache.js";
 import { Skeleton } from "./Skeleton.js";
 
 export function GifPreview({ visible, uri, title, exerciseId, onClose }) {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const [src, setSrc] = useState("");
   const [ready, setReady] = useState(false);
 
@@ -54,7 +56,8 @@ export function GifPreview({ visible, uri, title, exerciseId, onClose }) {
   );
 }
 
-const styles = StyleSheet.create({
+function styleFactory(c) {
+  return {
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.82)",
@@ -62,11 +65,11 @@ const styles = StyleSheet.create({
     padding: 20
   },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderRadius: 22,
     padding: 16,
     borderWidth: 1,
-    borderColor: colors.line
+    borderColor: c.line
   },
   gif: {
     width: "100%",
@@ -74,14 +77,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 16
   },
-  ph: { backgroundColor: colors.surface3 },
+  ph: { backgroundColor: c.surface3 },
   skel: { position: "absolute", left: 16, right: 16, top: 16, height: 280, overflow: "hidden", borderRadius: 16 },
   title: {
-    color: colors.text,
+    color: c.text,
     fontSize: 18,
     fontWeight: "800",
     textAlign: "center",
     marginTop: 14
   },
-  hint: { color: colors.muted, textAlign: "center", marginTop: 8, fontSize: 12 }
-});
+  hint: { color: c.muted, textAlign: "center", marginTop: 8, fontSize: 12 }
+};
+}

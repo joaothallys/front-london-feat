@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Field } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
-import { colors } from "../src/theme.js";
+import { useStyles, useTheme } from "../src/theme.js";
 
 const GOALS = [
   ["hipertrofia", "Hipertrofia", "Ganhar massa muscular"],
@@ -29,6 +29,8 @@ const DAYS = [
 ];
 
 export default function Onboarding() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { state, refresh } = useAppState();
   const [step, setStep] = useState(0);
   const [name, setName] = useState(state.profile.name || "");
@@ -111,6 +113,8 @@ export default function Onboarding() {
 }
 
 function Choice({ title, desc, on, onPress }) {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   return (
     <Pressable onPress={onPress} style={[styles.choice, on && styles.choiceOn]}>
       <Text style={styles.choiceT}>{title}</Text>
@@ -119,16 +123,17 @@ function Choice({ title, desc, on, onPress }) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: 20 },
+function styleFactory(c) {
+  return {
+  safe: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 20 },
   header: { paddingTop: 12, alignItems: "center" },
   dots: { flexDirection: "row", gap: 6, marginBottom: 18 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.line },
-  dotOn: { backgroundColor: colors.red },
-  kicker: { color: colors.red, fontSize: 12, fontWeight: "700", letterSpacing: 1.4, textTransform: "uppercase" },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: c.line },
+  dotOn: { backgroundColor: c.red },
+  kicker: { color: c.red, fontSize: 12, fontWeight: "700", letterSpacing: 1.4, textTransform: "uppercase" },
   mid: { flex: 1, justifyContent: "center", paddingVertical: 24 },
   question: {
-    color: colors.text,
+    color: c.text,
     fontSize: 26,
     fontWeight: "800",
     letterSpacing: 0.4,
@@ -137,8 +142,9 @@ const styles = StyleSheet.create({
     lineHeight: 34
   },
   footer: { paddingBottom: 8 },
-  choice: { backgroundColor: colors.surface, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: colors.line, marginBottom: 10 },
-  choiceOn: { borderColor: colors.red, backgroundColor: colors.redSoft },
-  choiceT: { color: colors.text, fontWeight: "800", fontSize: 16 },
-  choiceD: { color: colors.muted, marginTop: 4 }
-});
+  choice: { backgroundColor: c.surface, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: c.line, marginBottom: 10 },
+  choiceOn: { borderColor: c.red, backgroundColor: c.redSoft },
+  choiceT: { color: c.text, fontWeight: "800", fontSize: 16 },
+  choiceD: { color: c.muted, marginTop: 4 }
+};
+}

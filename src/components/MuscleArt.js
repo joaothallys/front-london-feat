@@ -4,7 +4,7 @@ import { Asset } from "expo-asset";
 import { Image } from "expo-image";
 import { SvgXml } from "react-native-svg";
 import { useAppState } from "../state/AppState.js";
-import { colors } from "../theme.js";
+import { useStyles, useTheme } from "../theme.js";
 
 const HOMEM = {
   peito: require("../../assets/muscles/homem/peito.svg"),
@@ -55,6 +55,8 @@ function isFemale(gender) {
 }
 
 export function MuscleArt({ id, width = 88, height = 88 }) {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { state } = useAppState();
   const female = isFemale(state.profile && state.profile.gender);
   const pack = female ? MULHER : HOMEM;
@@ -92,8 +94,10 @@ export function MuscleArt({ id, width = 88, height = 88 }) {
   );
 }
 
-const styles = StyleSheet.create({
-  box: { backgroundColor: colors.surface, borderRadius: 16, overflow: "hidden" },
+function styleFactory(c) {
+  return {
+  box: { backgroundColor: c.surface, borderRadius: 16, overflow: "hidden" },
   boxDark: { backgroundColor: "#000" },
   img: { width: "100%", height: "100%" }
-});
+};
+}

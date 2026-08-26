@@ -1,8 +1,10 @@
 import { Animated, StyleSheet, View } from "react-native";
 import React, { useEffect, useRef } from "react";
-import { colors } from "../theme.js";
+import { useStyles, useTheme } from "../theme.js";
 
 export function Skeleton({ width, height, radius = 8, style }) {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const opacity = useRef(new Animated.Value(0.35)).current;
   useEffect(() => {
     const loop = Animated.loop(Animated.sequence([
@@ -24,6 +26,8 @@ export function Skeleton({ width, height, radius = 8, style }) {
 }
 
 export function ExerciseSkeleton() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   return (
     <View style={styles.row}>
       <Skeleton width={64} height={64} radius={12} />
@@ -37,13 +41,17 @@ export function ExerciseSkeleton() {
 }
 
 export function ExerciseSkeletonList({ count = 8 }) {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const items = [];
   for (let i = 0; i < count; i += 1) items.push(<ExerciseSkeleton key={i} />);
   return <View>{items}</View>;
 }
 
-const styles = StyleSheet.create({
-  block: { backgroundColor: colors.surface3 },
+function styleFactory(c) {
+  return {
+  block: { backgroundColor: c.surface3 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
   grow: { flex: 1 }
-});
+};
+}

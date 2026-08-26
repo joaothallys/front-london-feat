@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "londonfitness",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/logo.png",
@@ -17,6 +17,9 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.londonfitness.app",
       "infoPlist": {
+        "NSCameraUsageDescription": "O London Fitness usa a câmera para a foto do seu treino.",
+        "NSPhotoLibraryUsageDescription": "O London Fitness acessa suas fotos para montar o card do treino.",
+        "NSPhotoLibraryAddUsageDescription": "O London Fitness salva a montagem do treino na sua galeria.",
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true,
           "NSAllowsArbitraryLoads": true
@@ -38,6 +41,13 @@
     "plugins": [
       "expo-router",
       "expo-asset",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O London Fitness acessa suas fotos para montar o card do treino.",
+          "cameraPermission": "O London Fitness usa a câmera para a foto do seu treino."
+        }
+      ],
       [
         "expo-splash-screen",
         {

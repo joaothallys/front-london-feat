@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Card, Screen, Section, TopBar } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
-import { colors } from "../src/theme.js";
+import { useStyles, useTheme } from "../src/theme.js";
 
 function fmtDate(iso) {
   if (!iso) return "—";
@@ -11,6 +11,8 @@ function fmtDate(iso) {
 }
 
 export default function Membership() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { state } = useAppState();
   const m = state.member || {};
   return (
@@ -41,6 +43,8 @@ export default function Membership() {
 }
 
 function Line({ k, v }) {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   return (
     <View style={styles.line}>
       <Text style={styles.p}>{k}</Text>
@@ -49,10 +53,12 @@ function Line({ k, v }) {
   );
 }
 
-const styles = StyleSheet.create({
-  k: { color: colors.red, fontWeight: "700" },
-  h: { color: colors.text, fontSize: 22, fontWeight: "800", marginVertical: 8 },
-  p: { color: colors.muted },
-  b: { color: colors.text, fontWeight: "700" },
+function styleFactory(c) {
+  return {
+  k: { color: c.red, fontWeight: "700" },
+  h: { color: c.text, fontSize: 22, fontWeight: "800", marginVertical: 8 },
+  p: { color: c.muted },
+  b: { color: c.text, fontWeight: "700" },
   line: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }
-});
+};
+}

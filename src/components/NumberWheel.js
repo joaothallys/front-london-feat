@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { colors } from "../theme.js";
+import { useStyles, useTheme } from "../theme.js";
 
 const ITEM_H = 40;
 const VISIBLE = 5;
@@ -29,6 +29,8 @@ function nearestIndex(values, value) {
 }
 
 export function NumberWheel({ value, min, max, step = 1, onChange }) {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const values = useMemo(() => range(min, max, step), [min, max, step]);
   const [cur, setCur] = useState(Number(value) || 0);
   const onChangeRef = useRef(onChange);
@@ -87,7 +89,8 @@ export function NumberWheel({ value, min, max, step = 1, onChange }) {
   );
 }
 
-const styles = StyleSheet.create({
+function styleFactory(c) {
+  return {
   box: { height: ITEM_H * VISIBLE, overflow: "hidden" },
   hi: {
     position: "absolute",
@@ -96,10 +99,11 @@ const styles = StyleSheet.create({
     top: ITEM_H * Math.floor(VISIBLE / 2),
     height: ITEM_H,
     borderRadius: 12,
-    backgroundColor: colors.surface3,
+    backgroundColor: c.surface3,
     zIndex: 0
   },
   item: { height: ITEM_H, alignItems: "center", justifyContent: "center", zIndex: 1 },
-  txt: { color: colors.muted, fontSize: 20, fontWeight: "600" },
-  txtOn: { color: colors.text, fontWeight: "800", fontSize: 24 }
-});
+  txt: { color: c.muted, fontSize: 20, fontWeight: "600" },
+  txtOn: { color: c.text, fontWeight: "800", fontSize: 24 }
+};
+}

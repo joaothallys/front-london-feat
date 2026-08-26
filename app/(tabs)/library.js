@@ -8,11 +8,13 @@ import { MuscleArt } from "../../src/components/MuscleArt.js";
 import { ExerciseThumb } from "../../src/components/ExerciseThumb.js";
 import { useAppState } from "../../src/state/AppState.js";
 import { D, exerciseOf } from "../../src/catalog.js";
-import { colors } from "../../src/theme.js";
+import { useStyles, useTheme } from "../../src/theme.js";
 
-const LIBRARY = ["peito", "costas", "ombros", "biceps", "triceps", "gluteos", "pernas"];
+const LIBRARY = ["peito", "costas", "ombros", "biceps", "triceps", "gluteos", "pernas", "trapezio"];
 
 export default function Library() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { state } = useAppState();
   const [tab, setTab] = useState("muscle");
   const [q, setQ] = useState("");
@@ -54,7 +56,9 @@ export default function Library() {
   );
 }
 
-const styles = StyleSheet.create({
+function styleFactory(c) {
+  return {
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  cell: { width: "48%", backgroundColor: colors.surface, borderRadius: 16, overflow: "hidden" }
-});
+  cell: { width: "48%", backgroundColor: c.surface, borderRadius: 16, overflow: "hidden" }
+};
+}

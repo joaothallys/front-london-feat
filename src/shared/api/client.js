@@ -293,7 +293,8 @@ export const api = {
   },
   history: {
     list() { return request("/api/history"); },
-    get(id) { return request("/api/history/" + id); }
+    get(id) { return request("/api/history/" + id); },
+    remove(id) { return request("/api/history/" + id, { method: "DELETE" }); }
   },
   progress: {
     get(range) { return request("/api/progress" + qstr({ range: range || "week" })); },

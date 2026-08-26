@@ -3,9 +3,10 @@ import { Text } from "react-native";
 import { api } from "@shared/api/client.js";
 import { Button, Card, Screen, TopBar } from "../src/components/ui.js";
 import { D } from "../src/catalog.js";
-import { colors } from "../src/theme.js";
+import { useTheme } from "../src/theme.js";
 
 export default function Sync() {
+  const { colors } = useTheme();
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
 

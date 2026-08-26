@@ -6,9 +6,11 @@ import { store } from "@shared/store/local-store.js";
 import { Button, Row, Screen, Section, Title } from "../../src/components/ui.js";
 import { useAppState } from "../../src/state/AppState.js";
 import { D } from "../../src/catalog.js";
-import { colors } from "../../src/theme.js";
+import { useStyles, useTheme } from "../../src/theme.js";
 
 export default function Profile() {
+  const { colors, preference } = useTheme();
+  const styles = useStyles(styleFactory);
   const { state, refresh } = useAppState();
   const mins = (state.history || []).reduce((a, h) => a + (h.duration || 0), 0);
   const prs = (state.history || []).filter((h) => h.volume > 12000).length;
@@ -41,6 +43,11 @@ export default function Profile() {
       <Row title="Sons" subtitle="Alerta de descanso" right={<Text style={styles.val}>{state.profile.sound ? "On" : "Off"}</Text>} onPress={() => { state.profile.sound = !state.profile.sound; SessionService.hasToken() && SessionService.pushProfile(state).catch(() => {}); refresh(); }} />
       <Row title="Lembretes de treino" subtitle="Aviso no horário" right={<Text style={styles.val}>{state.settings.reminders ? "On" : "Off"}</Text>} onPress={() => { state.settings.reminders = !state.settings.reminders; SessionService.hasToken() && SessionService.pushProfile(state).catch(() => {}); refresh(); }} />
       <Section>Geral</Section>
+      <Row
+        title="Aparência"
+        subtitle={{ system: "Igual ao iPhone", light: "Claro", dark: "Escuro" }[preference] || "Igual ao iPhone"}
+        onPress={() => router.push("/settings")}
+      />
       <Row title="Unidades de medida" subtitle={state.profile.unitKg ? "kg" : "lb"} onPress={() => { state.profile.unitKg = !state.profile.unitKg; SessionService.hasToken() && SessionService.pushProfile(state).catch(() => {}); refresh(); }} />
       <Row title="Matrícula" subtitle={state.member.plan} onPress={() => router.push("/membership")} />
       <Row title="Apps conectados" subtitle="Apple Saúde e Strava" onPress={() => router.push("/apps")} />
@@ -51,6 +58,8 @@ export default function Profile() {
 }
 
 function Stat({ n, l }) {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   return (
     <View style={styles.stat}>
       <Text style={styles.statN}>{n}</Text>
@@ -59,14 +68,16 @@ function Stat({ n, l }) {
   );
 }
 
-const styles = StyleSheet.create({
+function styleFactory(c) {
+  return {
   center: { alignItems: "center", marginBottom: 16 },
   logo: { width: 88, height: 88, borderRadius: 44, marginBottom: 8 },
-  name: { color: colors.text, fontSize: 22, fontWeight: "800" },
-  badge: { color: colors.red, marginTop: 6, fontWeight: "700" },
+  name: { color: c.text, fontSize: 22, fontWeight: "800" },
+  badge: { color: c.red, marginTop: 6, fontWeight: "700" },
   stats: { flexDirection: "row", gap: 8 },
-  stat: { flex: 1, backgroundColor: colors.surface, borderRadius: 14, padding: 12, alignItems: "center" },
-  statN: { color: colors.text, fontWeight: "800", fontSize: 18 },
-  statL: { color: colors.muted, fontSize: 11, marginTop: 4 },
-  val: { color: colors.muted2, fontWeight: "700" }
-});
+  stat: { flex: 1, backgroundColor: c.surface, borderRadius: 14, padding: 12, alignItems: "center" },
+  statN: { color: c.text, fontWeight: "800", fontSize: 18 },
+  statL: { color: c.muted, fontSize: 11, marginTop: 4 },
+  val: { color: c.muted2, fontWeight: "700" }
+};
+}

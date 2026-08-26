@@ -6,7 +6,7 @@ import { SessionService } from "@shared/services/account/SessionService.js";
 import { store } from "@shared/store/local-store.js";
 import { Button, Field } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
-import { colors } from "../src/theme.js";
+import { useStyles, useTheme } from "../src/theme.js";
 
 function maskPhone(value) {
   const d = String(value || "").replace(/\D/g, "").slice(0, 11);
@@ -18,6 +18,8 @@ function maskPhone(value) {
 }
 
 export default function Login() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { state, refresh } = useAppState();
   const [mode, setMode] = useState("login");
   const [name, setName] = useState("");
@@ -88,18 +90,20 @@ export default function Login() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+function styleFactory(c) {
+  return {
+  safe: { flex: 1, backgroundColor: c.bg },
   flex: { flex: 1 },
   scroll: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
   center: { alignItems: "center", marginTop: 8, marginBottom: 20 },
   logo: { width: 96, height: 96, borderRadius: 48, marginBottom: 12 },
-  h: { color: colors.text, fontSize: 26, fontWeight: "800" },
-  muted: { color: colors.muted, marginTop: 6, textAlign: "center" },
+  h: { color: c.text, fontSize: 26, fontWeight: "800" },
+  muted: { color: c.muted, marginTop: 6, textAlign: "center" },
   tabs: { flexDirection: "row", gap: 8, marginBottom: 16 },
-  tab: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, alignItems: "center" },
-  tabOn: { backgroundColor: colors.redSoft, borderColor: colors.red },
-  tabTxt: { color: colors.muted, fontWeight: "700", fontSize: 15 },
-  tabTxtOn: { color: colors.text },
-  err: { color: colors.red, marginBottom: 10, fontSize: 13 }
-});
+  tab: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: c.line, backgroundColor: c.surface, alignItems: "center" },
+  tabOn: { backgroundColor: c.redSoft, borderColor: c.red },
+  tabTxt: { color: c.muted, fontWeight: "700", fontSize: 15 },
+  tabTxtOn: { color: c.text },
+  err: { color: c.red, marginBottom: 10, fontSize: 13 }
+};
+}

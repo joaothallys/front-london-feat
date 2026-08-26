@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { SessionService } from "@shared/services/account/SessionService.js";
-import { Screen } from "../src/components/ui.js";
+import { Button, Screen } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
-import { colors } from "../src/theme.js";
+import { useStyles, useTheme } from "../src/theme.js";
 
 let pendingGenerate = null;
 
@@ -18,52 +18,79 @@ function onboardFrom(state) {
   };
 }
 
-function generateOnce(state) {
+async function runGenerate(state, retry) {
   const onboard = onboardFrom(state);
   if (!SessionService.hasToken()) {
     SessionService.applyLocalPlan(state, onboard);
-    return Promise.resolve();
+    return { ok: true, local: true };
   }
-  return SessionService.finishOnboarding(state, onboard).catch((err) => {
+  try {
+    if (retry) await SessionService.generateIaPlan(state, onboard);
+    else await SessionService.finishOnboarding(state, onboard);
+    return { ok: true };
+  } catch (err) {
     if (err && err.status === 401 && !SessionService.hasToken()) throw err;
     SessionService.applyLocalPlan(state, onboard);
-  });
+    return { ok: false };
+  }
 }
 
 export default function Ai() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { state, refresh } = useAppState();
+  const [phase, setPhase] = useState("loading");
   const [hint, setHint] = useState("Ficha com os aparelhos da London Fitness.");
 
-  useEffect(() => {
-    let cancelled = false;
+  function goHome() {
+    refresh();
+    router.replace("/(tabs)/home");
+  }
 
-    async function waitAndLeave() {
-      if (state.onboardingDone && state.plan && state.plan.split && state.plan.split.length && state.plan.id) {
-        router.replace("/(tabs)/home");
+  async function startGenerate(retry) {
+    setPhase("loading");
+    setHint(retry ? "Tentando de novo com a IA." : "Ficha com os aparelhos da London Fitness.");
+    if (!pendingGenerate) pendingGenerate = runGenerate(state, retry).finally(() => { pendingGenerate = null; });
+    try {
+      const result = await pendingGenerate;
+      if (result.ok) {
+        goHome();
         return;
       }
-      if (!pendingGenerate) pendingGenerate = generateOnce(state).finally(() => { pendingGenerate = null; });
-      try {
-        await pendingGenerate;
-        if (cancelled) return;
-        refresh();
-        router.replace("/(tabs)/home");
-      } catch (err) {
-        if (cancelled) return;
-        refresh();
-        router.replace("/login");
-      }
+      refresh();
+      setPhase("fail");
+    } catch (err) {
+      refresh();
+      router.replace("/login");
     }
+  }
 
-    waitAndLeave();
+  useEffect(() => {
+    if (state.onboardingDone && state.plan && state.plan.split && state.plan.split.length && state.plan.id && !state.plan.iaFailed) {
+      router.replace("/(tabs)/home");
+      return undefined;
+    }
+    startGenerate(false);
     const failHint = setTimeout(() => {
-      if (!cancelled) setHint("Ainda montando. Se a IA falhar, usamos um plano local.");
+      setHint("Ainda montando. A IA está demorando.");
     }, 20000);
-    return () => {
-      cancelled = true;
-      clearTimeout(failHint);
-    };
+    return () => clearTimeout(failHint);
   }, []);
+
+  if (phase === "fail") {
+    return (
+      <Screen noNav>
+        <View style={styles.box}>
+          <Text style={styles.h}>A IA não montou o plano</Text>
+          <Text style={styles.p}>
+            O servidor não conseguiu falar com a IA agora. Você pode tentar de novo ou seguir com um plano local e gerar depois.
+          </Text>
+          <Button label="Tentar com a IA de novo" onPress={() => startGenerate(true)} />
+          <Button ghost label="Continuar com plano local" onPress={goHome} />
+        </View>
+      </Screen>
+    );
+  }
 
   return (
     <Screen noNav>
@@ -74,7 +101,10 @@ export default function Ai() {
   );
 }
 
-const styles = StyleSheet.create({
-  h: { color: colors.text, fontSize: 22, fontWeight: "800", textAlign: "center", marginTop: 16 },
-  p: { color: colors.muted, textAlign: "center", marginTop: 8, paddingHorizontal: 24 }
-});
+function styleFactory(c) {
+  return {
+  box: { marginTop: 64 },
+  h: { color: c.text, fontSize: 22, fontWeight: "800", textAlign: "center", marginTop: 16 },
+  p: { color: c.muted, textAlign: "center", marginTop: 8, marginBottom: 20, paddingHorizontal: 24, lineHeight: 20 }
+};
+}

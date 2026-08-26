@@ -3,9 +3,11 @@ import { StyleSheet, Text, View } from "react-native";
 import { Screen, TopBar } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
 import { D } from "../src/catalog.js";
-import { colors } from "../src/theme.js";
+import { useStyles, useTheme } from "../src/theme.js";
 
 export default function Recovery() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { state } = useAppState();
   return (
     <Screen>
@@ -26,12 +28,14 @@ export default function Recovery() {
   );
 }
 
-const styles = StyleSheet.create({
+function styleFactory(c) {
+  return {
   row: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
-  label: { color: colors.text, width: 90, fontWeight: "700" },
-  bar: { flex: 1, height: 8, backgroundColor: colors.line, borderRadius: 4, overflow: "hidden" },
-  fill: { height: 8, backgroundColor: colors.green },
-  low: { backgroundColor: colors.red },
-  warn: { backgroundColor: colors.amber },
-  pct: { color: colors.muted, width: 40, textAlign: "right" }
-});
+  label: { color: c.text, width: 90, fontWeight: "700" },
+  bar: { flex: 1, height: 8, backgroundColor: c.line, borderRadius: 4, overflow: "hidden" },
+  fill: { height: 8, backgroundColor: c.green },
+  low: { backgroundColor: c.red },
+  warn: { backgroundColor: c.amber },
+  pct: { color: c.muted, width: 40, textAlign: "right" }
+};
+}

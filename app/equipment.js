@@ -5,9 +5,11 @@ import { api } from "@shared/api/client.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { Button, Screen, TopBar } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
-import { colors } from "../src/theme.js";
+import { useStyles, useTheme } from "../src/theme.js";
 
 export default function Equipment() {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
   const { state, refresh } = useAppState();
   const loc = (state.locations || []).find((l) => l.id === state.activeLocationId) || (state.locations || [])[0];
   if (!loc) return <Screen><TopBar title="Equipamento" back /><Text style={{ color: colors.muted }}>Nenhum local.</Text></Screen>;
@@ -46,10 +48,12 @@ export default function Equipment() {
   );
 }
 
-const styles = StyleSheet.create({
-  cat: { color: colors.text, fontWeight: "800", marginBottom: 8 },
-  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.line },
-  label: { color: colors.muted2 },
-  toggle: { width: 40, height: 22, borderRadius: 11, backgroundColor: colors.line },
-  on: { backgroundColor: colors.red }
-});
+function styleFactory(c) {
+  return {
+  cat: { color: c.text, fontWeight: "800", marginBottom: 8 },
+  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: c.line },
+  label: { color: c.muted2 },
+  toggle: { width: 40, height: 22, borderRadius: 11, backgroundColor: c.line },
+  on: { backgroundColor: c.red }
+};
+}
