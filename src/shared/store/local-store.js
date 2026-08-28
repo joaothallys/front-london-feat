@@ -28,7 +28,8 @@ function blank() {
     analytics: [],
     bodyMeasures: { height: null, weight: null, weightGoal: null },
     connectedApps: { appleHealth: "disconnected", strava: "disconnected" },
-    planDay: 0
+    planDay: 0,
+    liveSession: null
   };
 }
 

@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { api, unwrap } from "@shared/api/client.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { store } from "@shared/store/local-store.js";
@@ -59,9 +59,15 @@ function musclesOf(live) {
 }
 
 export function LiveSessionProvider({ children }) {
-  const [live, setLive] = useState(null);
+  const [live, setLive] = useState(() => store.get().liveSession || null);
   const [summary, setSummary] = useState(null);
   const timer = useRef(null);
+
+  useEffect(() => {
+    const S = store.get();
+    S.liveSession = live || null;
+    store.persist();
+  }, [live]);
 
   const push = useCallback((next) => {
     setLive(next);

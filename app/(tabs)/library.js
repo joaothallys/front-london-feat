@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Text, View } from "react-native";
 import { router } from "expo-router";
 import { MUSCLE_ART } from "@shared/domain/muscle-art.js";
 import { Chip, Empty, Field, Row, Screen, Title } from "../../src/components/ui.js";
@@ -47,7 +47,8 @@ export default function Library() {
               style={styles.cell}
               onPress={() => LIBRARY.indexOf(m.id) >= 0 ? router.push("/library/" + m.id) : null}
             >
-              <MuscleArt id={m.id} width={160} height={110} />
+              <MuscleArt id={m.id} width={148} height={168} />
+              <Text style={styles.cellLbl}>{m.label}</Text>
             </HapticPressable>
           ))}
         </View>
@@ -59,6 +60,7 @@ export default function Library() {
 function styleFactory(c) {
   return {
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  cell: { width: "48%", backgroundColor: c.surface, borderRadius: 16, overflow: "hidden" }
+  cell: { width: "48%", backgroundColor: c.surface, borderRadius: 16, overflow: "hidden", alignItems: "center", paddingTop: 8, paddingBottom: 12, borderWidth: 1, borderColor: c.line },
+  cellLbl: { color: c.text, fontWeight: "800", fontSize: 12, letterSpacing: 0.4, textTransform: "uppercase", marginTop: 6 }
 };
 }

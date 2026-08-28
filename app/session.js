@@ -150,9 +150,10 @@ export default function Session() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.top}>
-        <HapticPressable onPress={() => Alert.alert("Encerrar treino?", "", [
-          { text: "Cancelar" },
-          { text: "Encerrar", style: "destructive", onPress: () => { quit(); router.replace("/(tabs)/home"); } }
+        <HapticPressable onPress={() => Alert.alert("Sair do treino?", "O progresso fica salvo para você continuar depois.", [
+          { text: "Cancelar", style: "cancel" },
+          { text: "Encerrar", style: "destructive", onPress: () => { quit(); router.replace("/(tabs)/home"); } },
+          { text: "Continuar depois", onPress: () => router.replace("/(tabs)/home") }
         ])}><Text style={styles.back}>‹</Text></HapticPressable>
         <View style={{ flex: 1 }}>
           <Text style={styles.kicker}>Exercício {live.index + 1}/{live.items.length}</Text>

@@ -35,7 +35,7 @@ export default function Home() {
   const { colors } = useTheme();
   const styles = useStyles(styleFactory);
   const { state, refresh } = useAppState();
-  const { start } = useLive();
+  const { start, live } = useLive();
   const [gif, setGif] = useState(null);
   const [menu, setMenu] = useState(null);
   const [loadEdit, setLoadEdit] = useState(null);
@@ -90,17 +90,21 @@ export default function Home() {
   }
 
   function begin() {
+    if (live) {
+      router.push("/session");
+      return;
+    }
     if (!items.length) {
       ensureDay(state);
       refresh();
       router.push("/add-exercise");
       return;
     }
-    const live = start(day.name || "Meu Plano", items, {
+    const next = start(day.name || "Meu Plano", items, {
       sourceType: "plan_day",
       sourceId: (day && day.id) || (state.plan && state.plan.id) || null
     });
-    if (live) router.push("/session");
+    if (next) router.push("/session");
   }
 
   async function saveDayAsWorkout() {
@@ -342,7 +346,7 @@ export default function Home() {
           <Ionicons name="share-outline" size={20} color={colors.text} />
         </HapticPressable>
         <HapticPressable style={styles.cta} onPress={begin}>
-          <Text style={styles.ctaTxt}>Iniciar treino</Text>
+          <Text style={styles.ctaTxt}>{live ? "Continuar treino" : "Iniciar treino"}</Text>
         </HapticPressable>
       </View>
 
