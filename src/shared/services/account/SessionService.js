@@ -2,7 +2,7 @@ import { api, unwrap, readTokens, clearTokens } from "../../api/client.js";
 import { BiometricService } from "./BiometricService.js";
 import { catalog as D } from "../../catalog/index.js";
 import { ChestLibraryService } from "../exercises/ChestLibraryService.js";
-import { defaultLocations } from "../../domain/locations.js";
+import { defaultLocations, ensurePartnerGyms, isLondonFit } from "../../domain/locations.js";
 
 const EQUIPMENT_TO_API = { cabo: "polia", nenhum: "peso-corporal" };
 const EQUIPMENT_OK = { halteres: 1, barra: 1, polia: 1, maquina: 1, banco: 1, elastico: 1, kettlebell: 1, "peso-corporal": 1 };
@@ -155,10 +155,12 @@ function mapMembership(raw, profile, email) {
 }
 
 function mapLocation(row) {
+  const name = first(row, ["name"], "Local");
   return {
     id: first(row, ["id"], ""),
-    name: first(row, ["name"], "Local"),
+    name,
     type: first(row, ["type"], "gym"),
+    partner: !!(row && (row.partner || row.homologated)) || isLondonFit({ name }),
     equipment: asList(first(row, ["equipment"], []))
   };
 }
@@ -227,9 +229,10 @@ export const SessionService = {
       }),
       settled("locations", () => api.locations.list(), (data) => {
         const list = asList(data).map(mapLocation).filter((row) => row.id);
-        state.locations = list.length ? list : defaultLocations();
+        state.locations = ensurePartnerGyms(list.length ? list : defaultLocations());
         const active = asList(data).find((row) => row.isActive || row.is_active);
-        state.activeLocationId = (active && active.id) || (state.locations[0] && state.locations[0].id);
+        const keep = state.activeLocationId && state.locations.some((row) => row.id === state.activeLocationId);
+        state.activeLocationId = (active && active.id) || (keep && state.activeLocationId) || (state.locations[0] && state.locations[0].id);
       }),
       settled("workouts", () => api.workouts.list(), (data) => {
         state.custom = asList(data).map((row) => ({
@@ -319,6 +322,26 @@ export const SessionService = {
 
   async register(payload) {
     return api.auth.register(payload);
+  },
+
+  async loginWithGoogle(payload) {
+    const body = {};
+    if (payload && payload.idToken) body.idToken = payload.idToken;
+    if (payload && payload.accessToken) body.accessToken = payload.accessToken;
+    if (payload && payload.name) body.name = payload.name;
+    if (payload && payload.device) body.device = payload.device;
+    return api.auth.google(body);
+  },
+
+  async loginWithApple(payload) {
+    const body = {
+      identityToken: payload.identityToken,
+      nonce: payload.nonce,
+      device: "ios"
+    };
+    if (payload.name) body.name = payload.name;
+    if (payload.email) body.email = payload.email;
+    return api.auth.apple(body);
   },
 
   async logout() {

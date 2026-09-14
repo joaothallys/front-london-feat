@@ -25,7 +25,7 @@ export default function Library() {
 
   return (
     <Screen>
-      <Title>Exercícios</Title>
+      <Title style={styles.heading}>Exercícios</Title>
       <Field placeholder="Buscar exercício" value={q} onChangeText={setQ} />
       <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
         <Chip label="Por músculo" on={tab === "muscle"} onPress={() => setTab("muscle")} />
@@ -59,6 +59,7 @@ export default function Library() {
 
 function styleFactory(c) {
   return {
+  heading: { marginBottom: 18 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   cell: { width: "48%", backgroundColor: c.surface, borderRadius: 16, overflow: "hidden", alignItems: "center", paddingTop: 8, paddingBottom: 12, borderWidth: 1, borderColor: c.line },
   cellLbl: { color: c.text, fontWeight: "800", fontSize: 12, letterSpacing: 0.4, textTransform: "uppercase", marginTop: 6 }

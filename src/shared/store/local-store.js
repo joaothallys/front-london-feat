@@ -21,7 +21,7 @@ function blank() {
     recovery: {},
     settings: { restDefault: 90, sound: true, language: "pt-BR", reminders: false, theme: "system" },
     locations: defaultLocations(),
-    activeLocationId: "loc-academia",
+    activeLocationId: "loc-independent",
     favorites: [],
     favoriteWorkouts: [],
     feedback: {},

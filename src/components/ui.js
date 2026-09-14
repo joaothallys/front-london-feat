@@ -11,9 +11,12 @@ function styleFactory(c) {
     flex: { flex: 1 },
     pad: { paddingHorizontal: 16, paddingTop: 8 },
     top: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 },
+    topStack: { marginBottom: 18 },
+    topRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 },
     back: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" },
     backTxt: { color: c.text, fontSize: 28, marginTop: -4 },
-    title: { color: c.text, fontSize: 26, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase", flex: 1 },
+    title: { color: c.text, fontSize: 22, fontWeight: "800", letterSpacing: 0.4, textTransform: "uppercase", flex: 1 },
+    titleStack: { color: c.text, fontSize: 28, fontWeight: "800", letterSpacing: 0.4, textTransform: "uppercase", lineHeight: 34 },
     muted: { color: c.muted, fontSize: 14, lineHeight: 20 },
     kicker: { color: c.red, fontSize: 12, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 },
     section: { color: c.muted2, fontSize: 13, fontWeight: "700", marginTop: 18, marginBottom: 10, textTransform: "uppercase" },
@@ -61,24 +64,38 @@ export function Screen({ children, padded = true, noNav = false }) {
   );
 }
 
-export function TopBar({ title, back, right }) {
+export function TopBar({ title, back, right, stacked }) {
   const styles = useStyles(styleFactory);
+  const goBack = () => (typeof back === "string" ? router.push(back) : router.back());
+  const backBtn = back ? (
+    <HapticPressable onPress={goBack} style={styles.back}>
+      <Text style={styles.backTxt}>‹</Text>
+    </HapticPressable>
+  ) : null;
+  if (stacked) {
+    return (
+      <View style={styles.topStack}>
+        <View style={styles.topRow}>
+          {backBtn}
+          <View style={{ flex: 1 }} />
+          {right || null}
+        </View>
+        <Text style={styles.titleStack}>{title}</Text>
+      </View>
+    );
+  }
   return (
     <View style={styles.top}>
-      {back ? (
-        <HapticPressable onPress={() => (typeof back === "string" ? router.push(back) : router.back())} style={styles.back}>
-          <Text style={styles.backTxt}>‹</Text>
-        </HapticPressable>
-      ) : null}
-      <Text style={styles.title}>{title}</Text>
+      {backBtn}
+      <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{title}</Text>
       {right || null}
     </View>
   );
 }
 
-export function Title({ children }) {
+export function Title({ children, style }) {
   const styles = useStyles(styleFactory);
-  return <Text style={styles.title}>{children}</Text>;
+  return <Text style={[styles.title, style]}>{children}</Text>;
 }
 
 export function Muted({ children, style }) {
@@ -140,9 +157,9 @@ export function Chip({ label, on, onPress }) {
   );
 }
 
-export function Card({ children, onPress }) {
+export function Card({ children, onPress, style }) {
   const styles = useStyles(styleFactory);
-  const inner = <View style={styles.card}>{children}</View>;
+  const inner = <View style={[styles.card, style]}>{children}</View>;
   if (!onPress) return inner;
   return <HapticPressable onPress={onPress}>{inner}</HapticPressable>;
 }

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, Image, Text, View } from "react-native";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { BiometricService } from "@shared/services/account/BiometricService.js";
-import { Button } from "./ui.js";
+import { HapticPressable } from "./HapticPressable.js";
 import { useStyles } from "../theme.js";
 
 export function AppLock({ children }) {
@@ -66,18 +66,13 @@ export function AppLock({ children }) {
     <View style={styles.fill}>
       {children}
       {locked ? (
-        <View style={styles.cover}>
+        <HapticPressable style={styles.cover} onPress={unlock} disabled={busy}>
           <Image source={require("../../assets/logo.png")} style={styles.logo} />
           <Text style={styles.title}>LumenFit</Text>
-          <Text style={styles.sub}>Desbloqueie com {label} para continuar</Text>
-          <View style={styles.btn}>
-            <Button
-              label={busy ? "Aguardando…" : "Desbloquear com " + label}
-              onPress={unlock}
-              disabled={busy}
-            />
-          </View>
-        </View>
+          <Text style={styles.sub}>
+            {busy ? "Aguardando " + label + "…" : "Use " + label + " para continuar"}
+          </Text>
+        </HapticPressable>
       ) : null}
     </View>
   );
@@ -99,7 +94,6 @@ function styleFactory(c) {
     },
     logo: { width: 96, height: 96, borderRadius: 28, marginBottom: 18 },
     title: { color: c.text, fontSize: 28, fontWeight: "800", letterSpacing: 0.6 },
-    sub: { color: c.muted, marginTop: 10, textAlign: "center", fontSize: 15, lineHeight: 22 },
-    btn: { alignSelf: "stretch", marginTop: 28 }
+    sub: { color: c.muted, marginTop: 10, textAlign: "center", fontSize: 15, lineHeight: 22 }
   };
 }

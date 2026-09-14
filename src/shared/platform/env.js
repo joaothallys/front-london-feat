@@ -37,5 +37,11 @@ export function isReactNative() {
 }
 
 export function clientDevice() {
+  try {
+    const { Platform } = require("react-native");
+    if (Platform && Platform.OS === "android") return "android";
+    if (Platform && Platform.OS === "ios") return "ios";
+    if (Platform && Platform.OS === "web") return "web";
+  } catch (err) {}
   return isReactNative() ? "ios" : "web";
 }

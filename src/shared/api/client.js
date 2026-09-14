@@ -56,7 +56,9 @@ function skipAuthRefresh(path) {
   return p === "/api/auth/login"
     || p === "/api/auth/register"
     || p === "/api/auth/refresh"
-    || p === "/api/auth/logout";
+    || p === "/api/auth/logout"
+    || p === "/api/auth/google"
+    || p === "/api/auth/apple";
 }
 
 function authHeaders(extra) {
@@ -241,6 +243,12 @@ export const api = {
     },
     me() {
       return request("/api/auth/me");
+    },
+    google(body) {
+      return request("/api/auth/google", { method: "POST", body: Object.assign({ device: DEVICE }, body) }).then(saveAuth);
+    },
+    apple(body) {
+      return request("/api/auth/apple", { method: "POST", body: Object.assign({ device: DEVICE }, body) }).then(saveAuth);
     },
     deleteAccount() {
       return request("/api/auth/account", { method: "DELETE" });

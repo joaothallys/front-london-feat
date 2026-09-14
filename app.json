@@ -5,10 +5,15 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "londonfitness",
+    "scheme": [
+      "londonfitness",
+      "com.londonfitness.app",
+      "com.googleusercontent.apps.1053297902526-k4ugspt500kb8re2u2jok3d2dv57v37h"
+    ],
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
+      "usesAppleSignIn": true,
       "bundleIdentifier": "com.londonfitness.app",
       "infoPlist": {
         "NSCameraUsageDescription": "O LumenFit usa a câmera para a foto do seu treino.",
@@ -65,7 +70,8 @@
       "expo-image",
       "expo-sharing",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": false
