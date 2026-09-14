@@ -40,7 +40,7 @@ export default function Ai() {
   const styles = useStyles(styleFactory);
   const { state, refresh } = useAppState();
   const [phase, setPhase] = useState("loading");
-  const [hint, setHint] = useState("Ficha com os aparelhos da London Fitness.");
+  const [hint, setHint] = useState("Ficha com os aparelhos do LumenFit.");
 
   function goHome() {
     refresh();
@@ -49,7 +49,7 @@ export default function Ai() {
 
   async function startGenerate(retry) {
     setPhase("loading");
-    setHint(retry ? "Tentando de novo com a IA." : "Ficha com os aparelhos da London Fitness.");
+    setHint(retry ? "Tentando de novo com a IA." : "Ficha com os aparelhos do LumenFit.");
     if (!pendingGenerate) pendingGenerate = runGenerate(state, retry).finally(() => { pendingGenerate = null; });
     try {
       const result = await pendingGenerate;

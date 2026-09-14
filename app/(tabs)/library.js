@@ -10,7 +10,7 @@ import { useAppState } from "../../src/state/AppState.js";
 import { D, exerciseOf } from "../../src/catalog.js";
 import { useStyles, useTheme } from "../../src/theme.js";
 
-const LIBRARY = ["peito", "costas", "ombros", "biceps", "triceps", "gluteos", "pernas", "trapezio"];
+const LIBRARY = ["peito", "costas", "ombros", "biceps", "triceps", "gluteos", "pernas", "trapezio", "posterior", "panturrilha"];
 
 export default function Library() {
   const { colors } = useTheme();

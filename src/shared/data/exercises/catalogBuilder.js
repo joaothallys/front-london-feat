@@ -8,7 +8,9 @@ const META = {
   triceps: { primaryMuscle: "Tríceps", bodyPartRaw: "upper arms", targetRaw: "triceps" },
   gluteos: { primaryMuscle: "Glúteos", bodyPartRaw: "upper legs", targetRaw: "glutes" },
   pernas: { primaryMuscle: "Pernas", bodyPartRaw: "upper legs", targetRaw: "quadriceps" },
-  trapezio: { primaryMuscle: "Trapézio", bodyPartRaw: "back", targetRaw: "traps" }
+  trapezio: { primaryMuscle: "Trapézio", bodyPartRaw: "back", targetRaw: "traps" },
+  posterior: { primaryMuscle: "Posteriores", bodyPartRaw: "upper legs", targetRaw: "hamstrings" },
+  panturrilha: { primaryMuscle: "Panturrilha", bodyPartRaw: "lower legs", targetRaw: "calves" }
 };
 
 export function gif(id) {
@@ -93,5 +95,7 @@ export const CATEGORY_META = {
   triceps: { id: "triceps", title: "Tríceps", bodyPart: "upper arms", targetMuscle: "triceps" },
   gluteos: { id: "gluteos", title: "Glúteos", bodyPart: "upper legs", targetMuscle: "glutes" },
   pernas: { id: "pernas", title: "Pernas", bodyPart: "upper legs" },
-  trapezio: { id: "trapezio", title: "Trapézio", bodyPart: "back", targetMuscle: "traps" }
+  trapezio: { id: "trapezio", title: "Trapézio", bodyPart: "back", targetMuscle: "traps" },
+  posterior: { id: "posterior", title: "Posteriores", bodyPart: "upper legs", targetMuscle: "hamstrings" },
+  panturrilha: { id: "panturrilha", title: "Panturrilhas", bodyPart: "lower legs", targetMuscle: "calves" }
 };

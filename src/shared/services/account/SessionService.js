@@ -1,4 +1,5 @@
 import { api, unwrap, readTokens, clearTokens } from "../../api/client.js";
+import { BiometricService } from "./BiometricService.js";
 import { catalog as D } from "../../catalog/index.js";
 import { ChestLibraryService } from "../exercises/ChestLibraryService.js";
 import { defaultLocations } from "../../domain/locations.js";
@@ -325,6 +326,16 @@ export const SessionService = {
     try {
       if (refreshToken) await api.auth.logout(refreshToken);
     } catch (err) {}
+    clearTokens();
+  },
+
+  async deleteAccount() {
+    try {
+      await api.auth.deleteAccount();
+    } catch (err) {
+      if (!(err && err.status === 404)) throw err;
+    }
+    try { await BiometricService.disable(); } catch (err) {}
     clearTokens();
   },
 

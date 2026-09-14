@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SessionService } from "@shared/services/account/SessionService.js";
+import { BiometricService } from "@shared/services/account/BiometricService.js";
 import { store } from "@shared/store/local-store.js";
 import { Button, Field } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
@@ -28,7 +29,23 @@ export default function Login() {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [faceLabel, setFaceLabel] = useState("");
+  const [faceReady, setFaceReady] = useState(false);
   const isReg = mode === "register";
+
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      const can = await BiometricService.canUse();
+      const on = await BiometricService.isEnabled();
+      const creds = await BiometricService.credentials();
+      const label = await BiometricService.label();
+      if (!live) return;
+      setFaceLabel(label);
+      setFaceReady(!!(can && on && creds));
+    })();
+    return () => { live = false; };
+  }, []);
 
   async function submit() {
     setError("");
@@ -47,7 +64,27 @@ export default function Login() {
       await SessionService.hydrate(state);
       store.login({ userId: state.session && state.session.userId });
       refresh();
-      router.replace(state.onboardingDone ? "/(tabs)/home" : "/onboarding");
+      const go = () => router.replace(state.onboardingDone ? "/(tabs)/home" : "/onboarding");
+      if (await BiometricService.isEnabled()) {
+        await BiometricService.rememberLogin(email.trim(), password);
+        go();
+        return;
+      }
+      if (await BiometricService.canUse()) {
+        const label = faceLabel || (await BiometricService.label());
+        Alert.alert("Desbloqueio com " + label, "Quer abrir o LumenFit com " + label + " da próxima vez?", [
+          { text: "Agora não", onPress: go },
+          {
+            text: "Ativar",
+            onPress: async () => {
+              await BiometricService.enable(email.trim(), password);
+              go();
+            }
+          }
+        ]);
+        return;
+      }
+      go();
     } catch (err) {
       setError((err && err.message) || "Não foi possível autenticar.");
     } finally {
@@ -67,7 +104,7 @@ export default function Login() {
           <View style={styles.center}>
             <Image source={require("../assets/logo.png")} style={styles.logo} />
             <Text style={styles.h}>{isReg ? "Criar conta" : "Entrar"}</Text>
-            <Text style={styles.muted}>{isReg ? "Cadastre-se na Academia London Fitness" : "Use o e-mail e a senha da sua conta"}</Text>
+            <Text style={styles.muted}>{isReg ? "Cadastre-se no LumenFit" : "Use o e-mail e a senha da sua conta"}</Text>
           </View>
 
           <View style={styles.tabs}>
@@ -85,6 +122,36 @@ export default function Login() {
           {isReg ? <Field label="Telefone" value={phone} onChangeText={(v) => setPhone(maskPhone(v))} keyboardType="phone-pad" placeholder="(11) 99999-9999" maxLength={16} /> : null}
           {error ? <Text style={styles.err}>{error}</Text> : null}
           <Button label={busy ? "Aguarde..." : (isReg ? "Cadastrar" : "Entrar")} onPress={submit} disabled={busy} />
+          {!isReg && faceReady ? (
+            <Button
+              ghost
+              label={"Entrar com " + faceLabel}
+              disabled={busy}
+              onPress={async () => {
+                setError("");
+                setBusy(true);
+                try {
+                  const creds = await BiometricService.credentials();
+                  if (!creds) {
+                    setError("Ative o " + faceLabel + " depois de entrar com a senha.");
+                    return;
+                  }
+                  const ok = await BiometricService.authenticate("Entrar no LumenFit com " + faceLabel);
+                  if (!ok) return;
+                  setEmail(creds.email);
+                  await SessionService.login(creds.email, creds.password);
+                  await SessionService.hydrate(state);
+                  store.login({ userId: state.session && state.session.userId });
+                  refresh();
+                  router.replace(state.onboardingDone ? "/(tabs)/home" : "/onboarding");
+                } catch (err) {
+                  setError((err && err.message) || "Não foi possível entrar com " + faceLabel + ".");
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            />
+          ) : null}
       </ScrollView>
     </SafeAreaView>
   );

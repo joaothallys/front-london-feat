@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { api, unwrap } from "@shared/api/client.js";
@@ -13,12 +13,63 @@ import { ExerciseThumb } from "../src/components/ExerciseThumb.js";
 import { HapticPressable } from "../src/components/HapticPressable.js";
 import { MuscleArt } from "../src/components/MuscleArt.js";
 import { useAppState } from "../src/state/AppState.js";
+import { D } from "../src/catalog.js";
+import { replacePlanDay } from "../src/plan.js";
 import { useStyles, useTheme } from "../src/theme.js";
 
 const TABS = [
   ["todos", "Todos"],
   ["muscle", "Por músculo"]
 ];
+
+function one(value) {
+  if (Array.isArray(value)) return value[0];
+  return value;
+}
+
+function cloneItems(list) {
+  return (list || []).map((it) => ({
+    id: it.id || it.exerciseId,
+    sets: Number(it.sets) || 3,
+    reps: Number(it.reps) || 12,
+    kg: Number(it.kg) || 0,
+    rest: Number(it.rest || it.restSec) || 60
+  })).filter((it) => it.id);
+}
+
+function historyList(row) {
+  if (!row) return [];
+  if (Array.isArray(row)) return row;
+  if (Array.isArray(row.exercises)) return row.exercises;
+  if (Array.isArray(row.lines)) return row.lines;
+  if (Array.isArray(row.items)) return row.items;
+  return [];
+}
+
+function itemsFromHistory(row) {
+  return historyList(row).map((ex) => {
+    const id = ex.exerciseId || ex.id;
+    const sets = ex.sets;
+    if (Array.isArray(sets)) {
+      const work = sets.filter((s) => s && s.type !== "W");
+      const first = work[0] || {};
+      return {
+        id,
+        sets: work.length || 3,
+        reps: Number(first.reps) || 12,
+        kg: Number(first.kg) || 0,
+        rest: Number(ex.rest || ex.restSec) || 60
+      };
+    }
+    return {
+      id,
+      sets: Number(ex.sets) || 3,
+      reps: Number(ex.reps) || 12,
+      kg: Number(ex.kg) || 0,
+      rest: Number(ex.rest || ex.restSec) || 60
+    };
+  }).filter((it) => it.id);
+}
 
 function toItem(ex) {
   const view = catalogToAppView(ex) || ex;
@@ -31,15 +82,63 @@ function toItem(ex) {
   };
 }
 
+function upsertCustom(state, workout) {
+  const list = state.custom || [];
+  const idx = list.findIndex((row) => String(row.id) === String(workout.id));
+  if (idx >= 0) list[idx] = workout;
+  else list.push(workout);
+  state.custom = list;
+}
+
 export default function Create() {
   const { colors } = useTheme();
   const styles = useStyles(styleFactory);
+  const params = useLocalSearchParams();
   const { state, refresh } = useAppState();
-  const [name, setName] = useState("Meu treino");
+  const workoutId = String(one(params.id) || "");
+  const planIndexRaw = one(params.planDay);
+  const planIndex = planIndexRaw == null || planIndexRaw === "" ? null : Number(planIndexRaw);
+  const historyId = String(one(params.history) || "");
+  const programId = String(one(params.program) || "");
+  const existing = workoutId ? (state.custom || []).find((row) => String(row.id) === workoutId) : null;
+  const planDay = planIndex != null && !Number.isNaN(planIndex) && state.plan && state.plan.split
+    ? state.plan.split[planIndex]
+    : null;
+  const program = programId ? (D.programs || []).find((row) => row.id === programId) : null;
+  const mode = existing ? "saved" : planDay ? "plan" : historyId ? "history" : program ? "program" : "new";
+
+  const [name, setName] = useState(() => {
+    if (existing) return existing.name || "Meu treino";
+    if (planDay) return planDay.name || "Dia";
+    if (program) return program.name || "Meu treino";
+    return "Meu treino";
+  });
   const [q, setQ] = useState("");
   const [tab, setTab] = useState("todos");
   const [muscle, setMuscle] = useState("");
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(() => {
+    if (existing) return cloneItems(existing.items);
+    if (planDay) return cloneItems(planDay.items);
+    if (program && program.split && program.split[0]) return cloneItems(program.split[0].items);
+    return [];
+  });
+
+  useEffect(() => {
+    if (!historyId) return;
+    let cancelled = false;
+    (async () => {
+      let row = (state.history || []).find((item) => String(item.id) === historyId) || null;
+      try {
+        const remote = unwrap(await api.history.get(historyId));
+        if (remote) row = remote;
+      } catch (err) {}
+      if (cancelled || !row) return;
+      if (row.name) setName(row.name);
+      const next = itemsFromHistory(row);
+      if (next.length) setItems(next);
+    })();
+    return () => { cancelled = true; };
+  }, [historyId]);
 
   const showMuscles = tab === "muscle" && !muscle && !q.trim();
   const picked = useMemo(() => {
@@ -70,22 +169,32 @@ export default function Create() {
     });
   }
 
-  function remove(id) {
-    setItems((cur) => cur.filter((it) => it.id !== id));
+  function remove(index) {
+    setItems((cur) => cur.filter((_, i) => i !== index));
   }
 
   async function save() {
-    let id = "c" + Date.now();
+    const title = name || (mode === "plan" ? "Dia" : "Meu treino");
+    if (mode === "plan") {
+      replacePlanDay(state, planIndex, { name: title, items });
+      refresh();
+      router.replace({ pathname: "/(tabs)/workouts", params: { open: "plans" } });
+      return;
+    }
+
+    let id = existing ? existing.id : "c" + Date.now();
+    const payload = { name: title, exercises: SessionService.payloadItems(items) };
     if (SessionService.hasToken()) {
       try {
-        const created = unwrap(await api.workouts.create({
-          name: name || "Meu treino",
-          exercises: SessionService.payloadItems(items)
-        }));
-        id = created.id || id;
+        if (existing) {
+          unwrap(await api.workouts.update(existing.id, payload));
+        } else {
+          const created = unwrap(await api.workouts.create(payload));
+          id = (created && created.id) || id;
+        }
       } catch (err) {}
     }
-    state.custom.push({ id, name: name || "Meu treino", items });
+    upsertCustom(state, { id, name: title, items });
     refresh();
     router.replace({ pathname: "/(tabs)/workouts", params: { open: "saved" } });
   }
@@ -113,7 +222,7 @@ export default function Create() {
         <HapticPressable style={styles.back} onPress={() => (muscle ? setMuscle("") : router.back())}>
           <Ionicons name="chevron-back" size={22} color={colors.text} />
         </HapticPressable>
-        <Text style={styles.title}>Nova ficha</Text>
+        <Text style={styles.title}>{mode === "saved" || mode === "plan" ? "Editar ficha" : "Nova ficha"}</Text>
       </View>
 
       <FlatList
@@ -123,16 +232,16 @@ export default function Create() {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <View>
-            <Field label="Nome do treino" value={name} onChangeText={setName} autoCapitalize="words" />
+            <Field label={mode === "plan" ? "Nome do dia" : "Nome do treino"} value={name} onChangeText={setName} autoCapitalize="words" />
 
             <Text style={styles.section}>Na ficha · {items.length}</Text>
-            {items.length ? items.map((it) => {
+            {items.length ? items.map((it, i) => {
               const view = ChestLibraryService.view(it.id);
               return (
-                <View key={it.id} style={styles.picked}>
+                <View key={(it.id || "ex") + "-" + i} style={styles.picked}>
                   <ExerciseThumb exercise={view} size={44} showMuscle={false} />
                   <Text style={styles.pickedName} numberOfLines={1}>{view ? view.name : it.id}</Text>
-                  <HapticPressable onPress={() => remove(it.id)}>
+                  <HapticPressable onPress={() => remove(i)}>
                     <Ionicons name="close" size={18} color={colors.muted} />
                   </HapticPressable>
                 </View>
@@ -204,7 +313,11 @@ export default function Create() {
       />
 
       <View style={styles.footer}>
-        <Button label="Salvar ficha" onPress={save} disabled={!items.length} />
+        <Button
+          label={mode === "saved" || mode === "plan" ? "Salvar alterações" : "Salvar ficha"}
+          onPress={save}
+          disabled={!items.length}
+        />
       </View>
     </SafeAreaView>
   );

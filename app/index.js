@@ -27,7 +27,7 @@ export default function Splash() {
           source={require("../assets/logo.png")}
           style={[styles.logo, { opacity, transform: [{ scale }] }]}
         />
-        <Text style={styles.h1}>ACADEMIA{"\n"}LONDON{"\n"}<Text style={styles.red}>FITNESS</Text></Text>
+        <Text style={styles.h1}>LUMEN<Text style={styles.red}>FIT</Text></Text>
         <Text style={styles.p}>Treino, matrícula e evolução. Feito para a sua academia.</Text>
       </View>
       <Button

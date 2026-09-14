@@ -1,4 +1,5 @@
 import { api, unwrap } from "../../api/client.js";
+import { ExerciseMediaService } from "./ExerciseMediaService.js";
 
 export function genderForApi(value) {
   if (value === "female" || value === "mulher") return "mulher";
@@ -28,6 +29,26 @@ export function pickThumbUrl(media, fallback) {
 
 export function pickDetailUrl(media, fallback) {
   return gifOf(media) || fallback || stillOf(media) || "";
+}
+
+export async function resolveListThumb(exercise, gender, fallback) {
+  const id = exercise && (exercise.id || exercise.sourceId);
+  const cached = id ? ExerciseMediaService.getCached(id) : null;
+  if (cached && (cached.thumbnailUrl || cached.mediaUrl)) {
+    return cached.thumbnailUrl || cached.mediaUrl;
+  }
+  const q = (exercise && (exercise.sourceName || exercise.originalName || exercise.displayName || exercise.name)) || "";
+  const media = await fetchExerciseMedia(q, gender);
+  const url = pickThumbUrl(media, fallback);
+  if (id && url) {
+    ExerciseMediaService.saveManual(id, {
+      url,
+      thumbnailUrl: stillOf(media) || url,
+      source: "exercisedb",
+      searchTerm: q
+    });
+  }
+  return url || fallback || "";
 }
 
 export async function fetchExerciseMedia(query, gender) {

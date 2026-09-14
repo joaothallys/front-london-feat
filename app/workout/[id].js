@@ -1,8 +1,10 @@
 import React from "react";
 import { Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Button, Screen, TopBar } from "../../src/components/ui.js";
 import { ExerciseThumb } from "../../src/components/ExerciseThumb.js";
+import { HapticPressable } from "../../src/components/HapticPressable.js";
 import { useAppState } from "../../src/state/AppState.js";
 import { useLive } from "../../src/state/LiveSession.js";
 import { exerciseOf } from "../../src/catalog.js";
@@ -34,7 +36,18 @@ export default function SavedWorkout() {
 
   return (
     <Screen>
-      <TopBar title={workout.name} back />
+      <TopBar
+        title={workout.name}
+        back
+        right={
+          <HapticPressable
+            style={styles.editBtn}
+            onPress={() => router.push({ pathname: "/create", params: { id: workout.id } })}
+          >
+            <Ionicons name="pencil-outline" size={18} color={colors.text} />
+          </HapticPressable>
+        }
+      />
       <Text style={styles.meta}>
         {items.length + " exercício" + (items.length === 1 ? "" : "s")}
       </Text>
@@ -73,6 +86,7 @@ function styleFactory(c) {
     },
     grow: { flex: 1 },
     name: { color: c.text, fontWeight: "800", fontSize: 15 },
-    detail: { color: c.muted, marginTop: 4, fontSize: 13 }
+    detail: { color: c.muted, marginTop: 4, fontSize: 13 },
+    editBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" }
   };
 }

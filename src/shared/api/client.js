@@ -51,6 +51,14 @@ function errorFrom(json, status, headers) {
   return err;
 }
 
+function skipAuthRefresh(path) {
+  const p = String(path || "").split("?")[0];
+  return p === "/api/auth/login"
+    || p === "/api/auth/register"
+    || p === "/api/auth/refresh"
+    || p === "/api/auth/logout";
+}
+
 function authHeaders(extra) {
   const headers = Object.assign({ Accept: "application/json" }, extra || {});
   const { accessToken } = readTokens();
@@ -118,7 +126,7 @@ async function request(path, opts, retry) {
   if (res.status === 204) return {};
   let json = null;
   try { json = await res.json(); } catch (e) { json = null; }
-  if (res.status === 401 && !retry && path.indexOf("/api/auth/") !== 0) {
+  if (res.status === 401 && !retry && !skipAuthRefresh(path)) {
     const ok = await refreshAccess();
     if (ok) return request(path, Object.assign({}, opts, { timeoutMs }), true);
   }
@@ -233,6 +241,9 @@ export const api = {
     },
     me() {
       return request("/api/auth/me");
+    },
+    deleteAccount() {
+      return request("/api/auth/account", { method: "DELETE" });
     }
   },
 

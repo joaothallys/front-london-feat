@@ -180,7 +180,7 @@ export default function Home() {
           </HapticPressable>
           <HapticPressable
             style={styles.iconBtn}
-            onPress={() => Share.share({ message: (day && day.name) || "Meu Plano · London Fitness" }).catch(() => {})}
+            onPress={() => Share.share({ message: (day && day.name) || "Meu Plano · LumenFit" }).catch(() => {})}
           >
             <Ionicons name="share-outline" size={18} color={colors.text} />
           </HapticPressable>
@@ -341,7 +341,7 @@ export default function Home() {
       <View style={styles.ctaBar}>
         <HapticPressable
           style={styles.share}
-          onPress={() => Share.share({ message: (day && day.name) || "Meu Plano · London Fitness" }).catch(() => {})}
+          onPress={() => Share.share({ message: (day && day.name) || "Meu Plano · LumenFit" }).catch(() => {})}
         >
           <Ionicons name="share-outline" size={20} color={colors.text} />
         </HapticPressable>

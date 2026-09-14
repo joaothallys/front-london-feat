@@ -52,6 +52,7 @@ export default function Program() {
           }} />
         </Card>
       ))}
+      <Button ghost label="Editar como ficha" onPress={() => router.push({ pathname: "/create", params: { program: p.id } })} />
       <Button ghost label="Usar como meu plano" onPress={usePlan} />
     </Screen>
   );

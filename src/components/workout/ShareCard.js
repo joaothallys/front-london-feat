@@ -17,7 +17,7 @@ function Brand({ compact }) {
   return (
     <View style={styles.brand}>
       <Image source={require("../../../assets/logo.png")} style={compact ? styles.logoSm : styles.logo} />
-      <Text style={styles.brandTxt}>LONDON FITNESS</Text>
+      <Text style={styles.brandTxt}>LUMENFIT</Text>
     </View>
   );
 }

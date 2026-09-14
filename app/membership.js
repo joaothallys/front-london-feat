@@ -20,7 +20,7 @@ export default function Membership() {
       <TopBar title="Matrícula" back />
       <Card>
         <Text style={styles.k}>{m.unit}</Text>
-        <Text style={styles.h}>LONDON FITNESS</Text>
+        <Text style={styles.h}>LUMENFIT</Text>
         <Text style={styles.p}>Aluno: {m.name}</Text>
         <Text style={styles.p}>Código: {m.code}</Text>
       </Card>

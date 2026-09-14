@@ -1,11 +1,13 @@
 import React, { useCallback, useState } from "react";
 import { Text, View } from "react-native";
-import { useLocalSearchParams, useFocusEffect } from "expo-router";
+import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { api, unwrap } from "@shared/api/client.js";
 import { Empty, Screen, TopBar } from "../../src/components/ui.js";
+import { HapticPressable } from "../../src/components/HapticPressable.js";
 import { useAppState } from "../../src/state/AppState.js";
 import { exerciseOf } from "../../src/catalog.js";
-import { useStyles } from "../../src/theme.js";
+import { useStyles, useTheme } from "../../src/theme.js";
 
 function asList(value) {
   if (!value) return [];
@@ -22,6 +24,7 @@ function nameOf(id) {
 }
 
 export default function HistoryDetail() {
+  const { colors } = useTheme();
   const styles = useStyles(styleFactory);
   const { id } = useLocalSearchParams();
   const { state } = useAppState();
@@ -43,7 +46,20 @@ export default function HistoryDetail() {
   const exercises = asList(row);
   return (
     <Screen>
-      <TopBar title={(row && row.name) || "Treino"} back />
+      <TopBar
+        title={(row && row.name) || "Treino"}
+        back
+        right={
+          id ? (
+            <HapticPressable
+              style={styles.editBtn}
+              onPress={() => router.push({ pathname: "/create", params: { history: id } })}
+            >
+              <Ionicons name="pencil-outline" size={18} color={colors.text} />
+            </HapticPressable>
+          ) : null
+        }
+      />
       {row ? (
         <Text style={styles.meta}>
           {(row.durationMin || row.duration || 0) + " min · " + Math.round(row.volumeKg || row.volume || 0) + " kg · " + (row.calories || 0) + " kcal"}
@@ -72,6 +88,7 @@ function styleFactory(c) {
     meta: { color: c.muted, marginBottom: 12 },
     card: { backgroundColor: c.surface, borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: c.line },
     name: { color: c.text, fontWeight: "800", marginBottom: 8 },
-    set: { color: c.muted2, marginTop: 4 }
+    set: { color: c.muted2, marginTop: 4 },
+    editBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" }
   };
 }

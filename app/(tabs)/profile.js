@@ -1,7 +1,9 @@
-import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Alert, Image, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { SessionService } from "@shared/services/account/SessionService.js";
+import { BiometricService } from "@shared/services/account/BiometricService.js";
+import { confirmDeleteAccount } from "@shared/services/account/deleteAccountFlow.js";
 import { store } from "@shared/store/local-store.js";
 import { Button, Row, Screen, Section, Title } from "../../src/components/ui.js";
 import { useAppState } from "../../src/state/AppState.js";
@@ -14,6 +16,39 @@ export default function Profile() {
   const { state, refresh } = useAppState();
   const mins = (state.history || []).reduce((a, h) => a + (h.duration || 0), 0);
   const prs = (state.history || []).filter((h) => h.volume > 12000).length;
+  const [faceOn, setFaceOn] = useState(false);
+  const [faceLabel, setFaceLabel] = useState("Face ID");
+  const [faceOk, setFaceOk] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const loggedIn = SessionService.hasToken();
+
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      const can = await BiometricService.canUse();
+      const on = await BiometricService.isEnabled();
+      const label = await BiometricService.label();
+      if (!live) return;
+      setFaceOk(can);
+      setFaceOn(on);
+      setFaceLabel(label);
+    })();
+    return () => { live = false; };
+  }, []);
+
+  async function toggleFace() {
+    if (!faceOk) {
+      Alert.alert(faceLabel, "Cadastre o " + faceLabel + " no iPhone em Ajustes → Face ID e Código.");
+      return;
+    }
+    if (faceOn) {
+      await BiometricService.disable();
+      setFaceOn(false);
+      return;
+    }
+    const ok = await BiometricService.enable(state.profile.email || "", "");
+    if (ok) setFaceOn(true);
+  }
 
   async function logout() {
     await SessionService.logout();
@@ -28,7 +63,7 @@ export default function Profile() {
       <View style={styles.center}>
         <Image source={require("../../assets/logo.png")} style={styles.logo} />
         <Text style={styles.name}>{state.profile.name || "Aluno"}</Text>
-        <Text style={styles.badge}>Aluno London Fitness</Text>
+        <Text style={styles.badge}>Aluno LumenFit</Text>
       </View>
       <View style={styles.stats}>
         <Stat n={state.history.length} l="Treinos" />
@@ -42,6 +77,13 @@ export default function Profile() {
       <Section>Notificações</Section>
       <Row title="Sons" subtitle="Alerta de descanso" right={<Text style={styles.val}>{state.profile.sound ? "On" : "Off"}</Text>} onPress={() => { state.profile.sound = !state.profile.sound; SessionService.hasToken() && SessionService.pushProfile(state).catch(() => {}); refresh(); }} />
       <Row title="Lembretes de treino" subtitle="Aviso no horário" right={<Text style={styles.val}>{state.settings.reminders ? "On" : "Off"}</Text>} onPress={() => { state.settings.reminders = !state.settings.reminders; SessionService.hasToken() && SessionService.pushProfile(state).catch(() => {}); refresh(); }} />
+      <Section>Segurança</Section>
+      <Row
+        title={faceLabel}
+        subtitle={faceOn ? "Desbloqueio do app ligado" : "Desbloquear o LumenFit no iPhone"}
+        right={<Text style={styles.val}>{faceOn ? "On" : "Off"}</Text>}
+        onPress={toggleFace}
+      />
       <Section>Geral</Section>
       <Row
         title="Aparência"
@@ -53,6 +95,15 @@ export default function Profile() {
       <Row title="Apps conectados" subtitle="Apple Saúde e Strava" onPress={() => router.push("/apps")} />
       <Row title="Catálogo ExerciseDB" subtitle={D.exercises.length + " exercícios"} onPress={() => router.push("/sync")} />
       <Button ghost label="Sair" onPress={logout} />
+      {loggedIn ? (
+        <Button
+          ghost
+          danger
+          label={deleting ? "Excluindo..." : "Excluir conta"}
+          onPress={() => confirmDeleteAccount({ deleting, setDeleting, refresh })}
+          disabled={deleting}
+        />
+      ) : null}
     </Screen>
   );
 }

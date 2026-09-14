@@ -34,6 +34,7 @@ function styleFactory(c) {
     chipTxtOn: { color: c.text },
     card: { backgroundColor: c.surface, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: c.line, marginBottom: 10 },
     row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 16, padding: 12, borderWidth: 1, borderColor: c.line, marginBottom: 8 },
+    rowMain: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
     grow: { flex: 1 },
     rowTitle: { color: c.text, fontWeight: "700", fontSize: 15 },
     rowSub: { color: c.muted, fontSize: 12, marginTop: 2 },
@@ -60,7 +61,7 @@ export function Screen({ children, padded = true, noNav = false }) {
   );
 }
 
-export function TopBar({ title, back }) {
+export function TopBar({ title, back, right }) {
   const styles = useStyles(styleFactory);
   return (
     <View style={styles.top}>
@@ -70,6 +71,7 @@ export function TopBar({ title, back }) {
         </HapticPressable>
       ) : null}
       <Text style={styles.title}>{title}</Text>
+      {right || null}
     </View>
   );
 }
@@ -147,18 +149,26 @@ export function Card({ children, onPress }) {
 
 export function Row({ title, subtitle, onPress, right, thumb }) {
   const styles = useStyles(styleFactory);
-  const body = (
-    <View style={styles.row}>
+  const main = (
+    <>
       {thumb}
       <View style={styles.grow}>
         <Text style={styles.rowTitle}>{title}</Text>
         {subtitle ? <Text style={styles.rowSub}>{subtitle}</Text> : null}
       </View>
-      {right || <Text style={styles.chev}>›</Text>}
+      {right ? null : <Text style={styles.chev}>›</Text>}
+    </>
+  );
+  return (
+    <View style={styles.row}>
+      {onPress ? (
+        <HapticPressable onPress={onPress} style={styles.rowMain}>{main}</HapticPressable>
+      ) : (
+        <View style={styles.rowMain}>{main}</View>
+      )}
+      {right || null}
     </View>
   );
-  if (!onPress) return body;
-  return <HapticPressable onPress={onPress}>{body}</HapticPressable>;
 }
 
 export function Empty({ children }) {

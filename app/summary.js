@@ -91,7 +91,7 @@ export default function Summary() {
         (summary && summary.name) || "Treino",
         (stats && stats.duration) + " min · " + fmtInt(stats && stats.volume) + " kg · " + (stats && stats.calories) + " kcal",
         ((stats && stats.lines) || []).map((row) => row.name + " — " + row.detail).join("\n"),
-        "London Fitness"
+        "LumenFit"
       ].filter(Boolean).join("\n");
       await Share.share({ message: msg, url: photo || undefined });
     } catch (err) {

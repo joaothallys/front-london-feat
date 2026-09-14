@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { useStyles, useTheme } from "../theme.js";
 import { mediaUrl } from "../catalog.js";
 import { cachedGif, warmGif } from "../media/GifCache.js";
+import { resolveListThumb } from "@shared/services/media/LondonMediaService.js";
 import { MuscleArt } from "./MuscleArt.js";
 import { HapticPressable } from "./HapticPressable.js";
 import { Skeleton } from "./Skeleton.js";
@@ -30,7 +31,16 @@ export function ExerciseThumb({ exercise, size = 64, onPress, showMuscle = true,
       });
     } else {
       setUri("");
-      setReady(true);
+      resolveListThumb(exercise).then((next) => {
+        if (!live || !next) {
+          if (live) setReady(true);
+          return;
+        }
+        setUri(next);
+        warmGif(id, next).then((cached) => {
+          if (live && cached) setUri(cached);
+        });
+      });
     }
     return () => { live = false; };
   }, [id, remote]);

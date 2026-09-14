@@ -75,6 +75,47 @@ export function applyLoadToDay(state, patch) {
   persistPlan(state);
 }
 
+export function replacePlanDay(state, index, next) {
+  if (!state.plan || !Array.isArray(state.plan.split) || !state.plan.split[index]) return;
+  const day = state.plan.split[index];
+  day.name = (next && next.name) || day.name;
+  day.items = ((next && next.items) || []).map((it) => ({
+    id: it.id,
+    sets: it.sets || 3,
+    reps: it.reps || 12,
+    kg: it.kg || 0,
+    rest: it.rest || state.profile.restDefault || 60
+  }));
+  day.focus = dayMuscles(day);
+  persistPlan(state);
+}
+
+function emptyPlan() {
+  return { name: "Meu Plano", source: "custom", split: [] };
+}
+
+export function removePlanDay(state, index) {
+  if (!state.plan || !Array.isArray(state.plan.split) || !state.plan.split[index]) return;
+  state.plan.split.splice(index, 1);
+  if (!state.plan.split.length) {
+    removePlan(state);
+    return;
+  }
+  const current = Number(state.planDay) || 0;
+  if (current >= state.plan.split.length) state.planDay = state.plan.split.length - 1;
+  else if (current > index) state.planDay = current - 1;
+  persistPlan(state);
+}
+
+export function removePlan(state) {
+  const id = state.plan && state.plan.id;
+  state.plan = emptyPlan();
+  state.planDay = 0;
+  if (SessionService.hasToken() && id) {
+    api.plans.remove(id).catch(() => {});
+  }
+}
+
 export function persistPlan(state) {
   if (SessionService.hasToken() && state.plan && state.plan.id) {
     api.plans.update(state.plan.id, {

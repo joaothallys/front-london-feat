@@ -5,9 +5,10 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "expo-router/react-navigation";
 import { bootNative } from "../src/boot.js";
 import { BrandSplash } from "../src/components/BrandSplash.js";
+import { AppLock } from "../src/components/AppLock.js";
 import { AppStateProvider } from "../src/state/AppState.js";
 import { LiveSessionProvider } from "../src/state/LiveSession.js";
 import { AppThemeProvider, useTheme } from "../src/theme.js";
@@ -71,7 +72,9 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <AppStateProvider>
           <AppThemeProvider>
-            <ThemedApp />
+            <AppLock>
+              <ThemedApp />
+            </AppLock>
           </AppThemeProvider>
         </AppStateProvider>
       </SafeAreaProvider>

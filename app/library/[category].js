@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, router } from "expo-router";
@@ -7,6 +7,7 @@ import { ChestLibraryService } from "@shared/services/exercises/ChestLibraryServ
 import { FavoriteService } from "@shared/services/favorites/FavoriteService.js";
 import { CATEGORY_META } from "@shared/data/exercises/catalogBuilder.js";
 import { EQUIPMENT_FILTERS, LEVELS } from "@shared/types/exercise.js";
+import { resolveListThumb } from "@shared/services/media/LondonMediaService.js";
 import { Chip, Empty, Field, Screen, TopBar } from "../../src/components/ui.js";
 import { HapticPressable } from "../../src/components/HapticPressable.js";
 import { catalogToAppView } from "@shared/data/exercises/exerciseCatalog.js";
@@ -19,7 +20,8 @@ const LEVEL_LBL = { iniciante: "Iniciante", intermediario: "Intermediário", ava
 export default function CategoryLibrary() {
   const { colors } = useTheme();
   const styles = useStyles(styleFactory);
-  const { refresh } = useAppState();
+  const { state, refresh } = useAppState();
+  const gender = state.profile && state.profile.gender;
   const { category } = useLocalSearchParams();
   const cat = CATEGORY_META[category] || CATEGORY_META.peito;
   const [q, setQ] = useState("");
@@ -57,7 +59,7 @@ export default function CategoryLibrary() {
               <View key={ex.id} style={styles.card}>
                 <HapticPressable onPress={() => router.push("/exercise/" + ex.id)}>
                   <View style={styles.media}>
-                    {uri ? <StillThumb uri={uri} /> : <View style={styles.ph} />}
+                    <CardThumb exercise={view} fallback={uri} gender={gender} />
                   </View>
                   <Text style={styles.name} numberOfLines={2}>{ex.displayName}</Text>
                   <Text style={styles.meta} numberOfLines={1}>
@@ -77,6 +79,26 @@ export default function CategoryLibrary() {
       ) : <Empty>Nenhum exercício nesta categoria.</Empty>}
     </Screen>
   );
+}
+
+function CardThumb({ exercise, fallback, gender }) {
+  const styles = useStyles(styleFactory);
+  const [uri, setUri] = useState(fallback || "");
+
+  useEffect(() => {
+    let live = true;
+    if (fallback) {
+      setUri(fallback);
+      return;
+    }
+    resolveListThumb(exercise, gender).then((next) => {
+      if (live && next) setUri(next);
+    });
+    return () => { live = false; };
+  }, [exercise && exercise.id, fallback, gender]);
+
+  if (!uri) return <View style={styles.ph} />;
+  return <StillThumb uri={uri} />;
 }
 
 function StillThumb({ uri }) {
@@ -105,7 +127,7 @@ function styleFactory(c) {
     card: { width: "48%", backgroundColor: c.surface, borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: c.line, paddingBottom: 10 },
     media: { width: "100%", height: 128, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
     img: { width: "100%", height: 128, backgroundColor: "#fff" },
-    ph: { width: "100%", height: 128, backgroundColor: c.surface3 },
+    ph: { width: "100%", height: 128, backgroundColor: "#fff" },
     name: { color: c.text, fontWeight: "800", fontSize: 13, marginTop: 8, marginHorizontal: 8, minHeight: 34 },
     meta: { color: c.muted, fontSize: 11, marginHorizontal: 8, marginTop: 2 },
     fav: {

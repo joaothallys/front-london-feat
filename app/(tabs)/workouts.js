@@ -12,6 +12,7 @@ import { useLive } from "../../src/state/LiveSession.js";
 import { D, exerciseOf } from "../../src/catalog.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { api } from "@shared/api/client.js";
+import { removePlan, removePlanDay } from "../../src/plan.js";
 import { useStyles, useTheme } from "../../src/theme.js";
 
 const TABS = [
@@ -33,6 +34,14 @@ function DeleteAction({ onPress, styles }) {
     <HapticPressable style={styles.delete} onPress={onPress}>
       <Ionicons name="trash" size={18} color="#fff" />
       <Text style={styles.deleteTxt}>Apagar</Text>
+    </HapticPressable>
+  );
+}
+
+function EditBtn({ onPress, styles, colors }) {
+  return (
+    <HapticPressable style={styles.editBtn} onPress={onPress} hitSlop={8}>
+      <Ionicons name="pencil-outline" size={16} color={colors.muted} />
     </HapticPressable>
   );
 }
@@ -69,6 +78,34 @@ export default function Workouts() {
           if (SessionService.hasToken() && workout.id) {
             api.workouts.remove(workout.id).catch(() => {});
           }
+        }
+      }
+    ]);
+  }
+
+  function removeDay(day, index) {
+    Alert.alert("Excluir dia?", (day.name || "Este dia") + " sai do seu plano.", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Excluir",
+        style: "destructive",
+        onPress: () => {
+          removePlanDay(state, index);
+          refresh();
+        }
+      }
+    ]);
+  }
+
+  function removeWholePlan() {
+    Alert.alert("Excluir plano?", "Todos os dias do Meu Plano vão sair.", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Excluir",
+        style: "destructive",
+        onPress: () => {
+          removePlan(state);
+          refresh();
         }
       }
     ]);
@@ -127,17 +164,24 @@ export default function Workouts() {
                   overshootRight={false}
                   renderRightActions={() => <DeleteAction styles={styles} onPress={() => removeDone(h)} />}
                 >
-                  <HapticPressable
-                    style={styles.savedRow}
-                    onPress={() => router.push("/history/" + encodeURIComponent(h.id))}
-                  >
-                    <View style={styles.grow}>
-                      <Text style={styles.savedName}>{h.name || "Treino"}</Text>
-                      <Text style={styles.savedMeta}>
-                        {fmtDate(h.date) + " · " + (h.duration || 0) + " min · " + Math.round(h.volume || 0) + " kg"}
-                      </Text>
-                    </View>
-                  </HapticPressable>
+                  <View style={styles.savedRow}>
+                    <HapticPressable
+                      style={styles.savedMain}
+                      onPress={() => router.push("/history/" + encodeURIComponent(h.id))}
+                    >
+                      <View style={styles.grow}>
+                        <Text style={styles.savedName}>{h.name || "Treino"}</Text>
+                        <Text style={styles.savedMeta}>
+                          {fmtDate(h.date) + " · " + (h.duration || 0) + " min · " + Math.round(h.volume || 0) + " kg"}
+                        </Text>
+                      </View>
+                    </HapticPressable>
+                    <EditBtn
+                      styles={styles}
+                      colors={colors}
+                      onPress={() => router.push({ pathname: "/create", params: { history: h.id } })}
+                    />
+                  </View>
                 </Swipeable>
               ))}
             </View>
@@ -174,18 +218,25 @@ export default function Workouts() {
                     overshootRight={false}
                     renderRightActions={() => <DeleteAction styles={styles} onPress={() => removeSaved(c)} />}
                   >
-                    <HapticPressable
-                      style={styles.savedRow}
-                      onPress={() => router.push("/workout/" + encodeURIComponent(c.id))}
-                    >
-                      <ExerciseThumb exercise={exerciseOf(c.items[0] && c.items[0].id)} />
-                      <View style={styles.grow}>
-                        <Text style={styles.savedName}>{c.name}</Text>
-                        <Text style={styles.savedMeta}>
-                          {(c.items || []).length + " exercício" + ((c.items || []).length === 1 ? "" : "s")}
-                        </Text>
-                      </View>
-                    </HapticPressable>
+                    <View style={styles.savedRow}>
+                      <HapticPressable
+                        style={styles.savedMain}
+                        onPress={() => router.push("/workout/" + encodeURIComponent(c.id))}
+                      >
+                        <ExerciseThumb exercise={exerciseOf(c.items[0] && c.items[0].id)} />
+                        <View style={styles.grow}>
+                          <Text style={styles.savedName}>{c.name}</Text>
+                          <Text style={styles.savedMeta}>
+                            {(c.items || []).length + " exercício" + ((c.items || []).length === 1 ? "" : "s")}
+                          </Text>
+                        </View>
+                      </HapticPressable>
+                      <EditBtn
+                        styles={styles}
+                        colors={colors}
+                        onPress={() => router.push({ pathname: "/create", params: { id: c.id } })}
+                      />
+                    </View>
                   </Swipeable>
                 ))}
               </View>
@@ -205,14 +256,30 @@ export default function Workouts() {
           state.plan && state.plan.split && state.plan.split.length ? (
             <View style={styles.list}>
               {state.plan.split.map((d, i) => (
-                <Row
-                  key={i}
-                  title={d.name}
-                  subtitle={(d.items || []).length + " exercício" + ((d.items || []).length === 1 ? "" : "s")}
-                  thumb={<ExerciseThumb exercise={exerciseOf(d.items && d.items[0] && d.items[0].id)} />}
-                  onPress={() => startSplit(d)}
-                />
+                <Swipeable
+                  key={(d.id || d.name || "day") + "-" + i}
+                  overshootRight={false}
+                  renderRightActions={() => <DeleteAction styles={styles} onPress={() => removeDay(d, i)} />}
+                >
+                  <Row
+                    title={d.name}
+                    subtitle={(d.items || []).length + " exercício" + ((d.items || []).length === 1 ? "" : "s")}
+                    thumb={<ExerciseThumb exercise={exerciseOf(d.items && d.items[0] && d.items[0].id)} />}
+                    onPress={() => startSplit(d)}
+                    right={
+                      <EditBtn
+                        styles={styles}
+                        colors={colors}
+                        onPress={() => router.push({ pathname: "/create", params: { planDay: String(i) } })}
+                      />
+                    }
+                  />
+                </Swipeable>
               ))}
+              <HapticPressable style={styles.wipe} onPress={removeWholePlan}>
+                <Ionicons name="trash-outline" size={16} color={colors.red} />
+                <Text style={styles.wipeTxt}>Apagar plano inteiro</Text>
+              </HapticPressable>
             </View>
           ) : <Empty>Nenhum plano ainda.</Empty>
         ) : null}
@@ -226,6 +293,13 @@ export default function Workouts() {
                   title={p.name}
                   subtitle={(p.blurb || "") + " · " + p.days + " dias"}
                   onPress={() => router.push("/program/" + p.id)}
+                  right={
+                    <EditBtn
+                      styles={styles}
+                      colors={colors}
+                      onPress={() => router.push({ pathname: "/create", params: { program: p.id } })}
+                    />
+                  }
                 />
               ))}
             </View>
@@ -260,8 +334,12 @@ function styleFactory(c) {
     section: { color: c.muted, fontSize: 11, fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 10 },
     list: { gap: 8 },
     savedRow: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 16, padding: 12, borderWidth: 1, borderColor: c.line },
+    savedMain: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
     savedName: { color: c.text, fontWeight: "700", fontSize: 15 },
     savedMeta: { color: c.muted, fontSize: 12, marginTop: 2 },
+    editBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surface3, alignItems: "center", justifyContent: "center" },
+    wipe: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14, marginTop: 8 },
+    wipeTxt: { color: c.red, fontWeight: "800", fontSize: 13 },
     delete: { backgroundColor: c.red, width: 88, alignItems: "center", justifyContent: "center", borderRadius: 16, marginLeft: 8 },
     deleteTxt: { color: "#fff", fontWeight: "800", fontSize: 11, marginTop: 4, textTransform: "uppercase" },
     blank: { alignItems: "center", paddingVertical: 36, paddingHorizontal: 24 },
