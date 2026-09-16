@@ -32,6 +32,7 @@ export default function Session() {
   const [edit, setEdit] = useState(null);
   const [finishOpen, setFinishOpen] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [restMini, setRestMini] = useState(false);
 
   useEffect(() => {
     if (!live || !live.rest) return undefined;
@@ -282,6 +283,9 @@ export default function Session() {
           rest={live.rest}
           exerciseName={e ? e.name : item.id}
           hasNext={live.index < live.items.length - 1}
+          minimized={restMini}
+          onMinimize={() => setRestMini(true)}
+          onExpand={() => setRestMini(false)}
           onSkip={skipRest}
           onNext={next}
         />

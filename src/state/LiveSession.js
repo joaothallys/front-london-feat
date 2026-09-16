@@ -113,6 +113,33 @@ export function LiveSessionProvider({ children }) {
     return true;
   }, [push]);
 
+  const completeCurrentSet = useCallback(() => {
+    const cur = liveRef.current;
+    if (!cur || !cur.items) return;
+    if (restStillRunning(cur.rest)) {
+      skipRest();
+      return;
+    }
+    const item = cur.items[cur.index];
+    if (!item) return;
+    const idx = (item.sets || []).findIndex((s) => !s.done);
+    if (idx < 0) {
+      goToNext();
+      return;
+    }
+    const items = cur.items.map((it, ii) => {
+      if (ii !== cur.index) return it;
+      return {
+        ...it,
+        sets: it.sets.map((s, si) => (si === idx ? Object.assign({}, s, { done: true }) : s))
+      };
+    });
+    const rest = beginRest(item.rest || 60);
+    const current = exerciseOf(item.id);
+    push(Object.assign({}, cur, { items, rest }));
+    armRestAlert(rest.endsAt, (current && current.name) || "Hora da próxima série");
+  }, [push, skipRest, goToNext]);
+
   const startRest = useCallback((seconds) => {
     const cur = liveRef.current;
     if (!cur) return;
@@ -124,8 +151,8 @@ export function LiveSessionProvider({ children }) {
   }, [push]);
 
   useEffect(() => {
-    return subscribeWorkoutLiveActions({ skipRest, goToNext });
-  }, [skipRest, goToNext]);
+    return subscribeWorkoutLiveActions({ skipRest, goToNext, completeCurrentSet });
+  }, [skipRest, goToNext, completeCurrentSet]);
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (status) => {
@@ -228,8 +255,8 @@ export function LiveSessionProvider({ children }) {
   }, [live]);
 
   const value = useMemo(
-    () => ({ live, setLive: push, start, finish, quit, skipRest, goToNext, startRest, summary, setSummary }),
-    [live, push, start, finish, quit, skipRest, goToNext, startRest, summary]
+    () => ({ live, setLive: push, start, finish, quit, skipRest, goToNext, completeCurrentSet, startRest, summary, setSummary }),
+    [live, push, start, finish, quit, skipRest, goToNext, completeCurrentSet, startRest, summary]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
