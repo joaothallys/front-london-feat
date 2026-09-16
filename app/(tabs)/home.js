@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Modal,
@@ -12,7 +12,17 @@ import {
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
+import Animated, {
+  Easing,
+  Extrapolation,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming
+} from "react-native-reanimated";
 import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
 import { SESSION_DURATIONS } from "@shared/domain/profile.js";
 import { muscleArt } from "@shared/domain/muscle-art.js";
@@ -353,61 +363,57 @@ export default function Home() {
       <GifPreview visible={!!gif} uri={gif && gif.uri} title={gif && gif.title} exerciseId={gif && gif.id} onClose={() => setGif(null)} />
 
       {menu && menu.type === "list" ? (
-        <Pressable style={styles.sheetBg} onPress={() => setMenu(null)}>
-          <Pressable style={styles.sheet} onPress={() => {}}>
-            <View style={styles.sheetHead}>
-              <Text style={styles.sheetTitle}>{(day && day.name) || "Meu Plano"}</Text>
-            </View>
-            <SheetRow
-              icon="bookmark-outline"
-              label="Salvar treino"
-              onPress={saveDayAsWorkout}
-            />
-          </Pressable>
-        </Pressable>
+      <DismissSheet onClose={() => setMenu(null)}>
+        <View style={styles.sheetHead}>
+          <Text style={styles.sheetTitle}>{(day && day.name) || "Meu Plano"}</Text>
+        </View>
+        <SheetRow
+          icon="bookmark-outline"
+          label="Salvar treino"
+          onPress={saveDayAsWorkout}
+        />
+      </DismissSheet>
       ) : null}
 
       {menu && menu.type === "item" ? (
-        <Pressable style={styles.sheetBg} onPress={() => setMenu(null)}>
-          <Pressable style={styles.sheet} onPress={() => {}}>
-            <View style={styles.sheetHead}>
-              <ExerciseThumb exercise={menu.exercise} size={56} onPress={() => setGif({ uri: mediaUrl(menu.exercise), title: menu.exercise.name, id: menu.exercise.id })} />
-              <Text style={styles.sheetTitle}>{menu.exercise.name}</Text>
-            </View>
-            <SheetRow
-              icon="barbell-outline"
-              label="Peso e repetições"
-              right={(menu.item.kg || 0) + " kg · " + (menu.item.reps || 12)}
-              onPress={() => setLoadEdit({ kg: Number(menu.item.kg) || 0, reps: Number(menu.item.reps) || 12 })}
-            />
-            <Text style={styles.sheetHint}>Ao definir, vale para todos os exercícios do dia.</Text>
-            <SheetRow
-              icon="timer-outline"
-              label="Editar tempo de descanso"
-              right={(menu.item.rest || 45) + "s"}
-              onPress={() => {
-                const next = menu.item.rest >= 90 ? 45 : (menu.item.rest || 45) + 15;
-                updateDayItem(state, menu.index, { rest: next });
-                persistPlan(state);
-                refresh();
-                setMenu(Object.assign({}, menu, { item: Object.assign({}, menu.item, { rest: next }) }));
-              }}
-            />
-            <SheetRow icon="swap-horizontal" label="Substituir exercício" onPress={() => {
-              setMenu(null);
-              router.push({ pathname: "/add-exercise", params: { replace: String(menu.index) } });
-            }} />
-            <SheetRow icon="play-circle-outline" label="Vídeo e instruções" onPress={() => {
-              setMenu(null);
-              router.push("/exercise/" + menu.exercise.id);
-            }} />
-            <SheetRow icon="trash-outline" label="Remover do plano" danger onPress={() => {
-              removeExerciseFromDay(state, menu.index);
-              refresh();
-              setMenu(null);
-            }} />
-          </Pressable>
-        </Pressable>
+      <DismissSheet onClose={() => setMenu(null)}>
+        <View style={styles.sheetHead}>
+          <ExerciseThumb exercise={menu.exercise} size={56} onPress={() => setGif({ uri: mediaUrl(menu.exercise), title: menu.exercise.name, id: menu.exercise.id })} />
+          <Text style={styles.sheetTitle}>{menu.exercise.name}</Text>
+        </View>
+        <SheetRow
+          icon="barbell-outline"
+          label="Peso e repetições"
+          right={(menu.item.kg || 0) + " kg · " + (menu.item.reps || 12)}
+          onPress={() => setLoadEdit({ kg: Number(menu.item.kg) || 0, reps: Number(menu.item.reps) || 12 })}
+        />
+        <Text style={styles.sheetHint}>Ao definir, vale para todos os exercícios do dia.</Text>
+        <SheetRow
+          icon="timer-outline"
+          label="Editar tempo de descanso"
+          right={(menu.item.rest || 45) + "s"}
+          onPress={() => {
+            const next = menu.item.rest >= 90 ? 45 : (menu.item.rest || 45) + 15;
+            updateDayItem(state, menu.index, { rest: next });
+            persistPlan(state);
+            refresh();
+            setMenu(Object.assign({}, menu, { item: Object.assign({}, menu.item, { rest: next }) }));
+          }}
+        />
+        <SheetRow icon="swap-horizontal" label="Substituir exercício" onPress={() => {
+          setMenu(null);
+          router.push({ pathname: "/add-exercise", params: { replace: String(menu.index) } });
+        }} />
+        <SheetRow icon="play-circle-outline" label="Vídeo e instruções" onPress={() => {
+          setMenu(null);
+          router.push("/exercise/" + menu.exercise.id);
+        }} />
+        <SheetRow icon="trash-outline" label="Remover do plano" danger onPress={() => {
+          removeExerciseFromDay(state, menu.index);
+          refresh();
+          setMenu(null);
+        }} />
+      </DismissSheet>
       ) : null}
 
       <Modal visible={!!loadEdit} transparent animationType="slide" onRequestClose={() => setLoadEdit(null)}>
@@ -451,6 +457,89 @@ export default function Home() {
         </GestureHandlerRootView>
       </Modal>
     </SafeAreaView>
+  );
+}
+
+function DismissSheet({ onClose, children }) {
+  const styles = useStyles(styleFactory);
+  const y = useSharedValue(56);
+  const dim = useSharedValue(0);
+  const sheetH = useSharedValue(420);
+  const closing = useSharedValue(0);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
+  const dismiss = useCallback(() => closeRef.current(), []);
+
+  useEffect(() => {
+    dim.value = withTiming(1, { duration: 220, easing: Easing.out(Easing.cubic) });
+    y.value = withSpring(0, { damping: 28, stiffness: 240, mass: 0.9, overshootClamping: true });
+  }, [dim, y]);
+
+  const playClose = useCallback((duration) => {
+    if (closing.value) return;
+    closing.value = 1;
+    dim.value = withTiming(0, { duration, easing: Easing.out(Easing.cubic) });
+    y.value = withTiming(sheetH.value + 72, {
+      duration,
+      easing: Easing.bezier(0.22, 1, 0.36, 1)
+    }, (finished) => {
+      if (finished) runOnJS(dismiss)();
+    });
+  }, [closing, dim, dismiss, sheetH, y]);
+
+  const pan = useMemo(() => Gesture.Pan()
+    .activeOffsetY(12)
+    .failOffsetX([-28, 28])
+    .onUpdate((e) => {
+      if (closing.value) return;
+      y.value = Math.max(0, e.translationY);
+      dim.value = interpolate(y.value, [0, sheetH.value], [1, 0.18], Extrapolation.CLAMP);
+    })
+    .onEnd((e) => {
+      if (closing.value) return;
+      if (e.translationY > 72 || e.velocityY > 850) {
+        closing.value = 1;
+        const duration = e.velocityY > 1600 ? 150 : 220;
+        dim.value = withTiming(0, { duration, easing: Easing.out(Easing.cubic) });
+        y.value = withTiming(sheetH.value + 72, {
+          duration,
+          easing: Easing.bezier(0.22, 1, 0.36, 1)
+        }, (finished) => {
+          if (finished) runOnJS(dismiss)();
+        });
+      } else {
+        dim.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.cubic) });
+        y.value = withSpring(0, { damping: 28, stiffness: 280, mass: 0.85, overshootClamping: true });
+      }
+    }), [closing, dim, dismiss, sheetH, y]);
+
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: y.value }]
+  }));
+
+  const dimStyle = useAnimatedStyle(() => ({
+    opacity: dim.value
+  }));
+
+  return (
+    <Modal visible transparent animationType="none" presentationStyle="overFullScreen" onRequestClose={() => playClose(240)}>
+      <GestureHandlerRootView style={styles.sheetModal}>
+        <Animated.View style={[styles.sheetDim, dimStyle]} pointerEvents="none" />
+        <Pressable style={StyleSheet.absoluteFill} onPress={() => playClose(240)} />
+        <GestureDetector gesture={pan}>
+          <Animated.View
+            style={[styles.sheet, sheetStyle]}
+            onLayout={(e) => { sheetH.value = e.nativeEvent.layout.height; }}
+          >
+            <View style={styles.sheetHandle}>
+              <View style={styles.grabber} />
+            </View>
+            {children}
+          </Animated.View>
+        </GestureDetector>
+      </GestureHandlerRootView>
+    </Modal>
   );
 }
 
@@ -526,8 +615,11 @@ function styleFactory(c) {
   share: { width: 52, height: 52, borderRadius: 26, backgroundColor: c.surface3, alignItems: "center", justifyContent: "center" },
   cta: { flex: 1, height: 52, borderRadius: 26, backgroundColor: c.red, alignItems: "center", justifyContent: "center" },
   ctaTxt: { color: "#fff", fontWeight: "900", letterSpacing: 0.8, textTransform: "uppercase" },
-  sheetBg: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "flex-end" },
-  sheet: { backgroundColor: c.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, paddingBottom: 28 },
+  sheetModal: { flex: 1, justifyContent: "flex-end" },
+  sheetDim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.55)" },
+  sheet: { backgroundColor: c.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingBottom: 28 },
+  sheetHandle: { alignItems: "center", paddingTop: 10, paddingBottom: 12 },
+  grabber: { width: 40, height: 5, borderRadius: 3, backgroundColor: c.line },
   sheetHead: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12 },
   sheetTitle: { color: c.text, fontSize: 18, fontWeight: "800", flex: 1 },
   sheetHint: { color: c.muted, fontSize: 12, marginBottom: 8, marginLeft: 48 },

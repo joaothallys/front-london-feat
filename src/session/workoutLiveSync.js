@@ -1,23 +1,53 @@
 import { Platform } from "react-native";
-import { addUserInteractionListener } from "expo-widgets";
-import WorkoutLiveActivity from "../widgets/WorkoutLiveActivity";
-import WorkoutLockWidget from "../widgets/WorkoutLockWidget";
+import { requireOptionalNativeModule } from "expo";
 import { workoutLiveProps } from "./workoutLiveProps.js";
 
 const SESSION_URL = "londonfitness://session";
+const IDLE_PROPS = {
+  phase: "work",
+  exerciseName: "LumenFit",
+  nextExerciseName: "",
+  exerciseIndex: 0,
+  exerciseCount: 0,
+  setIndex: 0,
+  setCount: 0,
+  startedAt: 0,
+  endsAt: 0,
+  totalRest: 0,
+  pendingAction: ""
+};
 
+let api = null;
 let activity = null;
+let unavailable = false;
 
-function iosReady() {
-  return Platform.OS === "ios";
+function widgetsApi() {
+  if (unavailable) return null;
+  if (api) return api;
+  if (Platform.OS !== "ios" || !requireOptionalNativeModule("ExpoWidgets")) {
+    unavailable = true;
+    return null;
+  }
+  try {
+    api = {
+      addUserInteractionListener: require("expo-widgets").addUserInteractionListener,
+      live: require("../widgets/WorkoutLiveActivity").default,
+      lock: require("../widgets/WorkoutLockWidget").default
+    };
+    return api;
+  } catch (err) {
+    unavailable = true;
+    return null;
+  }
 }
 
 export function subscribeWorkoutLiveActions(handlers) {
-  if (!iosReady()) return () => {};
+  const native = widgetsApi();
+  if (!native) return () => {};
   try {
-    const existing = WorkoutLiveActivity.getInstances()[0];
+    const existing = native.live.getInstances()[0];
     if (existing) activity = existing;
-    const sub = addUserInteractionListener((event) => {
+    const sub = native.addUserInteractionListener((event) => {
       if (event.target === "skip") handlers.skipRest();
       else if (event.target === "next") handlers.goToNext();
     });
@@ -28,22 +58,11 @@ export function subscribeWorkoutLiveActions(handlers) {
 }
 
 export function syncWorkoutLive(live) {
-  if (!iosReady()) return;
-  const props = workoutLiveProps(live) || {
-    phase: "work",
-    exerciseName: "LumenFit",
-    nextExerciseName: "",
-    exerciseIndex: 0,
-    exerciseCount: 0,
-    setIndex: 0,
-    setCount: 0,
-    startedAt: Date.now(),
-    endsAt: 0,
-    totalRest: 0,
-    pendingAction: ""
-  };
+  const native = widgetsApi();
+  if (!native) return;
+  const props = workoutLiveProps(live) || Object.assign({}, IDLE_PROPS, { startedAt: Date.now() });
   try {
-    WorkoutLockWidget.updateSnapshot(props);
+    native.lock.updateSnapshot(props);
   } catch (err) {}
   try {
     if (!live) {
@@ -51,8 +70,8 @@ export function syncWorkoutLive(live) {
       return;
     }
     if (!activity) {
-      const existing = WorkoutLiveActivity.getInstances()[0];
-      activity = existing || WorkoutLiveActivity.start(props, SESSION_URL);
+      const existing = native.live.getInstances()[0];
+      activity = existing || native.live.start(props, SESSION_URL);
       if (existing) existing.update(props).catch(() => {});
       return;
     }
@@ -61,8 +80,8 @@ export function syncWorkoutLive(live) {
 }
 
 export function endWorkoutLive() {
-  if (!iosReady()) return;
-  const current = activity || (WorkoutLiveActivity.getInstances && WorkoutLiveActivity.getInstances()[0]);
+  const native = widgetsApi();
+  const current = activity || (native && native.live.getInstances()[0]);
   activity = null;
   if (!current || !current.end) return;
   current.end("immediate").catch(() => {});

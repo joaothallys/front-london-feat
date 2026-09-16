@@ -34,20 +34,20 @@ export const POSTERIOR = [
 ];
 
 export const FOCUS = {
-  peito: { view: "front", hot: { chest: true } },
-  costas: { view: "back", hot: { "upper-back": true } },
-  ombros: { view: "front", hot: { "front-deltoids": true } },
-  biceps: { view: "front", hot: { biceps: true } },
-  triceps: { view: "back", hot: { triceps: true } },
-  quadriceps: { view: "front", hot: { quadriceps: true } },
-  gluteos: { view: "back", hot: { gluteal: true } },
-  posterior: { view: "back", hot: { hamstring: true } },
-  abdomen: { view: "front", hot: { abs: true } },
-  adutores: { view: "back", hot: { adductor: true } },
-  abdutores: { view: "front", hot: { abductors: true } },
-  panturrilha: { view: "back", hot: { calves: true, "left-soleus": true, "right-soleus": true } },
-  trapezio: { view: "back", hot: { trapezius: true } },
-  antebracos: { view: "front", hot: { forearm: true } },
-  obliquos: { view: "front", hot: { obliques: true } },
-  lombar: { view: "back", hot: { "lower-back": true } }
+  peito: { view: "front", hot: { chest: true }, crop: "18 18 64 70" },
+  costas: { view: "back", hot: { "upper-back": true }, crop: "18 24 64 70" },
+  ombros: { view: "front", hot: { "front-deltoids": true }, crop: "10 18 80 58" },
+  biceps: { view: "front", hot: { biceps: true }, crop: "6 30 88 55" },
+  triceps: { view: "back", hot: { triceps: true }, crop: "6 36 88 55" },
+  quadriceps: { view: "front", hot: { quadriceps: true }, crop: "18 88 64 70" },
+  gluteos: { view: "back", hot: { gluteal: true }, crop: "20 88 60 52" },
+  posterior: { view: "back", hot: { hamstring: true }, crop: "18 116 64 58" },
+  abdomen: { view: "front", hot: { abs: true }, crop: "24 48 52 68" },
+  adutores: { view: "back", hot: { adductor: true }, crop: "26 104 48 50" },
+  abdutores: { view: "front", hot: { abductors: true }, crop: "24 86 52 52" },
+  panturrilha: { view: "back", hot: { calves: true, "left-soleus": true, "right-soleus": true }, crop: "16 152 68 62" },
+  trapezio: { view: "back", hot: { trapezius: true }, crop: "20 12 60 58" },
+  antebracos: { view: "front", hot: { forearm: true }, crop: "0 58 100 50" },
+  obliquos: { view: "front", hot: { obliques: true }, crop: "22 46 56 50" },
+  lombar: { view: "back", hot: { "lower-back": true }, crop: "24 60 52 52" }
 };
