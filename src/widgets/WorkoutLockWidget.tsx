@@ -10,6 +10,8 @@ import {
 import {
   font,
   foregroundStyle,
+  lineLimit,
+  minimumScaleFactor,
   monospacedDigit,
   padding,
   progressViewStyle,
@@ -97,9 +99,9 @@ const WorkoutLockWidgetView = (props: WorkoutLockProps, environment: WidgetEnvir
             modifiers={[font({ weight: "bold", design: "rounded", size: 22 }), monospacedDigit()]}
           />
         ) : (
-          <Text modifiers={[font({ weight: "bold", size: 15 })]}>{exerciseName}</Text>
+          <Text modifiers={[font({ weight: "bold", size: 15 }), lineLimit(1), minimumScaleFactor(0.7)]}>{exerciseName}</Text>
         )}
-        <Text modifiers={[font({ size: 11 })]}>
+        <Text modifiers={[font({ size: 11 }), lineLimit(1), minimumScaleFactor(0.75)]}>
           {resting ? exerciseName : exerciseIndex + "/" + exerciseCount}
         </Text>
       </VStack>
@@ -116,7 +118,7 @@ const WorkoutLockWidgetView = (props: WorkoutLockProps, environment: WidgetEnvir
         <Image systemName="dumbbell.fill" color={accent} size={16} />
         <Text modifiers={[font({ weight: "bold", size: 12 }), foregroundStyle(accent)]}>LUMENFIT</Text>
       </HStack>
-      <Text modifiers={[font({ weight: "heavy", design: "rounded", size: family === "systemMedium" ? 22 : 18 })]}>
+      <Text modifiers={[font({ weight: "heavy", design: "rounded", size: family === "systemMedium" ? 22 : 18 }), lineLimit(2), minimumScaleFactor(0.7)]}>
         {exerciseName}
       </Text>
       {resting ? (

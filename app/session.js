@@ -18,6 +18,7 @@ import { updateDayItem, ensureDay } from "../src/plan.js";
 import { FinishSheet } from "../src/components/workout/FinishSheet.js";
 import { RestOverlay } from "../src/components/workout/RestOverlay.js";
 import { restStillRunning } from "../src/session/restClock.js";
+import { playRestAlertNow } from "../src/session/restAlert.js";
 import { useStyles, useTheme } from "../src/theme.js";
 
 export default function Session() {
@@ -35,19 +36,20 @@ export default function Session() {
   useEffect(() => {
     if (!live || !live.rest) return undefined;
     let done = false;
-    function tick() {
+    function tick(fromBackground) {
       if (restStillRunning(live.rest)) {
         setTick((n) => n + 1);
         return;
       }
       if (done) return;
       done = true;
+      if (!fromBackground) playRestAlertNow();
       skipRest();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     }
-    const t = setInterval(tick, 250);
+    const t = setInterval(() => tick(false), 250);
     const sub = AppState.addEventListener("change", (next) => {
-      if (next === "active") tick();
+      if (next === "active") tick(true);
     });
     return () => {
       clearInterval(t);

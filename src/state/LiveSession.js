@@ -6,6 +6,7 @@ import { store } from "@shared/store/local-store.js";
 import { D, exerciseOf } from "../catalog.js";
 import { computeWorkoutStats } from "../workout/stats.js";
 import { beginRest, restStillRunning } from "../session/restClock.js";
+import { armRestAlert, disarmRestAlert } from "../session/restAlert.js";
 import { endWorkoutLive, subscribeWorkoutLiveActions, syncWorkoutLive } from "../session/workoutLiveSync.js";
 
 const Ctx = createContext(null);
@@ -96,12 +97,14 @@ export function LiveSessionProvider({ children }) {
   const skipRest = useCallback(() => {
     const cur = liveRef.current;
     if (!cur || !cur.rest) return;
+    disarmRestAlert();
     push(Object.assign({}, cur, { rest: null }));
   }, [push]);
 
   const goToNext = useCallback(() => {
     const cur = liveRef.current;
     if (!cur || !cur.items) return false;
+    disarmRestAlert();
     if (cur.index >= cur.items.length - 1) {
       push(Object.assign({}, cur, { rest: null }));
       return false;
@@ -113,7 +116,11 @@ export function LiveSessionProvider({ children }) {
   const startRest = useCallback((seconds) => {
     const cur = liveRef.current;
     if (!cur) return;
-    push(Object.assign({}, cur, { rest: beginRest(seconds) }));
+    const rest = beginRest(seconds);
+    const item = cur.items && cur.items[cur.index];
+    const current = item ? exerciseOf(item.id) : null;
+    push(Object.assign({}, cur, { rest }));
+    armRestAlert(rest.endsAt, (current && current.name) || "Hora da próxima série");
   }, [push]);
 
   useEffect(() => {
@@ -208,6 +215,7 @@ export function LiveSessionProvider({ children }) {
     store.persist();
     setSummary(rec);
     setLive(null);
+    disarmRestAlert();
     return rec;
   }, [live]);
 
@@ -215,6 +223,7 @@ export function LiveSessionProvider({ children }) {
     if (live && live.apiId && SessionService.hasToken()) {
       api.sessions.abandon(live.apiId).catch(() => {});
     }
+    disarmRestAlert();
     setLive(null);
   }, [live]);
 

@@ -8,6 +8,7 @@ import { Button, Row, Screen, Section, Title } from "../../src/components/ui.js"
 import { useAppState } from "../../src/state/AppState.js";
 import { D } from "../../src/catalog.js";
 import { useStyles, useTheme } from "../../src/theme.js";
+import { requestRestAlertPermission, setRestSoundOn } from "../../src/session/restAlert.js";
 
 export default function Profile() {
   const { preference } = useTheme();
@@ -72,7 +73,18 @@ export default function Profile() {
       <Row title="Nível de condicionamento" subtitle={state.profile.level} onPress={() => router.push("/settings")} />
       <Row title="Locais de treino" subtitle={(state.locations || []).length + " locais"} onPress={() => router.push("/locations")} />
       <Section>Notificações</Section>
-      <Row title="Sons" subtitle="Alerta de descanso" right={<Text style={styles.val}>{state.profile.sound ? "On" : "Off"}</Text>} onPress={() => { state.profile.sound = !state.profile.sound; SessionService.hasToken() && SessionService.pushProfile(state).catch(() => {}); refresh(); }} />
+      <Row
+        title="Aviso sonoro do intervalo"
+        subtitle="Quando o descanso acaba"
+        right={<Text style={styles.val}>{state.profile.sound !== false ? "On" : "Off"}</Text>}
+        onPress={async () => {
+          const next = state.profile.sound === false;
+          setRestSoundOn(next);
+          if (next) await requestRestAlertPermission();
+          SessionService.hasToken() && SessionService.pushProfile(state).catch(() => {});
+          refresh();
+        }}
+      />
       <Row title="Lembretes de treino" subtitle="Aviso no horário" right={<Text style={styles.val}>{state.settings.reminders ? "On" : "Off"}</Text>} onPress={() => { state.settings.reminders = !state.settings.reminders; SessionService.hasToken() && SessionService.pushProfile(state).catch(() => {}); refresh(); }} />
       <Section>Segurança</Section>
       <Row
