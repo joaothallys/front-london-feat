@@ -349,6 +349,7 @@ export const SessionService = {
     try {
       if (refreshToken) await api.auth.logout(refreshToken);
     } catch (err) {}
+    BiometricService.suppressAutoLogin();
     clearTokens();
   },
 

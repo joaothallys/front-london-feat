@@ -2,15 +2,13 @@ import React, { useState } from "react";
 import { Text, View } from "react-native";
 import { router } from "expo-router";
 import { MUSCLE_ART } from "@shared/domain/muscle-art.js";
-import { Chip, Empty, Field, Row, Screen, Title } from "../../src/components/ui.js";
+import { Empty, Field, Row, Screen, Segmented, Title } from "../../src/components/ui.js";
 import { HapticPressable } from "../../src/components/HapticPressable.js";
 import { MuscleArt } from "../../src/components/MuscleArt.js";
 import { ExerciseThumb } from "../../src/components/ExerciseThumb.js";
 import { useAppState } from "../../src/state/AppState.js";
 import { D, exerciseOf } from "../../src/catalog.js";
 import { useStyles, useTheme } from "../../src/theme.js";
-
-const LIBRARY = ["peito", "costas", "ombros", "biceps", "triceps", "gluteos", "pernas", "trapezio", "posterior", "panturrilha"];
 
 export default function Library() {
   const { colors } = useTheme();
@@ -27,10 +25,11 @@ export default function Library() {
     <Screen>
       <Title style={styles.heading}>Exercícios</Title>
       <Field placeholder="Buscar exercício" value={q} onChangeText={setQ} />
-      <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-        <Chip label="Por músculo" on={tab === "muscle"} onPress={() => setTab("muscle")} />
-        <Chip label="Favoritos" on={tab === "favorites"} onPress={() => setTab("favorites")} />
-      </View>
+      <Segmented
+        options={[{ id: "muscle", label: "Por músculo" }, { id: "favorites", label: "Favoritos" }]}
+        value={tab}
+        onChange={setTab}
+      />
       {q.trim() ? (
         search.length ? search.map((ex) => (
           <Row key={ex.id} title={ex.name} subtitle={(ex.bodyPart || "") + " · " + (ex.equipment || "")} thumb={<ExerciseThumb exercise={ex} />} onPress={() => router.push("/exercise/" + ex.id)} />
@@ -45,7 +44,7 @@ export default function Library() {
             <HapticPressable
               key={m.id}
               style={styles.cell}
-              onPress={() => LIBRARY.indexOf(m.id) >= 0 ? router.push("/library/" + m.id) : null}
+              onPress={() => router.push("/library/" + m.id)}
             >
               <MuscleArt id={m.id} width={148} height={168} />
               <Text style={styles.cellLbl}>{m.label}</Text>

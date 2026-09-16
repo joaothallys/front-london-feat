@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View } from "react-native";
 import { router } from "expo-router";
-import { Button, Chip, Screen, Section, TopBar } from "../src/components/ui.js";
+import { Button, Chip, Screen, Section, Segmented, TopBar } from "../src/components/ui.js";
 import { useLive } from "../src/state/LiveSession.js";
 import { D } from "../src/catalog.js";
 
@@ -36,9 +36,11 @@ export default function Fast() {
         ))}
       </View>
       <Section>Duração</Section>
-      <View style={{ flexDirection: "row" }}>
-        {[20, 30, 45].map((n) => <Chip key={n} label={n + " min"} on={dur === n} onPress={() => setDur(n)} />)}
-      </View>
+      <Segmented
+        options={[[20, "20 min"], [30, "30 min"], [45, "45 min"]]}
+        value={dur}
+        onChange={setDur}
+      />
       <Button label="Gerar e treinar" onPress={go} />
     </Screen>
   );

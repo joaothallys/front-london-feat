@@ -35,19 +35,19 @@ export const POSTERIOR = [
 
 export const FOCUS = {
   peito: { view: "front", hot: { chest: true } },
-  costas: { view: "back", hot: { "upper-back": true, "lower-back": true } },
+  costas: { view: "back", hot: { "upper-back": true } },
   ombros: { view: "front", hot: { "front-deltoids": true } },
-  trapezio: { view: "back", hot: { trapezius: true } },
   biceps: { view: "front", hot: { biceps: true } },
   triceps: { view: "back", hot: { triceps: true } },
-  antebracos: { view: "front", hot: { forearm: true } },
-  abdomen: { view: "front", hot: { abs: true } },
-  obliquos: { view: "front", hot: { obliques: true } },
-  pernas: { view: "front", hot: { quadriceps: true, calves: true } },
   quadriceps: { view: "front", hot: { quadriceps: true } },
-  posterior: { view: "back", hot: { hamstring: true } },
   gluteos: { view: "back", hot: { gluteal: true } },
-  abdutores: { view: "front", hot: { abductors: true } },
+  posterior: { view: "back", hot: { hamstring: true } },
+  abdomen: { view: "front", hot: { abs: true } },
   adutores: { view: "back", hot: { adductor: true } },
-  panturrilha: { view: "back", hot: { calves: true, "left-soleus": true, "right-soleus": true } }
+  abdutores: { view: "front", hot: { abductors: true } },
+  panturrilha: { view: "back", hot: { calves: true, "left-soleus": true, "right-soleus": true } },
+  trapezio: { view: "back", hot: { trapezius: true } },
+  antebracos: { view: "front", hot: { forearm: true } },
+  obliquos: { view: "front", hot: { obliques: true } },
+  lombar: { view: "back", hot: { "lower-back": true } }
 };

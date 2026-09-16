@@ -67,6 +67,7 @@ export default function Login() {
       const on = await BiometricService.isEnabled();
       const creds = await BiometricService.credentials();
       if (!live || !can || !on || !creds) return;
+      if (!BiometricService.consumeAutoLogin()) return;
       setBusy("face");
       try {
         const ok = await BiometricService.authenticate("Entrar no LumenFit com " + label);

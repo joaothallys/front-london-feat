@@ -5,13 +5,15 @@ import { BiometricService } from "@shared/services/account/BiometricService.js";
 import { HapticPressable } from "./HapticPressable.js";
 import { useStyles } from "../theme.js";
 
+const LOCK_AFTER_MS = 5 * 60 * 1000;
+
 export function AppLock({ children }) {
   const styles = useStyles(styleFactory);
   const [locked, setLocked] = useState(false);
   const [label, setLabel] = useState("Face ID");
   const [busy, setBusy] = useState(false);
-  const unlocked = useRef(false);
   const prompting = useRef(false);
+  const leftAt = useRef(0);
 
   const shouldLock = useCallback(async () => {
     return SessionService.hasToken() && (await BiometricService.isEnabled());
@@ -24,7 +26,7 @@ export function AppLock({ children }) {
     try {
       const ok = await BiometricService.authenticate();
       if (ok) {
-        unlocked.current = true;
+        leftAt.current = 0;
         setLocked(false);
       }
     } finally {
@@ -35,29 +37,24 @@ export function AppLock({ children }) {
 
   useEffect(() => {
     let live = true;
-    (async () => {
-      setLabel(await BiometricService.label());
-      if (!(await shouldLock())) return;
-      if (!live) return;
-      setLocked(true);
-      await unlock();
-    })();
+    BiometricService.label().then((name) => {
+      if (live) setLabel(name);
+    });
     return () => { live = false; };
-  }, [shouldLock, unlock]);
+  }, []);
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", async (next) => {
-      if (next === "background") {
-        if (await shouldLock()) {
-          unlocked.current = false;
-          setLocked(true);
-        }
+      if (next !== "active") {
+        if (!leftAt.current) leftAt.current = Date.now();
         return;
       }
-      if (next === "active" && !unlocked.current && (await shouldLock())) {
-        setLocked(true);
-        await unlock();
-      }
+      const away = leftAt.current ? Date.now() - leftAt.current : 0;
+      leftAt.current = 0;
+      if (prompting.current || away < LOCK_AFTER_MS) return;
+      if (!(await shouldLock())) return;
+      setLocked(true);
+      await unlock();
     });
     return () => sub.remove();
   }, [shouldLock, unlock]);

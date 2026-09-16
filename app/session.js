@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, AppState, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 import { router } from "expo-router";
 import { Image } from "expo-image";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../src/components/ui.js";
 import { HapticPressable } from "../src/components/HapticPressable.js";
@@ -15,13 +16,15 @@ import { exerciseOf, mediaUrl } from "../src/catalog.js";
 import { cachedGif, warmGif } from "../src/media/GifCache.js";
 import { updateDayItem, ensureDay } from "../src/plan.js";
 import { FinishSheet } from "../src/components/workout/FinishSheet.js";
+import { RestOverlay } from "../src/components/workout/RestOverlay.js";
+import { restStillRunning } from "../src/session/restClock.js";
 import { useStyles, useTheme } from "../src/theme.js";
 
 export default function Session() {
   const { colors } = useTheme();
   const styles = useStyles(styleFactory);
   const { state, refresh } = useAppState();
-  const { live, setLive, finish, quit } = useLive();
+  const { live, setLive, finish, quit, skipRest, goToNext, startRest } = useLive();
   const [, setTick] = useState(0);
   const [gifUri, setGifUri] = useState("");
   const [gifReady, setGifReady] = useState(false);
@@ -31,16 +34,26 @@ export default function Session() {
 
   useEffect(() => {
     if (!live || !live.rest) return undefined;
-    const t = setInterval(() => {
-      if (!live.rest) return;
-      live.rest.left -= 1;
-      if (live.rest.left <= 0) {
-        live.rest = null;
+    let done = false;
+    function tick() {
+      if (restStillRunning(live.rest)) {
+        setTick((n) => n + 1);
+        return;
       }
-      setTick((n) => n + 1);
-    }, 1000);
-    return () => clearInterval(t);
-  }, [live && live.rest]);
+      if (done) return;
+      done = true;
+      skipRest();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    }
+    const t = setInterval(tick, 250);
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next === "active") tick();
+    });
+    return () => {
+      clearInterval(t);
+      sub.remove();
+    };
+  }, [live && live.rest && live.rest.endsAt, skipRest]);
 
   const item = live && live.items && live.items[live.index];
   const e = item ? exerciseOf(item.id) : null;
@@ -77,10 +90,8 @@ export default function Session() {
   function toggleSet(i) {
     const s = item.sets[i];
     s.done = !s.done;
-    if (s.done) {
-      live.rest = { total: item.rest || 60, left: item.rest || 60 };
-    } else live.rest = null;
-    setLive({ ...live });
+    if (s.done) startRest(item.rest || 60);
+    else skipRest();
   }
 
   function persistLoad(patch) {
@@ -127,13 +138,7 @@ export default function Session() {
 
   async function next() {
     setEdit(null);
-    if (live.index < live.items.length - 1) {
-      live.index += 1;
-      live.rest = null;
-      setLive({ ...live });
-    } else {
-      setFinishOpen(true);
-    }
+    if (!goToNext()) setFinishOpen(true);
   }
 
   async function confirmFinish(payload) {
@@ -270,12 +275,14 @@ export default function Session() {
           </View>
         </GestureHandlerRootView>
       </Modal>
-      {live.rest ? (
-        <View style={styles.rest}>
-          <Text style={styles.kicker}>Descanso</Text>
-          <Text style={styles.timer}>{live.rest.left}s</Text>
-          <Button ghost label="Pular" onPress={() => { live.rest = null; setLive({ ...live }); }} />
-        </View>
+      {restStillRunning(live.rest) ? (
+        <RestOverlay
+          rest={live.rest}
+          exerciseName={e ? e.name : item.id}
+          hasNext={live.index < live.items.length - 1}
+          onSkip={skipRest}
+          onNext={next}
+        />
       ) : null}
       <FinishSheet
         visible={finishOpen}
@@ -326,8 +333,6 @@ function styleFactory(c) {
   wheels: { flexDirection: "row", gap: 12 },
   wheelCol: { flex: 1 },
   wheelLbl: { color: c.muted, textAlign: "center", fontWeight: "700", marginBottom: 4, textTransform: "uppercase", fontSize: 11, letterSpacing: 0.6 },
-  wheelLblOn: { color: c.red },
-  rest: { position: "absolute", left: 16, right: 16, bottom: 24, backgroundColor: c.surface, borderRadius: 20, padding: 20, alignItems: "center", borderWidth: 1, borderColor: c.line },
-  timer: { color: c.text, fontSize: 48, fontWeight: "800", marginVertical: 8 }
+  wheelLblOn: { color: c.red }
 };
 }

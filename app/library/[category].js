@@ -22,7 +22,8 @@ export default function CategoryLibrary() {
   const styles = useStyles(styleFactory);
   const { state, refresh } = useAppState();
   const gender = state.profile && state.profile.gender;
-  const { category } = useLocalSearchParams();
+  const { category: rawCategory } = useLocalSearchParams();
+  const category = rawCategory === "pernas" ? "quadriceps" : rawCategory;
   const cat = CATEGORY_META[category] || CATEGORY_META.peito;
   const [q, setQ] = useState("");
   const [level, setLevel] = useState("todos");

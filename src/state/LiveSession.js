@@ -1,9 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { AppState } from "react-native";
 import { api, unwrap } from "@shared/api/client.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { store } from "@shared/store/local-store.js";
 import { D, exerciseOf } from "../catalog.js";
 import { computeWorkoutStats } from "../workout/stats.js";
+import { beginRest, restStillRunning } from "../session/restClock.js";
+import { endWorkoutLive, subscribeWorkoutLiveActions, syncWorkoutLive } from "../session/workoutLiveSync.js";
 
 const Ctx = createContext(null);
 
@@ -58,15 +61,27 @@ function musclesOf(live) {
   return Object.keys(muscles);
 }
 
+function normalizeLive(live) {
+  if (!live) return null;
+  if (!live.rest) return live;
+  if (live.rest.endsAt) return live;
+  if (live.rest.left) return Object.assign({}, live, { rest: beginRest(live.rest.left) });
+  return Object.assign({}, live, { rest: null });
+}
+
 export function LiveSessionProvider({ children }) {
-  const [live, setLive] = useState(() => store.get().liveSession || null);
+  const [live, setLive] = useState(() => normalizeLive(store.get().liveSession || null));
   const [summary, setSummary] = useState(null);
   const timer = useRef(null);
+  const liveRef = useRef(live);
+  liveRef.current = live;
 
   useEffect(() => {
     const S = store.get();
     S.liveSession = live || null;
     store.persist();
+    syncWorkoutLive(live);
+    if (!live) endWorkoutLive();
   }, [live]);
 
   const push = useCallback((next) => {
@@ -77,6 +92,42 @@ export function LiveSessionProvider({ children }) {
       api.sessions.update(next.apiId, { exercises: payload(next) }).catch(() => {});
     }, 400);
   }, []);
+
+  const skipRest = useCallback(() => {
+    const cur = liveRef.current;
+    if (!cur || !cur.rest) return;
+    push(Object.assign({}, cur, { rest: null }));
+  }, [push]);
+
+  const goToNext = useCallback(() => {
+    const cur = liveRef.current;
+    if (!cur || !cur.items) return false;
+    if (cur.index >= cur.items.length - 1) {
+      push(Object.assign({}, cur, { rest: null }));
+      return false;
+    }
+    push(Object.assign({}, cur, { index: cur.index + 1, rest: null }));
+    return true;
+  }, [push]);
+
+  const startRest = useCallback((seconds) => {
+    const cur = liveRef.current;
+    if (!cur) return;
+    push(Object.assign({}, cur, { rest: beginRest(seconds) }));
+  }, [push]);
+
+  useEffect(() => {
+    return subscribeWorkoutLiveActions({ skipRest, goToNext });
+  }, [skipRest, goToNext]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (status) => {
+      if (status !== "active") return;
+      const cur = liveRef.current;
+      if (cur && cur.rest && !restStillRunning(cur.rest)) skipRest();
+    });
+    return () => sub.remove();
+  }, [skipRest]);
 
   const start = useCallback((name, items, meta) => {
     const S = store.get();
@@ -167,7 +218,10 @@ export function LiveSessionProvider({ children }) {
     setLive(null);
   }, [live]);
 
-  const value = useMemo(() => ({ live, setLive: push, start, finish, quit, summary, setSummary }), [live, push, start, finish, quit, summary]);
+  const value = useMemo(
+    () => ({ live, setLive: push, start, finish, quit, skipRest, goToNext, startRest, summary, setSummary }),
+    [live, push, start, finish, quit, skipRest, goToNext, startRest, summary]
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

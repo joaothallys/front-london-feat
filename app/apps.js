@@ -1,13 +1,13 @@
 import React from "react";
 import { api } from "@shared/api/client.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
-import { Chip, Row, Screen, TopBar } from "../src/components/ui.js";
+import { Cell, Group, Screen, TopBar } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
 
 export default function Apps() {
   const { state, refresh } = useAppState();
-  function tog(k) {
-    state.connectedApps[k] = state.connectedApps[k] === "connected" ? "disconnected" : "connected";
+  function tog(k, on) {
+    state.connectedApps[k] = on ? "connected" : "disconnected";
     refresh();
     if (SessionService.hasToken()) {
       const app = k === "appleHealth" ? "apple_health" : k;
@@ -17,8 +17,21 @@ export default function Apps() {
   return (
     <Screen>
       <TopBar title="Apps conectados" back />
-      <Row title="Apple Saúde" subtitle={state.connectedApps.appleHealth} right={<Chip label={state.connectedApps.appleHealth === "connected" ? "Desconectar" : "Conectar"} onPress={() => tog("appleHealth")} />} />
-      <Row title="Strava" subtitle={state.connectedApps.strava} right={<Chip label={state.connectedApps.strava === "connected" ? "Desconectar" : "Conectar"} onPress={() => tog("strava")} />} />
+      <Group>
+        <Cell
+          title="Apple Saúde"
+          subtitle={state.connectedApps.appleHealth === "connected" ? "Conectado" : "Desconectado"}
+          switchOn={state.connectedApps.appleHealth === "connected"}
+          onSwitch={(on) => tog("appleHealth", on)}
+        />
+        <Cell
+          last
+          title="Strava"
+          subtitle={state.connectedApps.strava === "connected" ? "Conectado" : "Desconectado"}
+          switchOn={state.connectedApps.strava === "connected"}
+          onSwitch={(on) => tog("strava", on)}
+        />
+      </Group>
     </Screen>
   );
 }

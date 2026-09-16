@@ -1,4 +1,3 @@
-/** Ordem oficial da categoria Costas. O 38º foi validado na ExerciseDB. */
 export const backExerciseIds = [
   "puxador-por-tras",
   "remada-curvada-smith",
@@ -30,9 +29,6 @@ export const backExerciseIds = [
   "remada-maquina-pegada-neutra",
   "remada-sentada-maquina",
   "remada-inclinada",
-  "extensao-lombar",
-  "superman",
-  "bom-dia-barra",
   "encolhimento-trapezio",
   "remada-alta-halteres",
   "puxada-assistida",

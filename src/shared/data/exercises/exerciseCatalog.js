@@ -7,6 +7,7 @@ import { trapezioCatalog } from "./trapezioCatalog.js";
 import { tricepsCatalog } from "./tricepsCatalog.js";
 import { posteriorCatalog } from "./posteriorCatalog.js";
 import { panturrilhaCatalog } from "./panturrilhaCatalog.js";
+import { lombarCatalog } from "./lombarCatalog.js";
 
 function gif(id) {
   return id ? { type: "gif", source: "exercisedb", url: "https://static.exercisedb.dev/media/" + id + ".gif" } : null;
@@ -135,9 +136,10 @@ export { trapezioCatalog } from "./trapezioCatalog.js";
 export { tricepsCatalog } from "./tricepsCatalog.js";
 export { posteriorCatalog } from "./posteriorCatalog.js";
 export { panturrilhaCatalog } from "./panturrilhaCatalog.js";
+export { lombarCatalog } from "./lombarCatalog.js";
 export { catalogToAppView } from "./catalogBuilder.js";
 
-const allCatalog = chestCatalog.concat(backCatalog, shoulderCatalog, bicepsCatalog, trapezioCatalog, tricepsCatalog, posteriorCatalog, panturrilhaCatalog);
+const allCatalog = chestCatalog.concat(backCatalog, shoulderCatalog, bicepsCatalog, trapezioCatalog, tricepsCatalog, posteriorCatalog, panturrilhaCatalog, lombarCatalog);
 const byId = {};
 allCatalog.forEach((ex) => { byId[ex.id] = ex; });
 
@@ -154,7 +156,9 @@ export function getCatalogByCategory(category) {
   if (category === "triceps") return tricepsCatalog.slice();
   if (category === "posterior") return posteriorCatalog.slice();
   if (category === "panturrilha") return panturrilhaCatalog.slice();
-  if (category === "gluteos" || category === "pernas") return [];
+  if (category === "lombar") return lombarCatalog.slice();
+  if (category === "pernas") return getCatalogByCategory("quadriceps");
+  if (category === "gluteos" || category === "quadriceps" || category === "abdomen" || category === "adutores" || category === "abdutores" || category === "antebracos" || category === "obliquos") return [];
   return allCatalog.slice();
 }
 

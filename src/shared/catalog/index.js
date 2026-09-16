@@ -1,20 +1,7 @@
 import { translateBody, translateEquipment, translateInstructions, translateMuscle, translateName } from "../i18n/pt.js";
+import { MUSCLE_ART } from "../domain/muscle-art.js";
 
-  const muscles = [
-    { id: "peito", label: "Peito", body: "chest" },
-    { id: "costas", label: "Costas", body: "back" },
-    { id: "ombros", label: "Ombros", body: "shoulders" },
-    { id: "biceps", label: "Bíceps", body: "upper arms" },
-    { id: "triceps", label: "Tríceps", body: "upper arms" },
-    { id: "pernas", label: "Pernas", body: "upper legs" },
-    { id: "quadriceps", label: "Quadríceps", body: "upper legs" },
-    { id: "posterior", label: "Posterior", body: "upper legs" },
-    { id: "gluteos", label: "Glúteos", body: "upper legs" },
-    { id: "panturrilha", label: "Panturrilha", body: "lower legs" },
-    { id: "abdomen", label: "Abdômen", body: "waist" },
-    { id: "trapezio", label: "Trapézio", body: "back" },
-    { id: "cardio", label: "Cardio", body: "cardio" }
-  ];
+  const muscles = MUSCLE_ART.map((m) => ({ id: m.id, label: m.label, body: m.bodyPart }));
 
   const equipment = [
     { id: "barra", label: "Barra", raw: "barbell" },
@@ -62,19 +49,25 @@ import { translateBody, translateEquipment, translateInstructions, translateMusc
     const part = slug((row.bodyParts || [])[0]);
     const target = slug((row.targetMuscles || [])[0]);
     if (part === "chest") return "peito";
-    if (part === "back") return "costas";
     if (part === "shoulders") return "ombros";
-    if (part === "waist") return "abdomen";
     if (part === "lower legs") return "panturrilha";
-    if (part === "cardio") return "cardio";
+    if (part === "lower arms") return "antebracos";
     if (part === "neck") return "ombros";
     if (part === "upper arms") return target.indexOf("tricep") >= 0 ? "triceps" : "biceps";
+    if (part === "waist") return target.indexOf("oblique") >= 0 ? "obliquos" : "abdomen";
+    if (part === "back") {
+      if (target.indexOf("trap") >= 0) return "trapezio";
+      if (target.indexOf("spine") >= 0 || target.indexOf("lower") >= 0) return "lombar";
+      return "costas";
+    }
     if (part === "upper legs") {
       if (target.indexOf("hamstring") >= 0) return "posterior";
       if (target.indexOf("glute") >= 0) return "gluteos";
+      if (target.indexOf("adductor") >= 0) return "adutores";
+      if (target.indexOf("abductor") >= 0) return "abdutores";
       return "quadriceps";
     }
-    return "cardio";
+    return "peito";
   }
 
   function mapEq(row) {

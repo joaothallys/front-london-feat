@@ -5,6 +5,8 @@ const ENABLED = "lumen.bio.enabled";
 const EMAIL = "lumen.bio.email";
 const PASSWORD = "lumen.bio.password";
 
+let skipAutoLogin = false;
+
 async function read(key) {
   try {
     return (await SecureStore.getItemAsync(key)) || "";
@@ -89,5 +91,17 @@ export const BiometricService = {
     await write(ENABLED, "");
     await write(EMAIL, "");
     await write(PASSWORD, "");
+  },
+
+  suppressAutoLogin() {
+    skipAutoLogin = true;
+  },
+
+  consumeAutoLogin() {
+    if (skipAutoLogin) {
+      skipAutoLogin = false;
+      return false;
+    }
+    return true;
   }
 };

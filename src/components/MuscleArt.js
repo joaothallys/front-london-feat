@@ -3,6 +3,7 @@ import { View } from "react-native";
 import Svg, { Polygon } from "react-native-svg";
 import { useStyles, useTheme } from "../theme.js";
 import { ANTERIOR, POSTERIOR, FOCUS } from "./muscleMapData.js";
+import { muscleArt } from "@shared/domain/muscle-art.js";
 
 function toPoints(raw) {
   const n = String(raw || "").trim().split(/\s+/);
@@ -14,7 +15,8 @@ function toPoints(raw) {
 export function MuscleArt({ id, width = 88, height = 88 }) {
   const { colors, scheme } = useTheme();
   const styles = useStyles(styleFactory);
-  const focus = FOCUS[id] || FOCUS.peito;
+  const art = muscleArt(id);
+  const focus = (art && FOCUS[art.id]) || FOCUS.peito;
   const groups = focus.view === "back" ? POSTERIOR : ANTERIOR;
   const body = scheme === "light" ? "#c8d2d5" : "#3a4e53";
   const hot = colors.red;

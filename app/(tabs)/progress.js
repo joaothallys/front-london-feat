@@ -5,7 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Svg, { Circle, Polyline } from "react-native-svg";
 import { api, unwrap } from "@shared/api/client.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
-import { Chip, Empty, Screen } from "../../src/components/ui.js";
+import { Empty, Screen, Segmented } from "../../src/components/ui.js";
 import { ExerciseThumb } from "../../src/components/ExerciseThumb.js";
 import { HapticPressable } from "../../src/components/HapticPressable.js";
 import { MuscleArt } from "../../src/components/MuscleArt.js";
@@ -27,11 +27,18 @@ const MUSCLE = {
   ombros: "Ombros",
   biceps: "Bíceps",
   triceps: "Tríceps",
+  quadriceps: "Quadríceps",
   gluteos: "Glúteos",
-  pernas: "Pernas",
-  panturrilha: "Panturrilha",
+  posterior: "Posteriores",
   abdomen: "Abdômen",
+  adutores: "Adutores",
+  abdutores: "Abdutores",
+  panturrilha: "Panturrilhas",
   trapezio: "Trapézio",
+  antebracos: "Antebraços",
+  obliquos: "Oblíquos",
+  lombar: "Lombar",
+  pernas: "Quadríceps",
   outros: "Outros"
 };
 
@@ -244,9 +251,7 @@ export default function Progress() {
       ) : null}
 
       <View style={styles.chips}>
-        {RANGES.map(([id, label]) => (
-          <Chip key={id} label={label} on={range === id} onPress={() => setRange(id)} />
-        ))}
+        <Segmented options={RANGES} value={range} onChange={setRange} />
       </View>
 
       <View style={styles.stats}>

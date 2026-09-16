@@ -7,7 +7,7 @@ import { ensure } from "@shared/services/exercises/LondonExercise.js";
 import { fetchExerciseMedia, pickDetailUrl } from "@shared/services/media/LondonMediaService.js";
 import { FavoriteService } from "@shared/services/favorites/FavoriteService.js";
 import { FeedbackService } from "@shared/services/feedback/FeedbackService.js";
-import { Button, Chip, Screen, Section, TopBar } from "../../src/components/ui.js";
+import { Button, Chip, Screen, Section, Segmented, TopBar } from "../../src/components/ui.js";
 import { useLive } from "../../src/state/LiveSession.js";
 import { useAppState } from "../../src/state/AppState.js";
 import { exerciseOf, mediaUrl } from "../../src/catalog.js";
@@ -85,8 +85,11 @@ export default function ExerciseDetail() {
         <Chip label="Não gostei" on={fb === "negative"} onPress={() => { FeedbackService.set(id, "negative"); refresh(); }} />
       </View>
       <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}>
-        <Chip label="Músculo" on={tab === "muscle"} onPress={() => setTab("muscle")} />
-        <Chip label="Instruções" on={tab === "instructions"} onPress={() => setTab("instructions")} />
+        <Segmented
+          options={[{ id: "muscle", label: "Músculo" }, { id: "instructions", label: "Instruções" }]}
+          value={tab}
+          onChange={setTab}
+        />
       </View>
       {tab === "muscle" ? (
         <>

@@ -6,11 +6,17 @@ const META = {
   ombros: { primaryMuscle: "Ombros", bodyPartRaw: "shoulders", targetRaw: "delts" },
   biceps: { primaryMuscle: "Bíceps", bodyPartRaw: "upper arms", targetRaw: "biceps" },
   triceps: { primaryMuscle: "Tríceps", bodyPartRaw: "upper arms", targetRaw: "triceps" },
+  quadriceps: { primaryMuscle: "Quadríceps", bodyPartRaw: "upper legs", targetRaw: "quadriceps" },
   gluteos: { primaryMuscle: "Glúteos", bodyPartRaw: "upper legs", targetRaw: "glutes" },
-  pernas: { primaryMuscle: "Pernas", bodyPartRaw: "upper legs", targetRaw: "quadriceps" },
-  trapezio: { primaryMuscle: "Trapézio", bodyPartRaw: "back", targetRaw: "traps" },
   posterior: { primaryMuscle: "Posteriores", bodyPartRaw: "upper legs", targetRaw: "hamstrings" },
-  panturrilha: { primaryMuscle: "Panturrilha", bodyPartRaw: "lower legs", targetRaw: "calves" }
+  abdomen: { primaryMuscle: "Abdômen", bodyPartRaw: "waist", targetRaw: "abs" },
+  adutores: { primaryMuscle: "Adutores", bodyPartRaw: "upper legs", targetRaw: "adductors" },
+  abdutores: { primaryMuscle: "Abdutores", bodyPartRaw: "upper legs", targetRaw: "abductors" },
+  panturrilha: { primaryMuscle: "Panturrilhas", bodyPartRaw: "lower legs", targetRaw: "calves" },
+  trapezio: { primaryMuscle: "Trapézio", bodyPartRaw: "back", targetRaw: "traps" },
+  antebracos: { primaryMuscle: "Antebraços", bodyPartRaw: "lower arms", targetRaw: "forearms" },
+  obliquos: { primaryMuscle: "Oblíquos", bodyPartRaw: "waist", targetRaw: "abs" },
+  lombar: { primaryMuscle: "Lombar", bodyPartRaw: "back", targetRaw: "spine" }
 };
 
 export function gif(id) {
@@ -89,13 +95,19 @@ export function catalogToAppView(ex) {
 
 export const CATEGORY_META = {
   peito: { id: "peito", title: "Peito", bodyPart: "chest" },
-  costas: { id: "costas", title: "Costas", bodyPart: "back" },
+  costas: { id: "costas", title: "Costas", bodyPart: "back", targetMuscle: "lats" },
   ombros: { id: "ombros", title: "Ombros", bodyPart: "shoulders" },
   biceps: { id: "biceps", title: "Bíceps", bodyPart: "upper arms", targetMuscle: "biceps" },
   triceps: { id: "triceps", title: "Tríceps", bodyPart: "upper arms", targetMuscle: "triceps" },
+  quadriceps: { id: "quadriceps", title: "Quadríceps", bodyPart: "upper legs", targetMuscle: "quadriceps" },
   gluteos: { id: "gluteos", title: "Glúteos", bodyPart: "upper legs", targetMuscle: "glutes" },
-  pernas: { id: "pernas", title: "Pernas", bodyPart: "upper legs" },
-  trapezio: { id: "trapezio", title: "Trapézio", bodyPart: "back", targetMuscle: "traps" },
   posterior: { id: "posterior", title: "Posteriores", bodyPart: "upper legs", targetMuscle: "hamstrings" },
-  panturrilha: { id: "panturrilha", title: "Panturrilhas", bodyPart: "lower legs", targetMuscle: "calves" }
+  abdomen: { id: "abdomen", title: "Abdômen", bodyPart: "waist" },
+  adutores: { id: "adutores", title: "Adutores", bodyPart: "upper legs", targetMuscle: "adductors" },
+  abdutores: { id: "abdutores", title: "Abdutores", bodyPart: "upper legs", targetMuscle: "abductors" },
+  panturrilha: { id: "panturrilha", title: "Panturrilhas", bodyPart: "lower legs", targetMuscle: "calves" },
+  trapezio: { id: "trapezio", title: "Trapézio", bodyPart: "back", targetMuscle: "traps" },
+  antebracos: { id: "antebracos", title: "Antebraços", bodyPart: "lower arms" },
+  obliquos: { id: "obliquos", title: "Oblíquos", bodyPart: "waist", targetMuscle: "abs" },
+  lombar: { id: "lombar", title: "Lombar", bodyPart: "back", targetMuscle: "spine" }
 };

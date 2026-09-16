@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Image, StyleSheet, Text, View } from "react-native";
+import { Alert, Image, Text, View } from "react-native";
 import { router } from "expo-router";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { BiometricService } from "@shared/services/account/BiometricService.js";
-import { confirmDeleteAccount } from "@shared/services/account/deleteAccountFlow.js";
 import { store } from "@shared/store/local-store.js";
 import { Button, Row, Screen, Section, Title } from "../../src/components/ui.js";
 import { useAppState } from "../../src/state/AppState.js";
@@ -11,7 +10,7 @@ import { D } from "../../src/catalog.js";
 import { useStyles, useTheme } from "../../src/theme.js";
 
 export default function Profile() {
-  const { colors, preference } = useTheme();
+  const { preference } = useTheme();
   const styles = useStyles(styleFactory);
   const { state, refresh } = useAppState();
   const mins = (state.history || []).reduce((a, h) => a + (h.duration || 0), 0);
@@ -19,8 +18,6 @@ export default function Profile() {
   const [faceOn, setFaceOn] = useState(false);
   const [faceLabel, setFaceLabel] = useState("Face ID");
   const [faceOk, setFaceOk] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const loggedIn = SessionService.hasToken();
 
   useEffect(() => {
     let live = true;
@@ -94,16 +91,9 @@ export default function Profile() {
       <Row title="Matrícula" subtitle={state.member.plan} onPress={() => router.push("/membership")} />
       <Row title="Apps conectados" subtitle="Apple Saúde e Strava" onPress={() => router.push("/apps")} />
       <Row title="Catálogo ExerciseDB" subtitle={D.exercises.length + " exercícios"} onPress={() => router.push("/sync")} />
-      <Button ghost label="Sair" onPress={logout} />
-      {loggedIn ? (
-        <Button
-          ghost
-          danger
-          label={deleting ? "Excluindo..." : "Excluir conta"}
-          onPress={() => confirmDeleteAccount({ deleting, setDeleting, refresh })}
-          disabled={deleting}
-        />
-      ) : null}
+      <View style={styles.logoutWrap}>
+        <Button ghost label="Sair" onPress={logout} />
+      </View>
     </Screen>
   );
 }
@@ -129,6 +119,7 @@ function styleFactory(c) {
   stat: { flex: 1, backgroundColor: c.surface, borderRadius: 14, padding: 12, alignItems: "center" },
   statN: { color: c.text, fontWeight: "800", fontSize: 18 },
   statL: { color: c.muted, fontSize: 11, marginTop: 4 },
-  val: { color: c.muted2, fontWeight: "700" }
+  val: { color: c.muted2, fontWeight: "700" },
+  logoutWrap: { marginTop: 28 }
 };
 }

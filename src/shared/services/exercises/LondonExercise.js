@@ -18,14 +18,21 @@ export function isLondonId(id) {
 
 function guessMuscle(id) {
   const s = String(id || "");
-  if (/glute|hip-thrust|abduc|aduc/.test(s)) return "gluteos";
+  if (/glute|hip-thrust/.test(s)) return "gluteos";
+  if (/abduc/.test(s)) return "abdutores";
+  if (/aduc/.test(s)) return "adutores";
+  if (/lombar|hyperext|superman|bom-dia/.test(s)) return "lombar";
+  if (/panturr/.test(s)) return "panturrilha";
   if (/triceps|pulley|testa|frances/.test(s)) return "triceps";
-  if (/leg|agacha|extensor|flexor|hack|avanco|passada|panturr/.test(s)) return "pernas";
+  if (/leg|agacha|extensor|hack|avanco|passada/.test(s)) return "quadriceps";
   if (/rosca|biceps/.test(s)) return "biceps";
   if (/trapez|encolh/.test(s)) return "trapezio";
   if (/supino|crucifixo|flexao|crossover|peito/.test(s)) return "peito";
   if (/puxad|remada|barra-fixa|pullover/.test(s)) return "costas";
   if (/desenvolv|elevacao|ombro|face-pull/.test(s)) return "ombros";
+  if (/abdominal|crunch|prancha/.test(s)) return "abdomen";
+  if (/obliqu/.test(s)) return "obliquos";
+  if (/antebrac|punho/.test(s)) return "antebracos";
   return "";
 }
 

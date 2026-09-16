@@ -2,7 +2,7 @@
   "expo": {
     "name": "LumenFit",
     "slug": "lumenfit",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": [
@@ -15,14 +15,23 @@
       "supportsTablet": false,
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.londonfitness.app",
+      "appleTeamId": "2572AZCAGV",
+      "buildNumber": "2",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.londonfitness.app"
+        ]
+      },
       "infoPlist": {
         "NSCameraUsageDescription": "O LumenFit usa a câmera para a foto do seu treino.",
         "NSPhotoLibraryUsageDescription": "O LumenFit acessa suas fotos para montar o card do treino.",
         "NSPhotoLibraryAddUsageDescription": "O LumenFit salva a montagem do treino na sua galeria.",
         "NSFaceIDUsageDescription": "O LumenFit usa o Face ID para desbloquear o app no iPhone.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSSupportsLiveActivities": true,
+        "NSSupportsLiveActivitiesFrequentUpdates": true,
         "NSAppTransportSecurity": {
-          "NSAllowsLocalNetworking": true,
-          "NSAllowsArbitraryLoads": true
+          "NSAllowsLocalNetworking": true
         }
       }
     },
@@ -71,7 +80,31 @@
       "expo-sharing",
       "expo-status-bar",
       "expo-web-browser",
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      [
+        "expo-widgets",
+        {
+          "bundleIdentifier": "com.londonfitness.app.widgets",
+          "groupIdentifier": "group.com.londonfitness.app",
+          "frequentUpdates": true,
+          "widgets": [
+            {
+              "name": "WorkoutLockWidget",
+              "displayName": "LumenFit Treino",
+              "description": "Veja o intervalo e o exercício atual na tela de bloqueio.",
+              "ios": {
+                "supportedFamilies": [
+                  "accessoryCircular",
+                  "accessoryRectangular",
+                  "accessoryInline",
+                  "systemSmall",
+                  "systemMedium"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false

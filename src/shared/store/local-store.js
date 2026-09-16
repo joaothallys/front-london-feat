@@ -107,12 +107,5 @@ export const store = {
     storageRemove(KEY);
     Object.keys(state).forEach((key) => { delete state[key]; });
     Object.assign(state, blank());
-  },
-  reset() {
-    this.wipeLocal();
-    if (typeof location !== "undefined" && location.reload) {
-      location.hash = "#/splash";
-      location.reload();
-    }
   }
 };

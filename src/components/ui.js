@@ -1,5 +1,5 @@
 import React from "react";
-import { ActivityIndicator, ScrollView, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, ScrollView, Switch, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useStyles, useTheme } from "../theme.js";
@@ -31,10 +31,25 @@ function styleFactory(c) {
     field: { marginBottom: 12 },
     label: { color: c.muted, fontSize: 12, fontWeight: "600", marginBottom: 6 },
     input: { backgroundColor: c.surface, borderRadius: 12, borderWidth: 1, borderColor: c.line, color: c.text, paddingHorizontal: 14, paddingVertical: 12, fontSize: 16 },
-    chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: c.surface, borderWidth: 1, borderColor: c.line, marginRight: 8, marginBottom: 8 },
+    chip: { alignSelf: "flex-start", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: c.surface, borderWidth: 1, borderColor: c.line, marginRight: 8, marginBottom: 8 },
     chipOn: { backgroundColor: c.redSoft, borderColor: c.red },
     chipTxt: { color: c.muted2, fontWeight: "600" },
     chipTxtOn: { color: c.text },
+    group: { backgroundColor: c.surface, borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: c.line, marginBottom: 4 },
+    cell: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14, minHeight: 52 },
+    cellBorder: { borderBottomWidth: 1, borderBottomColor: c.line },
+    cellTitle: { color: c.text, fontWeight: "600", fontSize: 16 },
+    cellSub: { color: c.muted, fontSize: 12, marginTop: 2 },
+    cellValue: { color: c.muted, fontWeight: "600", fontSize: 15 },
+    seg: { flexDirection: "row", backgroundColor: c.surface2, borderRadius: 12, padding: 3, marginBottom: 12 },
+    segItem: { flex: 1, paddingVertical: 9, borderRadius: 9, alignItems: "center", justifyContent: "center" },
+    segOn: { backgroundColor: c.surface3 },
+    segTxt: { color: c.muted, fontWeight: "700", fontSize: 13 },
+    segTxtOn: { color: c.text },
+    step: { flexDirection: "row", alignItems: "center", gap: 8 },
+    stepBtn: { width: 32, height: 32, borderRadius: 10, backgroundColor: c.surface2, alignItems: "center", justifyContent: "center" },
+    stepBtnTxt: { color: c.text, fontSize: 18, fontWeight: "700", marginTop: -1 },
+    stepVal: { color: c.text, fontWeight: "800", fontSize: 16, minWidth: 44, textAlign: "center" },
     card: { backgroundColor: c.surface, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: c.line, marginBottom: 10 },
     row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 16, padding: 12, borderWidth: 1, borderColor: c.line, marginBottom: 8 },
     rowMain: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
@@ -154,6 +169,74 @@ export function Chip({ label, on, onPress }) {
     <HapticPressable onPress={onPress} style={[styles.chip, on && styles.chipOn]}>
       <Text style={[styles.chipTxt, on && styles.chipTxtOn]}>{label}</Text>
     </HapticPressable>
+  );
+}
+
+export function Group({ children, style }) {
+  const styles = useStyles(styleFactory);
+  return <View style={[styles.group, style]}>{children}</View>;
+}
+
+export function Cell({ title, subtitle, value, onPress, switchOn, onSwitch, last, right }) {
+  const { colors } = useTheme();
+  const styles = useStyles(styleFactory);
+  const body = (
+    <>
+      <View style={styles.grow}>
+        <Text style={styles.cellTitle}>{title}</Text>
+        {subtitle ? <Text style={styles.cellSub}>{subtitle}</Text> : null}
+      </View>
+      {value != null && value !== "" ? <Text style={styles.cellValue}>{value}</Text> : null}
+      {right || null}
+      {onSwitch ? (
+        <Switch
+          value={!!switchOn}
+          onValueChange={onSwitch}
+          trackColor={{ false: colors.line, true: colors.red }}
+          thumbColor="#ffffff"
+          ios_backgroundColor={colors.line}
+        />
+      ) : null}
+      {onPress && !onSwitch ? <Text style={styles.chev}>›</Text> : null}
+    </>
+  );
+  const box = [styles.cell, !last && styles.cellBorder];
+  if (onPress && !onSwitch) {
+    return <HapticPressable onPress={onPress} style={box}>{body}</HapticPressable>;
+  }
+  return <View style={box}>{body}</View>;
+}
+
+export function Segmented({ options, value, onChange }) {
+  const styles = useStyles(styleFactory);
+  return (
+    <View style={styles.seg}>
+      {options.map((opt) => {
+        const id = Array.isArray(opt) ? opt[0] : opt.id;
+        const label = Array.isArray(opt) ? opt[1] : opt.label;
+        const on = value === id;
+        return (
+          <HapticPressable key={String(id)} onPress={() => onChange(id)} style={[styles.segItem, on && styles.segOn]}>
+            <Text style={[styles.segTxt, on && styles.segTxtOn]}>{label}</Text>
+          </HapticPressable>
+        );
+      })}
+    </View>
+  );
+}
+
+export function Stepper({ value, onMinus, onPlus, suffix }) {
+  const styles = useStyles(styleFactory);
+  return (
+    <View style={styles.step}>
+      <HapticPressable onPress={onMinus} style={styles.stepBtn}>
+        <Text style={styles.stepBtnTxt}>−</Text>
+      </HapticPressable>
+      <Text style={styles.stepVal}>{value}{suffix || ""}</Text>
+      <HapticPressable onPress={onPlus} style={styles.stepBtn}>
+        <Text style={styles.stepBtnTxt}>+</Text>
+      </HapticPressable>
+    </View>
   );
 }
 

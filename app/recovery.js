@@ -31,7 +31,7 @@ export default function Recovery() {
 function styleFactory(c) {
   return {
   row: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
-  label: { color: c.text, width: 90, fontWeight: "700" },
+  label: { color: c.text, width: 110, fontWeight: "700" },
   bar: { flex: 1, height: 8, backgroundColor: c.line, borderRadius: 4, overflow: "hidden" },
   fill: { height: 8, backgroundColor: c.green },
   low: { backgroundColor: c.red },
