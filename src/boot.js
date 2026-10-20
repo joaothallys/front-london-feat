@@ -14,35 +14,46 @@ const KEYS = [
 ];
 
 export async function bootNative() {
-  applyApiUrl();
-  const pairs = await AsyncStorage.multiGet(KEYS);
-  const cache = {};
-  pairs.forEach(([key, value]) => {
-    if (value != null) cache[key] = value;
-  });
-  seedStorageCache(cache);
-  setStorageBackend({
-    get(key) {
-      return cache[key] || null;
-    },
-    set(key, value) {
-      cache[key] = value;
-      AsyncStorage.setItem(key, value).catch(() => {});
-    },
-    remove(key) {
-      delete cache[key];
-      AsyncStorage.removeItem(key).catch(() => {});
-    }
-  });
-  store.rehydrate();
-  ExerciseCache.rehydrate();
-  registerCatalog();
-  hydrateGifCache().catch(() => {});
-  if (SessionService.hasToken()) {
+  try {
+    applyApiUrl();
+    let pairs = [];
     try {
-      await SessionService.hydrate(store.get());
-      store.persist();
-    } catch (err) {}
+      pairs = await AsyncStorage.multiGet(KEYS);
+    } catch (err) {
+      pairs = [];
+    }
+    const cache = {};
+    pairs.forEach(([key, value]) => {
+      if (value != null) cache[key] = value;
+    });
+    seedStorageCache(cache);
+    setStorageBackend({
+      get(key) {
+        return cache[key] || null;
+      },
+      set(key, value) {
+        cache[key] = value;
+        AsyncStorage.setItem(key, value).catch(() => {});
+      },
+      remove(key) {
+        delete cache[key];
+        AsyncStorage.removeItem(key).catch(() => {});
+      }
+    });
+    try { store.rehydrate(); } catch (err) {}
+    try { ExerciseCache.rehydrate(); } catch (err) {}
+    try { registerCatalog(); } catch (err) {}
+    hydrateGifCache().catch(() => {});
+    if (SessionService.hasToken()) {
+      try {
+        await SessionService.hydrate(store.get());
+        store.persist();
+      } catch (err) {}
+    }
+  } catch (err) {}
+  try {
+    return store.get();
+  } catch (err) {
+    return null;
   }
-  return store.get();
 }

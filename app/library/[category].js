@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -113,8 +113,12 @@ function StillThumb({ uri }) {
       contentFit="contain"
       cachePolicy="memory-disk"
       autoplay={false}
-      onLoad={() => {
-        if (ref.current && ref.current.stopAnimating) ref.current.stopAnimating();
+      onLoad={Platform.OS === "web" ? undefined : () => {
+        const img = ref.current;
+        if (!img || !img.stopAnimating) return;
+        try {
+          Promise.resolve(img.stopAnimating()).catch(() => {});
+        } catch (err) {}
       }}
     />
   );

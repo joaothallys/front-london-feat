@@ -6,7 +6,6 @@ import { store } from "@shared/store/local-store.js";
 import { D, exerciseOf } from "../catalog.js";
 import { computeWorkoutStats } from "../workout/stats.js";
 import { beginRest, restStillRunning } from "../session/restClock.js";
-import { armRestAlert, disarmRestAlert } from "../session/restAlert.js";
 import { endWorkoutLive, subscribeWorkoutLiveActions, syncWorkoutLive } from "../session/workoutLiveSync.js";
 
 const Ctx = createContext(null);
@@ -71,7 +70,13 @@ function normalizeLive(live) {
 }
 
 export function LiveSessionProvider({ children }) {
-  const [live, setLive] = useState(() => normalizeLive(store.get().liveSession || null));
+  const [live, setLive] = useState(() => {
+    try {
+      return normalizeLive(store.get().liveSession || null);
+    } catch (err) {
+      return null;
+    }
+  });
   const [summary, setSummary] = useState(null);
   const timer = useRef(null);
   const liveRef = useRef(live);
@@ -81,11 +86,14 @@ export function LiveSessionProvider({ children }) {
     const S = store.get();
     S.liveSession = live || null;
     store.persist();
-    syncWorkoutLive(live);
-    if (!live) endWorkoutLive();
+    try {
+      if (live) syncWorkoutLive(live);
+      else endWorkoutLive();
+    } catch (err) {}
   }, [live]);
 
   const push = useCallback((next) => {
+    liveRef.current = next;
     setLive(next);
     if (!next || !next.apiId || !SessionService.hasToken()) return;
     clearTimeout(timer.current);
@@ -97,14 +105,12 @@ export function LiveSessionProvider({ children }) {
   const skipRest = useCallback(() => {
     const cur = liveRef.current;
     if (!cur || !cur.rest) return;
-    disarmRestAlert();
     push(Object.assign({}, cur, { rest: null }));
   }, [push]);
 
   const goToNext = useCallback(() => {
     const cur = liveRef.current;
     if (!cur || !cur.items) return false;
-    disarmRestAlert();
     if (cur.index >= cur.items.length - 1) {
       push(Object.assign({}, cur, { rest: null }));
       return false;
@@ -135,24 +141,37 @@ export function LiveSessionProvider({ children }) {
       };
     });
     const rest = beginRest(item.rest || 60);
-    const current = exerciseOf(item.id);
     push(Object.assign({}, cur, { items, rest }));
-    armRestAlert(rest.endsAt, (current && current.name) || "Hora da próxima série");
   }, [push, skipRest, goToNext]);
 
   const startRest = useCallback((seconds) => {
     const cur = liveRef.current;
     if (!cur) return;
     const rest = beginRest(seconds);
-    const item = cur.items && cur.items[cur.index];
-    const current = item ? exerciseOf(item.id) : null;
     push(Object.assign({}, cur, { rest }));
-    armRestAlert(rest.endsAt, (current && current.name) || "Hora da próxima série");
+  }, [push]);
+
+  const toggleSet = useCallback((itemIndex, setIndex) => {
+    const cur = liveRef.current;
+    const item = cur && cur.items && cur.items[itemIndex];
+    if (!item || !item.sets || !item.sets[setIndex]) return;
+    const done = !item.sets[setIndex].done;
+    const items = cur.items.map((it, ii) => {
+      if (ii !== itemIndex) return it;
+      return { ...it, sets: it.sets.map((s, si) => (si === setIndex ? Object.assign({}, s, { done }) : s)) };
+    });
+    if (!done) {
+      push(Object.assign({}, cur, { items, index: itemIndex, rest: null }));
+      return;
+    }
+    const rest = beginRest(item.rest || 60);
+    push(Object.assign({}, cur, { items, index: itemIndex, rest }));
   }, [push]);
 
   useEffect(() => {
+    if (!live) return undefined;
     return subscribeWorkoutLiveActions({ skipRest, goToNext, completeCurrentSet });
-  }, [skipRest, goToNext, completeCurrentSet]);
+  }, [live, skipRest, goToNext, completeCurrentSet]);
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (status) => {
@@ -242,7 +261,6 @@ export function LiveSessionProvider({ children }) {
     store.persist();
     setSummary(rec);
     setLive(null);
-    disarmRestAlert();
     return rec;
   }, [live]);
 
@@ -250,13 +268,12 @@ export function LiveSessionProvider({ children }) {
     if (live && live.apiId && SessionService.hasToken()) {
       api.sessions.abandon(live.apiId).catch(() => {});
     }
-    disarmRestAlert();
     setLive(null);
   }, [live]);
 
   const value = useMemo(
-    () => ({ live, setLive: push, start, finish, quit, skipRest, goToNext, completeCurrentSet, startRest, summary, setSummary }),
-    [live, push, start, finish, quit, skipRest, goToNext, completeCurrentSet, startRest, summary]
+    () => ({ live, setLive: push, start, finish, quit, skipRest, goToNext, completeCurrentSet, startRest, toggleSet, summary, setSummary }),
+    [live, push, start, finish, quit, skipRest, goToNext, completeCurrentSet, startRest, toggleSet, summary]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

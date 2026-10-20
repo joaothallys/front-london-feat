@@ -1,3 +1,4 @@
+import { Sentry } from "../src/sentry.js";
 import React, { useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -8,6 +9,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "expo-router/react-navigation";
 import { bootNative } from "../src/boot.js";
 import { BrandSplash } from "../src/components/BrandSplash.js";
+import { LaunchBoundary } from "../src/components/LaunchBoundary.js";
 import { AppLock } from "../src/components/AppLock.js";
 import { AppStateProvider } from "../src/state/AppState.js";
 import { LiveSessionProvider } from "../src/state/LiveSession.js";
@@ -48,12 +50,18 @@ function ThemedApp() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   const [booted, setBooted] = useState(false);
   const [introDone, setIntroDone] = useState(false);
 
   useEffect(() => {
-    bootNative().finally(() => setBooted(true));
+    let alive = true;
+    bootNative()
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setBooted(true);
+      });
+    return () => { alive = false; };
   }, []);
 
   if (!booted || !introDone) {
@@ -68,16 +76,20 @@ export default function RootLayout() {
     );
   }
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <AppStateProvider>
-          <AppThemeProvider>
-            <AppLock>
-              <ThemedApp />
-            </AppLock>
-          </AppThemeProvider>
-        </AppStateProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <LaunchBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <AppStateProvider>
+            <AppThemeProvider>
+              <AppLock>
+                <ThemedApp />
+              </AppLock>
+            </AppThemeProvider>
+          </AppStateProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </LaunchBoundary>
   );
 }
+
+export default Sentry.wrap(RootLayout);

@@ -290,6 +290,11 @@ export const api = {
     remove(id) { return request("/api/workouts/" + id, { method: "DELETE" }); }
   },
 
+  shares: {
+    create(body) { return request("/api/shares", { method: "POST", body }); },
+    get(id) { return request("/api/shares/" + encodeURIComponent(id)); }
+  },
+
   plans: {
     list() { return request("/api/plans"); },
     active() { return request("/api/plans/active"); },

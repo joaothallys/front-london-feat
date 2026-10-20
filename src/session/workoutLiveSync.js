@@ -28,10 +28,21 @@ let unavailable = false;
 let thumbCache = { id: "", path: "" };
 let thumbToken = 0;
 
+function isIpadDevice() {
+  if (Platform.OS !== "ios") return false;
+  if (Platform.isPad) return true;
+  const idiom = Platform.constants && Platform.constants.interfaceIdiom;
+  return idiom === "pad" || idiom === "tablet";
+}
+
+function widgetsSupported() {
+  return Platform.OS === "ios" && !isIpadDevice();
+}
+
 function widgetsApi() {
   if (unavailable) return null;
   if (api) return api;
-  if (Platform.OS !== "ios" || !requireOptionalNativeModule("ExpoWidgets")) {
+  if (!widgetsSupported() || !requireOptionalNativeModule("ExpoWidgets")) {
     unavailable = true;
     return null;
   }
@@ -83,9 +94,14 @@ function publish(native, props, live) {
       return;
     }
     if (!activity) {
-      const existing = native.live.getInstances()[0];
-      activity = existing || native.live.start(props, SESSION_URL);
-      if (existing) existing.update(props).catch(() => {});
+      try {
+        const existing = native.live.getInstances()[0];
+        activity = existing || native.live.start(props, SESSION_URL);
+        if (existing) existing.update(props).catch(() => {});
+      } catch (err) {
+        unavailable = true;
+        activity = null;
+      }
       return;
     }
     activity.update(props).catch(() => {});
@@ -93,6 +109,7 @@ function publish(native, props, live) {
 }
 
 export function subscribeWorkoutLiveActions(handlers) {
+  if (!handlers || !widgetsSupported()) return () => {};
   const native = widgetsApi();
   if (!native) return () => {};
   try {
@@ -105,19 +122,25 @@ export function subscribeWorkoutLiveActions(handlers) {
     });
     return () => sub.remove();
   } catch (err) {
+    unavailable = true;
     return () => {};
   }
 }
 
 export function syncWorkoutLive(live) {
+  if (!live) {
+    endWorkoutLive();
+    return;
+  }
+  if (!widgetsSupported()) return;
   const native = widgetsApi();
   if (!native) return;
-  const item = live && live.items && live.items[live.index];
+  const item = live.items && live.items[live.index];
   const exercise = item ? exerciseOf(item.id) : null;
   const cached = exercise && thumbCache.id === exercise.id ? thumbCache.path : "";
   const props = workoutLiveProps(live, { thumbPath: cached }) || Object.assign({}, IDLE_PROPS, { startedAt: Date.now() });
   publish(native, props, live);
-  if (!live || !exercise) return;
+  if (!exercise) return;
   const token = ++thumbToken;
   shareThumb(exercise).then((path) => {
     if (!path || token !== thumbToken) return;
@@ -128,9 +151,14 @@ export function syncWorkoutLive(live) {
 }
 
 export function endWorkoutLive() {
-  const native = widgetsApi();
-  const current = activity || (native && native.live.getInstances()[0]);
+  const current = activity;
   activity = null;
-  if (!current || !current.end) return;
-  current.end("immediate").catch(() => {});
+  if (current && current.end) current.end("immediate").catch(() => {});
+  const native = widgetsApi();
+  if (!native) return;
+  try {
+    native.live.getInstances().forEach((instance) => {
+      if (instance && instance.end) instance.end("immediate").catch(() => {});
+    });
+  } catch (err) {}
 }

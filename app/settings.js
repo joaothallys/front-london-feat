@@ -7,7 +7,7 @@ import { Cell, Group, Screen, Section, Segmented, Stepper, TopBar } from "../src
 import { HapticPressable } from "../src/components/HapticPressable.js";
 import { useAppState } from "../src/state/AppState.js";
 import { useTheme } from "../src/theme.js";
-import { requestRestAlertPermission, setRestSoundOn } from "../src/session/restAlert.js";
+import { setRestSoundOn } from "../src/session/restAlert.js";
 
 const THEMES = [
   ["system", "Sistema"],
@@ -78,19 +78,10 @@ export default function Settings() {
         />
         <Cell
           title="Aviso sonoro do intervalo"
-          subtitle="Toca quando o tempo de descanso acaba, inclusive na tela de bloqueio"
+          subtitle="Toca quando o descanso acaba, com o app aberto"
           switchOn={state.profile.sound !== false}
-          onSwitch={async (on) => {
+          onSwitch={(on) => {
             setRestSoundOn(on);
-            if (on) {
-              const ok = await requestRestAlertPermission();
-              if (!ok) {
-                Alert.alert(
-                  "Notificações",
-                  "Sem permissão, o aviso toca só com o app aberto. Ative as notificações do LumenFit nos Ajustes do iPhone para ouvir com a tela bloqueada."
-                );
-              }
-            }
             sync();
           }}
         />

@@ -2,7 +2,7 @@
   "expo": {
     "name": "LumenFit",
     "slug": "lumenfit",
-    "version": "1.0.4",
+    "version": "1.0.10",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": [
@@ -16,7 +16,7 @@
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.londonfitness.app",
       "appleTeamId": "2572AZCAGV",
-      "buildNumber": "4",
+      "buildNumber": "19",
       "entitlements": {
         "com.apple.security.application-groups": [
           "group.com.londonfitness.app"
@@ -30,6 +30,18 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSSupportsLiveActivities": true,
         "NSSupportsLiveActivitiesFrequentUpdates": true,
+        "UIRequiresFullScreen": true,
+        "UIRequiredDeviceCapabilities": [
+          "arm64"
+        ],
+        "UISupportedInterfaceOrientations": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown"
+        ],
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown"
+        ],
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true
         }
@@ -113,7 +125,15 @@
           ]
         }
       ],
-      "expo-audio"
+      "expo-audio",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "organization": "minha-empresa-dt",
+          "project": "lumenfit"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false

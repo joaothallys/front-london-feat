@@ -46,11 +46,11 @@ type WorkoutLiveProps = {
   pendingAction: string;
 };
 
-const CTA = "#B6FF3B";
-const CARD = "#0B0B0B";
-
 const WorkoutLiveActivityLayout = (props: WorkoutLiveProps, environment: { isLuminanceReduced?: boolean; activityFamily?: "small" | "medium" }) => {
   "widget";
+  // The layout runs isolated inside the widget extension: it cannot see module-level values.
+  const CTA = "#B6FF3B";
+  const CARD = "#0B0B0B";
   const accent = environment.isLuminanceReduced ? "#FFFFFF" : CTA;
   const muted = environment.isLuminanceReduced ? "#BBBBBB" : "#9A9A9A";
   const resting = props.phase === "rest" && Number(props.endsAt) > 0;

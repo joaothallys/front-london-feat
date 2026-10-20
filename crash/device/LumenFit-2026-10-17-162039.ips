@@ -1,0 +1,377 @@
+{"app_name":"LumenFit","timestamp":"2026-10-17 16:20:39.00 -0300","app_version":"1.0.10","slice_uuid":"8bcdfbcb-82f0-3429-8192-0685f1a8dcee","build_version":"13","platform":2,"bundleID":"com.londonfitness.app","share_with_app_devs":0,"is_first_party":0,"bug_type":"309","os_version":"iPhone OS 27.0.1 (24A446)","roots_installed":0,"name":"LumenFit","incident_id":"544C6FC1-F6F5-4828-9A01-FF5F19CBA1FE"}
+{
+  "uptime" : 87000,
+  "procRole" : "Non UI",
+  "version" : 2,
+  "userID" : 501,
+  "deployVersion" : 210,
+  "modelCode" : "iPhone15,4",
+  "coalitionID" : 3460,
+  "osVersion" : {
+    "isEmbedded" : true,
+    "train" : "iPhone OS 27.0.1",
+    "releaseType" : "User",
+    "build" : "24A446"
+  },
+  "captureTime" : "2026-10-17 16:20:37.5983 -0300",
+  "codeSigningMonitor" : 2,
+  "incident" : "544C6FC1-F6F5-4828-9A01-FF5F19CBA1FE",
+  "pid" : 7349,
+  "translated" : false,
+  "cpuType" : "ARM-64",
+  "procLaunch" : "2026-10-17 16:20:36.8002 -0300",
+  "procStartAbsTime" : 2094769915931,
+  "procExitAbsTime" : 2094786633351,
+  "procName" : "LumenFit",
+  "procPath" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/LumenFit",
+  "bundleInfo" : {"CFBundleShortVersionString":"1.0.10","CFBundleVersion":"13","CFBundleIdentifier":"com.londonfitness.app"},
+  "storeInfo" : {"distributorID":"com.apple.TestFlight","deviceIdentifierForVendor":"3F39F75A-DAC4-4428-A30B-358F8BFADB1C","thirdParty":true},
+  "parentProc" : "launchd",
+  "parentPid" : 1,
+  "coalitionName" : "com.londonfitness.app",
+  "crashReporterKey" : "01ae176eb3a17377d9486e9ba015726d1da8ee36",
+  "developerMode" : 1,
+  "bootProgressRegister" : "0x20800004",
+  "wasUnlockedSinceBoot" : 1,
+  "isLocked" : 0,
+  "codeSigningID" : "com.londonfitness.app",
+  "codeSigningTeamID" : "2572AZCAGV",
+  "codeSigningFlags" : 570434309,
+  "codeSigningValidationCategory" : 3,
+  "codeSigningTrustLevel" : 4,
+  "codeSigningAuxiliaryInfo" : 9007199254740992,
+  "instructionByteStream" : {"beforePC":"oIMf+OELAPmog1\/46AcA+ekLQPkqAUD5CgEA+SkFQPkKAUD5SgFa+A==","atPC":"CWkq+AAhAJFM9PyX4AdA+f17Qqn\/wwCRwANf1v+DANH9ewGp\/UMAkQ=="},
+  "bootSessionUUID" : "A072101D-D180-47E7-B23F-3FF20CE078BC",
+  "basebandVersion" : "4.02.04",
+  "vmRegionInfo" : "0x458637d80 is in 0x458000000-0x45a000000;  bytes after start: 6520192  bytes before end: 27034239\n      REGION TYPE                   START - END        [ VSIZE] PRT\/MAX SHRMOD  REGION DETAIL\n      commpage (reserved)        3135ac000-458000000   [  5.1G] ---\/--- SM=COW  reserved VM address space (unallocated)\n--->  GPU Carveout (reserved)    458000000-45a000000   [ 32.0M] ---\/--- SM=COW  reserved VM address space (unallocated)\n      GPU Carveout (reserved)    45a000000-fc0000000   [ 45.6G] ---\/--- SM=COW  reserved VM address space (unallocated)",
+  "exception" : {"codes":"0x0000000000000001, 0x0000000458637d80","rawCodes":[1,18662784384],"type":"EXC_BAD_ACCESS","signal":"SIGSEGV","subtype":"KERN_INVALID_ADDRESS at 0x0000000458637d80"},
+  "termination" : {"flags":1024,"code":11,"namespace":"SIGNAL","indicator":"Segmentation fault: 11","byProc":"exc handler","byPid":7349},
+  "vmregioninfo" : "0x458637d80 is in 0x458000000-0x45a000000;  bytes after start: 6520192  bytes before end: 27034239\n      REGION TYPE                   START - END        [ VSIZE] PRT\/MAX SHRMOD  REGION DETAIL\n      commpage (reserved)        3135ac000-458000000   [  5.1G] ---\/--- SM=COW  reserved VM address space (unallocated)\n--->  GPU Carveout (reserved)    458000000-45a000000   [ 32.0M] ---\/--- SM=COW  reserved VM address space (unallocated)\n      GPU Carveout (reserved)    45a000000-fc0000000   [ 45.6G] ---\/--- SM=COW  reserved VM address space (unallocated)",
+  "faultingThread" : 0,
+  "threads" : [{"triggered":true,"id":932685,"threadState":{"x":[{"value":6167646632},{"value":4310956064,"symbolLocation":24,"symbol":"VTT for expo::ExpoViewProps"},{"value":6167648608},{"value":6167644656},{"value":6167648872},{"value":6167648624},{"value":1},{"value":18446744072367376383},{"value":6167646632},{"value":0},{"value":12495137752,"symbolLocation":16,"symbol":"vtable for __cxxabiv1::__class_type_info"},{"value":0},{"value":4},{"value":870},{"value":0},{"value":10710363167314185375},{"value":4492459912,"symbolLocation":0,"symbol":"facebook::react::BaseViewProps::BaseViewProps(facebook::react::PropsParserContext const&, facebook::react::BaseViewProps const&, facebook::react::RawProps const&, std::__1::function<bool (std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)> const&)"},{"value":4346092224},{"value":0},{"value":6167646632},{"value":6167648872},{"value":6167644656},{"value":4310956040,"symbolLocation":0,"symbol":"VTT for expo::ExpoViewProps"},{"value":4310956040,"symbolLocation":0,"symbol":"VTT for expo::ExpoViewProps"},{"value":4310955992,"symbolLocation":0,"symbol":"vtable for expo::ExpoViewProps"},{"value":6167648624},{"value":4310956024,"symbolLocation":32,"symbol":"vtable for expo::ExpoViewProps"},{"value":6167646632},{"value":4357452416}],"flavor":"ARM_THREAD_STATE64","lr":{"value":4493229924},"cpsr":{"value":2147487744},"fp":{"value":6167641392},"sp":{"value":6167641360},"esr":{"value":2449473606,"description":"(Data Abort) byte write Translation fault"},"pc":{"value":4491329720,"matchesCrashFrame":1},"far":{"value":18662784384}},"queue":"com.apple.main-thread","frames":[{"imageOffset":4915384,"symbol":"facebook::react::Props::Props()","symbolLocation":52,"imageIndex":8},{"imageOffset":6815588,"symbol":"facebook::react::YogaStylableProps::YogaStylableProps(facebook::react::PropsParserContext const&, facebook::react::YogaStylableProps const&, facebook::react::RawProps const&, std::__1::function<bool (std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)> const&)","symbolLocation":84,"imageIndex":8},{"imageOffset":6045680,"symbol":"facebook::react::BaseViewProps::BaseViewProps(facebook::react::PropsParserContext const&, facebook::react::BaseViewProps const&, facebook::react::RawProps const&, std::__1::function<bool (std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)> const&)","symbolLocation":104,"imageIndex":8},{"imageOffset":62552,"symbol":"expo::ExpoViewProps::ExpoViewProps(facebook::react::PropsParserContext const&, expo::ExpoViewProps const&, facebook::react::RawProps const&, std::__1::function<bool (std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)> const&)","symbolLocation":60,"imageIndex":5},{"imageOffset":81612,"symbol":"void facebook::react::RawPropsParser::prepare<expo::ExpoViewProps>()","symbolLocation":332,"imageIndex":5},{"imageOffset":78416,"symbol":"std::__1::unique_ptr<expo::ExpoViewComponentDescriptor<expo::ExpoViewShadowNode<expo::ExpoViewProps, expo::ExpoViewState>> const, std::__1::default_delete<expo::ExpoViewComponentDescriptor<expo::ExpoViewShadowNode<expo::ExpoViewProps, expo::ExpoViewState>> const>> std::__1::make_unique[abi:nqe210106]<expo::ExpoViewComponentDescriptor<expo::ExpoViewShadowNode<expo::ExpoViewProps, expo::ExpoViewState>> const, facebook::react::ComponentDescriptorParameters const&, 0>(facebook::react::ComponentDescriptorParameters const&)","symbolLocation":92,"imageIndex":5},{"imageOffset":69172,"symbol":"std::__1::unique_ptr<facebook::react::ComponentDescriptor const, std::__1::default_delete<facebook::react::ComponentDescriptor const>> facebook::react::concreteComponentDescriptorConstructor<expo::ExpoViewComponentDescriptor<expo::ExpoViewShadowNode<expo::ExpoViewProps, expo::ExpoViewState>>>(facebook::react::ComponentDescriptorParameters const&)","symbolLocation":28,"imageIndex":5},{"imageOffset":5345620,"symbol":"facebook::react::ComponentDescriptorRegistry::add(facebook::react::ComponentDescriptorProvider const&) const","symbolLocation":128,"imageIndex":8},{"imageOffset":5320336,"symbol":"facebook::react::ComponentDescriptorProviderRegistry::add(facebook::react::ComponentDescriptorProvider const&) const","symbolLocation":396,"imageIndex":8},{"imageOffset":9821676,"symbol":"-[RCTComponentViewFactory registerComponentViewClass:]","symbolLocation":580,"imageIndex":8},{"imageOffset":104248,"symbol":"+[ExpoFabricViewObjC registerComponent:appContext:]","symbolLocation":728,"imageIndex":5},{"imageOffset":238808,"symbol":"AppContext.registerNativeViews()","symbolLocation":668,"imageIndex":5},{"imageOffset":239360,"symbol":"closure #2 in AppContext.registerNativeModules(provider:)","symbolLocation":68,"imageIndex":5},{"imageOffset":156457,"symbol":"<deduplicated_symbol>","symbolLocation":1,"imageIndex":5},{"imageOffset":253265,"symbol":"specialized thunk for @escaping @isolated(any) @callee_guaranteed @async () -> (@out A)","symbolLocation":1,"imageIndex":5},{"imageOffset":157805,"symbol":"<deduplicated_symbol>","symbolLocation":1,"imageIndex":5},{"imageOffset":30861,"symbol":"completeTaskWithClosure(swift::AsyncContext*, swift::SwiftError*)","symbolLocation":1,"imageIndex":17}]},{"id":932697,"threadState":{"x":[{"value":0},{"value":0},{"value":8540247048,"symbolLocation":0,"symbol":"OBJC_CLASS_$_NSPathStore2"},{"value":6168208000},{"value":1024},{"value":66},{"value":4603809536},{"value":18446744072367376383},{"value":2773958212413882462},{"value":2773958212413882462},{"value":0},{"value":6168207376},{"value":4603809680},{"value":1},{"value":67},{"value":0},{"value":338},{"value":8571810536},{"value":0},{"value":4602033760},{"value":0},{"value":0},{"value":4603809536},{"value":4604316864},{"value":0},{"value":4354101312},{"value":4354101376},{"value":0},{"value":276}],"flavor":"ARM_THREAD_STATE64","lr":{"value":6828918508},"cpsr":{"value":1073745920},"fp":{"value":6168209104},"sp":{"value":6168207840},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":9899223108},"far":{"value":0}},"queue":"AXCodeItemAccess","frames":[{"imageOffset":26692,"symbol":"stat","symbolLocation":8,"imageIndex":19},{"imageOffset":4253420,"symbol":"-[NSBundle _initWithPath:unique:options:]","symbolLocation":476,"imageIndex":20},{"imageOffset":1309696,"symbol":"+[NSBundle bundleWithURL:]","symbolLocation":32,"imageIndex":20},{"imageOffset":200520,"symbol":"__43-[AXCodeItem prepareBackingBundleIfNeeded:]_block_invoke","symbolLocation":220,"imageIndex":21},{"imageOffset":114612,"symbol":"_dispatch_client_callout","symbolLocation":16,"imageIndex":22},{"imageOffset":74032,"symbol":"_dispatch_lane_barrier_sync_invoke_and_complete","symbolLocation":56,"imageIndex":22},{"imageOffset":200120,"symbol":"-[AXCodeItem prepareBackingBundleIfNeeded:]","symbolLocation":252,"imageIndex":21},{"imageOffset":201236,"symbol":"__50-[AXCodeItem loadWithStrategy:onQueue:completion:]_block_invoke_2","symbolLocation":160,"imageIndex":21},{"imageOffset":7372,"symbol":"_dispatch_call_block_and_release","symbolLocation":32,"imageIndex":22},{"imageOffset":114612,"symbol":"_dispatch_client_callout","symbolLocation":16,"imageIndex":22},{"imageOffset":43132,"symbol":"_dispatch_lane_serial_drain","symbolLocation":644,"imageIndex":22},{"imageOffset":46192,"symbol":"_dispatch_lane_invoke","symbolLocation":312,"imageIndex":22},{"imageOffset":89228,"symbol":"_dispatch_root_queue_drain_deferred_wlh","symbolLocation":248,"imageIndex":22},{"imageOffset":87728,"symbol":"_dispatch_workloop_worker_thread","symbolLocation":640,"imageIndex":22},{"imageOffset":4664,"symbol":"_pthread_wqthread","symbolLocation":292,"imageIndex":23},{"imageOffset":2320,"symbol":"start_wqthread","symbolLocation":8,"imageIndex":23}]},{"id":932698,"frames":[],"threadState":{"x":[{"value":6168784896},{"value":6659},{"value":6168248320},{"value":0},{"value":409604},{"value":18446744073709551615},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":0},"cpsr":{"value":4096},"fp":{"value":0},"sp":{"value":6168784896},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":6818752776},"far":{"value":0}}},{"id":932699,"frames":[],"threadState":{"x":[{"value":6169358336},{"value":8195},{"value":6168821760},{"value":0},{"value":409604},{"value":18446744073709551615},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":0},"cpsr":{"value":4096},"fp":{"value":0},"sp":{"value":6169358336},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":6818752776},"far":{"value":0}}},{"id":932700,"frames":[],"threadState":{"x":[{"value":6169931776},{"value":10243},{"value":6169395200},{"value":0},{"value":409604},{"value":18446744073709551615},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":0},"cpsr":{"value":4096},"fp":{"value":0},"sp":{"value":6169931776},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":6818752776},"far":{"value":0}}},{"id":932701,"threadState":{"x":[{"value":0},{"value":17179869201},{"value":103079215123},{"value":5895},{"value":335007449088},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":78},{"value":0},{"value":0},{"value":8540021296,"symbolLocation":48,"symbol":"_dispatch_main_q"},{"value":0},{"value":18446744073709551569},{"value":7701436846320280064},{"value":0},{"value":0},{"value":0},{"value":0},{"value":335007449088},{"value":5895},{"value":17179869201},{"value":6170503160},{"value":103079215123},{"value":18446744073709550527},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":9899213576},"cpsr":{"value":4096},"fp":{"value":6170502816},"sp":{"value":6170502736},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":9899199700},"far":{"value":0}},"queue":"AXBinaryMonitorQueue","frames":[{"imageOffset":3284,"symbol":"mach_msg2_trap","symbolLocation":8,"imageIndex":19},{"imageOffset":17160,"symbol":"mach_msg2_internal","symbolLocation":76,"imageIndex":19},{"imageOffset":16936,"symbol":"mach_msg_overwrite","symbolLocation":424,"imageIndex":19},{"imageOffset":16500,"symbol":"mach_msg","symbolLocation":24,"imageIndex":19},{"imageOffset":225860,"symbol":"_dispatch_send_wakeup_runloop_thread","symbolLocation":80,"imageIndex":22},{"imageOffset":66700,"symbol":"_dispatch_runloop_queue_poke","symbolLocation":216,"imageIndex":22},{"imageOffset":51860,"symbol":"__52-[AXBinaryMonitor _processLoadedImagesMatchingName:]_block_invoke","symbolLocation":132,"imageIndex":21},{"imageOffset":7372,"symbol":"_dispatch_call_block_and_release","symbolLocation":32,"imageIndex":22},{"imageOffset":114612,"symbol":"_dispatch_client_callout","symbolLocation":16,"imageIndex":22},{"imageOffset":43132,"symbol":"_dispatch_lane_serial_drain","symbolLocation":644,"imageIndex":22},{"imageOffset":46192,"symbol":"_dispatch_lane_invoke","symbolLocation":312,"imageIndex":22},{"imageOffset":89228,"symbol":"_dispatch_root_queue_drain_deferred_wlh","symbolLocation":248,"imageIndex":22},{"imageOffset":87728,"symbol":"_dispatch_workloop_worker_thread","symbolLocation":640,"imageIndex":22},{"imageOffset":4664,"symbol":"_pthread_wqthread","symbolLocation":292,"imageIndex":23},{"imageOffset":2320,"symbol":"start_wqthread","symbolLocation":8,"imageIndex":23}]},{"id":932702,"frames":[],"threadState":{"x":[{"value":6171078656},{"value":16643},{"value":6170542080},{"value":0},{"value":409604},{"value":18446744073709551615},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":0},"cpsr":{"value":4096},"fp":{"value":0},"sp":{"value":6171078656},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":6818752776},"far":{"value":0}}},{"id":932704,"name":"com.facebook.react.runtime.JavaScript","threadState":{"x":[{"value":4560029192},{"value":8787203144,"objc-selector":"isProxy"},{"value":3},{"value":12},{"value":24},{"value":12},{"value":0},{"value":6},{"value":9679222600,"symbolLocation":8,"symbol":"_OBJC_$_CATEGORY_INSTANCE_METHODS_NSString_$_MobileBackup"},{"value":187},{"value":131},{"value":6813270016},{"value":13209616384},{"value":1},{"value":8779293384,"objc-selector":"🤯"},{"value":7909760},{"value":9679222592,"symbolLocation":0,"symbol":"_OBJC_$_CATEGORY_INSTANCE_METHODS_NSString_$_MobileBackup"},{"value":9679222601,"symbolLocation":9,"symbol":"_OBJC_$_CATEGORY_INSTANCE_METHODS_NSString_$_MobileBackup"},{"value":0},{"value":35651179},{"value":9068137405,"symbolLocation":45,"symbol":"_OBJC_$_CATEGORY_INSTANCE_METHODS_NSString_$_VCControlChannelMessageProtocol"},{"value":8787203144,"objc-selector":"isProxy"},{"value":8540111392,"symbolLocation":0,"symbol":"OBJC_CLASS_$__TtCs15__StringStorage"},{"value":8540249248,"symbolLocation":0,"symbol":"OBJC_CLASS_$_NSString"},{"value":0},{"value":4291057106},{"value":8540011904,"symbolLocation":0,"symbol":"runtimeLock"},{"value":6172176608},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":6817498080},"cpsr":{"value":536875008},"fp":{"value":6172159392},"sp":{"value":6172159344},"esr":{"value":2181038091,"description":"(Instruction Abort) Access flag fault"},"pc":{"value":6817500244},"far":{"value":0}},"frames":[{"imageOffset":19540,"symbol":"getMethodNoSuper_nolock(objc_class*, objc_selector*)","symbolLocation":884,"imageIndex":24},{"imageOffset":17376,"symbol":"objc_lookUpImpOrForward","symbolLocation":308,"imageIndex":24},{"imageOffset":3300,"symbol":"_objc_msgSend_uncached","symbolLocation":68,"imageIndex":25},{"imageOffset":14188,"symbol":"_os_log_fmt_flatten_object_impl","symbolLocation":100,"imageIndex":26},{"imageOffset":67292,"symbol":"os_log_fmt_flatten","symbolLocation":1652,"imageIndex":26},{"imageOffset":6024,"symbol":"_os_log_impl_flatten_and_send","symbolLocation":800,"imageIndex":26},{"imageOffset":35244,"symbol":"_os_log_with_args_impl","symbolLocation":416,"imageIndex":26},{"imageOffset":832960,"symbol":"_CFLogvEx3","symbolLocation":188,"imageIndex":27},{"imageOffset":698080,"symbol":"_NSLogv","symbolLocation":124,"imageIndex":20},{"imageOffset":698172,"symbol":"NSLog","symbolLocation":56,"imageIndex":20},{"imageOffset":2485320,"symbol":"-[RCTMultipartDataTask startTask]","symbolLocation":440,"imageIndex":8},{"imageOffset":2419452,"symbol":"attemptAsynchronousLoadOfBundleAtURL(NSURL*, void (RCTLoadingProgress*) block_pointer, void (NSError*, RCTSource*) block_pointer)","symbolLocation":716,"imageIndex":8},{"imageOffset":2418156,"symbol":"+[RCTJavaScriptLoader loadBundleAtURL:onProgress:onComplete:]","symbolLocation":512,"imageIndex":8},{"imageOffset":12819484,"symbol":"-[RCTHost loadBundleAtURL:onProgress:onComplete:]","symbolLocation":304,"imageIndex":8},{"imageOffset":12905820,"symbol":"-[RCTInstance _loadJSBundle:]","symbolLocation":372,"imageIndex":8},{"imageOffset":12979388,"symbol":"-[RCTInstance _start]::$_5::operator()(facebook::jsi::Runtime&) const","symbolLocation":628,"imageIndex":8},{"imageOffset":12978748,"symbol":"decltype(std::declval<-[RCTInstance _start]::$_5&>()(std::declval<facebook::jsi::Runtime&>())) std::__1::__invoke[abi:de190102]<-[RCTInstance _start]::$_5&, facebook::jsi::Runtime&>(-[RCTInstance _start]::$_5&, facebook::jsi::Runtime&)","symbolLocation":32,"imageIndex":8},{"imageOffset":12978668,"symbol":"void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:de190102]<-[RCTInstance _start]::$_5&, facebook::jsi::Runtime&>(-[RCTInstance _start]::$_5&, facebook::jsi::Runtime&)","symbolLocation":32,"imageIndex":8},{"imageOffset":12978624,"symbol":"std::__1::__function::__alloc_func<-[RCTInstance _start]::$_5, std::__1::allocator<-[RCTInstance _start]::$_5>, void (facebook::jsi::Runtime&)>::operator()[abi:de190102](facebook::jsi::Runtime&)","symbolLocation":36,"imageIndex":8},{"imageOffset":12973576,"symbol":"std::__1::__function::__func<-[RCTInstance _start]::$_5, std::__1::allocator<-[RCTInstance _start]::$_5>, void (facebook::jsi::Runtime&)>::operator()(facebook::jsi::Runtime&)","symbolLocation":36,"imageIndex":8},{"imageOffset":12466092,"symbol":"std::__1::__function::__value_func<void (facebook::jsi::Runtime&)>::operator()[abi:de190102](facebook::jsi::Runtime&) const","symbolLocation":68,"imageIndex":8},{"imageOffset":12459540,"symbol":"std::__1::function<void (facebook::jsi::Runtime&)>::operator()(facebook::jsi::Runtime&) const","symbolLocation":32,"imageIndex":8},{"imageOffset":12595208,"symbol":"facebook::react::ReactInstance::initializeRuntime(facebook::react::ReactInstance::JSRuntimeFlags, std::__1::function<void (facebook::jsi::Runtime&)>)::$_0::operator()(facebook::jsi::Runtime&) const","symbolLocation":1744,"imageIndex":8},{"imageOffset":12593452,"symbol":"decltype(std::declval<facebook::react::ReactInstance::initializeRuntime(facebook::react::ReactInstance::JSRuntimeFlags, std::__1::function<void (facebook::jsi::Runtime&)>)::$_0&>()(std::declval<facebook::jsi::Runtime&>())) std::__1::__invoke[abi:de190102]<facebook::react::ReactInstance::initializeRuntime(facebook::react::ReactInstance::JSRuntimeFlags, std::__1::function<void (facebook::jsi::Runtime&)>)::$_0&, facebook::jsi::Runtime&>(facebook::react::ReactInstance::initializeRuntime(facebook::react::ReactInstance::JSRuntimeFlags, std::__1::function<void (facebook::jsi::Runtime&)>)::$_0&, facebook::jsi::Runtime&)","symbolLocation":32,"imageIndex":8},{"imageOffset":12593372,"symbol":"void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:de190102]<facebook::react::ReactInstance::initializeRuntime(facebook::react::ReactInstance::JSRuntimeFlags, std::__1::function<void (facebook::jsi::Runtime&)>)::$_0&, facebook::jsi::Runtime&>(facebook::react::ReactInstance::initializeRuntime(facebook::react::ReactInstance::JSRuntimeFlags, std::__1::function<void (facebook::jsi::Runtime&)>)::$_0&, facebook::jsi::Runtime&)","symbolLocation":32,"imageIndex":8},{"imageOffset":12593328,"symbol":"std::__1::__function::__alloc_func<facebook::react::ReactInstance::initializeRuntime(facebook::react::ReactInstance::JSRuntimeFlags, std::__1::function<void (facebook::jsi::Runtime&)>)::$_0, std::__1::allocator<facebook::react::ReactInstance::initializeRuntime(facebook::react::ReactInstance::JSRuntimeFlags, std::__1::function<void (facebook::jsi::Runtime&)>)::$_0>, void (facebook::jsi::Runtime&)>::operator()[abi:de190102](facebook::jsi::Runtime&)","symbolLocation":36,"imageIndex":8},{"imageOffset":12588452,"symbol":"std::__1::__function::__func<facebook::react::ReactInstance::initializeRuntime(facebook::react::ReactInstance::JSRuntimeFlags, std::__1::function<void (facebook::jsi::Runtime&)>)::$_0, std::__1::allocator<facebook::react::ReactInstance::initializeRuntime(facebook::react::ReactInstance::JSRuntimeFlags, std::__1::function<void (facebook::jsi::Runtime&)>)::$_0>, void (facebook::jsi::Runtime&)>::operator()(facebook::jsi::Runtime&)","symbolLocation":36,"imageIndex":8},{"imageOffset":11822620,"symbol":"std::__1::__function::__value_func<void (facebook::jsi::Runtime&)>::operator()[abi:de190102](facebook::jsi::Runtime&) const","symbolLocation":68,"imageIndex":8},{"imageOffset":11822540,"symbol":"std::__1::function<void (facebook::jsi::Runtime&)>::operator()(facebook::jsi::Runtime&) const","symbolLocation":32,"imageIndex":8},{"imageOffset":11956204,"symbol":"facebook::react::Task::execute(facebook::jsi::Runtime&, bool)","symbolLocation":560,"imageIndex":8},{"imageOffset":11910036,"symbol":"facebook::react::RuntimeScheduler_Modern::executeTask(facebook::jsi::Runtime&, facebook::react::Task&, bool) const","symbolLocation":172,"imageIndex":8},{"imageOffset":11913216,"symbol":"facebook::react::RuntimeScheduler_Modern::runEventLoopTick(facebook::jsi::Runtime&, facebook::react::Task&)","symbolLocation":256,"imageIndex":8},{"imageOffset":11912432,"symbol":"facebook::react::RuntimeScheduler_Modern::runEventLoop(facebook::jsi::Runtime&)","symbolLocation":188,"imageIndex":8},{"imageOffset":11952356,"symbol":"facebook::react::RuntimeScheduler_Modern::scheduleEventLoop()::$_0::operator()(facebook::jsi::Runtime&) const","symbolLocation":36,"imageIndex":8},{"imageOffset":11952308,"symbol":"decltype(std::declval<facebook::react::RuntimeScheduler_Modern::scheduleEventLoop()::$_0&>()(std::declval<facebook::jsi::Runtime&>())) std::__1::__invoke[abi:de190102]<facebook::react::RuntimeScheduler_Modern::scheduleEventLoop()::$_0&, facebook::jsi::Runtime&>(facebook::react::RuntimeScheduler_Modern::scheduleEventLoop()::$_0&, facebook::jsi::Runtime&)","symbolLocation":32,"imageIndex":8},{"imageOffset":11952228,"symbol":"void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:de190102]<facebook::react::RuntimeScheduler_Modern::scheduleEventLoop()::$_0&, facebook::jsi::Runtime&>(facebook::react::RuntimeScheduler_Modern::scheduleEventLoop()::$_0&, facebook::jsi::Runtime&)","symbolLocation":32,"imageIndex":8},{"imageOffset":11952184,"symbol":"std::__1::__function::__alloc_func<facebook::react::RuntimeScheduler_Modern::scheduleEventLoop()::$_0, std::__1::allocator<facebook::react::RuntimeScheduler_Modern::scheduleEventLoop()::$_0>, void (facebook::jsi::Runtime&)>::operator()[abi:de190102](facebook::jsi::Runtime&)","symbolLocation":36,"imageIndex":8},{"imageOffset":11947728,"symbol":"std::__1::__function::__func<facebook::react::RuntimeScheduler_Modern::scheduleEventLoop()::$_0, std::__1::allocator<facebook::react::RuntimeScheduler_Modern::scheduleEventLoop()::$_0>, void (facebook::jsi::Runtime&)>::operator()(facebook::jsi::Runtime&)","symbolLocation":36,"imageIndex":8},{"imageOffset":12466092,"symbol":"std::__1::__function::__value_func<void (facebook::jsi::Runtime&)>::operator()[abi:de190102](facebook::jsi::Runtime&) const","symbolLocation":68,"imageIndex":8},{"imageOffset":12459540,"symbol":"std::__1::function<void (facebook::jsi::Runtime&)>::operator()(facebook::jsi::Runtime&) const","symbolLocation":32,"imageIndex":8},{"imageOffset":12458596,"symbol":"_ZZZN8facebook5react13ReactInstanceC1ENSt3__110unique_ptrINS0_9JSRuntimeENS2_14default_deleteIS4_EEEENS2_10shared_ptrINS0_18MessageQueueThreadEEENS8_INS0_12TimerManagerEEENS2_8functionIFvRNS_3jsi7RuntimeERKNS0_14JsErrorHandler14ProcessedErrorEEEEPNS0_18jsinspector_modern10HostTargetEENK3$_0clINSD_IFvSG_EEEEEDaT_ENKUlvE_clEv","symbolLocation":164,"imageIndex":8},{"imageOffset":12458420,"symbol":"_ZNSt3__18__invokeB8de190102IRZZN8facebook5react13ReactInstanceC1ENS_10unique_ptrINS2_9JSRuntimeENS_14default_deleteIS5_EEEENS_10shared_ptrINS2_18MessageQueueThreadEEENS9_INS2_12TimerManagerEEENS_8functionIFvRNS1_3jsi7RuntimeERKNS2_14JsErrorHandler14ProcessedErrorEEEEPNS2_18jsinspector_modern10HostTargetEENK3$_0clINSE_IFvSH_EEEEEDaT_EUlvE_JEEEDTclclsr3stdE7declvalISW_EEspclsr3stdE7declvalIT0_EEEEOSW_DpOSZ_","symbolLocation":24,"imageIndex":8},{"imageOffset":12458348,"symbol":"_ZNSt3__128__invoke_void_return_wrapperIvLb1EE6__callB8de190102IJRZZN8facebook5react13ReactInstanceC1ENS_10unique_ptrINS4_9JSRuntimeENS_14default_deleteIS7_EEEENS_10shared_ptrINS4_18MessageQueueThreadEEENSB_INS4_12TimerManagerEEENS_8functionIFvRNS3_3jsi7RuntimeERKNS4_14JsErrorHandler14ProcessedErrorEEEEPNS4_18jsinspector_modern10HostTargetEENK3$_0clINSG_IFvSJ_EEEEEDaT_EUlvE_EEEvDpOT_","symbolLocation":24,"imageIndex":8},{"imageOffset":12458312,"symbol":"_ZNSt3__110__function12__alloc_funcIZZN8facebook5react13ReactInstanceC1ENS_10unique_ptrINS3_9JSRuntimeENS_14default_deleteIS6_EEEENS_10shared_ptrINS3_18MessageQueueThreadEEENSA_INS3_12TimerManagerEEENS_8functionIFvRNS2_3jsi7RuntimeERKNS3_14JsErrorHandler14ProcessedErrorEEEEPNS3_18jsinspector_modern10HostTargetEENK3$_0clINSF_IFvSI_EEEEEDaT_EUlvE_NS_9allocatorISY_EEFvvEEclB8de190102Ev","symbolLocation":28,"imageIndex":8},{"imageOffset":12453512,"symbol":"_ZNSt3__110__function6__funcIZZN8facebook5react13ReactInstanceC1ENS_10unique_ptrINS3_9JSRuntimeENS_14default_deleteIS6_EEEENS_10shared_ptrINS3_18MessageQueueThreadEEENSA_INS3_12TimerManagerEEENS_8functionIFvRNS2_3jsi7RuntimeERKNS3_14JsErrorHandler14ProcessedErrorEEEEPNS3_18jsinspector_modern10HostTargetEENK3$_0clINSF_IFvSI_EEEEEDaT_EUlvE_NS_9allocatorISY_EEFvvEEclEv","symbolLocation":28,"imageIndex":8},{"imageOffset":2591016,"symbol":"std::__1::__function::__value_func<void ()>::operator()[abi:de190102]() const","symbolLocation":60,"imageIndex":8},{"imageOffset":2587784,"symbol":"std::__1::function<void ()>::operator()() const","symbolLocation":24,"imageIndex":8},{"imageOffset":2652164,"symbol":"facebook::react::tryAndReturnError(std::__1::function<void ()> const&)","symbolLocation":24,"imageIndex":8},{"imageOffset":2588528,"symbol":"facebook::react::RCTMessageThread::tryFunc(std::__1::function<void ()> const&)","symbolLocation":36,"imageIndex":8},{"imageOffset":2609892,"symbol":"facebook::react::RCTMessageThread::runOnQueue(std::__1::function<void ()>&&)::$_0::operator()() const","symbolLocation":80,"imageIndex":8},{"imageOffset":2609800,"symbol":"decltype(std::declval<facebook::react::RCTMessageThread::runOnQueue(std::__1::function<void ()>&&)::$_0&>()()) std::__1::__invoke[abi:de190102]<facebook::react::RCTMessageThread::runOnQueue(std::__1::function<void ()>&&)::$_0&>(facebook::react::RCTMessageThread::runOnQueue(std::__1::function<void ()>&&)::$_0&)","symbolLocation":24,"imageIndex":8},{"imageOffset":2609728,"symbol":"void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:de190102]<facebook::react::RCTMessageThread::runOnQueue(std::__1::function<void ()>&&)::$_0&>(facebook::react::RCTMessageThread::runOnQueue(std::__1::function<void ()>&&)::$_0&)","symbolLocation":24,"imageIndex":8},{"imageOffset":2609692,"symbol":"std::__1::__function::__alloc_func<facebook::react::RCTMessageThread::runOnQueue(std::__1::function<void ()>&&)::$_0, std::__1::allocator<facebook::react::RCTMessageThread::runOnQueue(std::__1::function<void ()>&&)::$_0>, void ()>::operator()[abi:de190102]()","symbolLocation":28,"imageIndex":8},{"imageOffset":2604760,"symbol":"std::__1::__function::__func<facebook::react::RCTMessageThread::runOnQueue(std::__1::function<void ()>&&)::$_0, std::__1::allocator<facebook::react::RCTMessageThread::runOnQueue(std::__1::function<void ()>&&)::$_0>, void ()>::operator()()","symbolLocation":28,"imageIndex":8},{"imageOffset":2591016,"symbol":"std::__1::__function::__value_func<void ()>::operator()[abi:de190102]() const","symbolLocation":60,"imageIndex":8},{"imageOffset":2587784,"symbol":"std::__1::function<void ()>::operator()() const","symbolLocation":24,"imageIndex":8},{"imageOffset":2587740,"symbol":"invocation function for block in facebook::react::RCTMessageThread::runAsync(std::__1::function<void ()>)","symbolLocation":48,"imageIndex":8},{"imageOffset":530932,"symbol":"__CFRUNLOOP_IS_CALLING_OUT_TO_A_BLOCK__","symbolLocation":28,"imageIndex":27},{"imageOffset":240960,"symbol":"__CFRunLoopDoBlocks","symbolLocation":356,"imageIndex":27},{"imageOffset":239320,"symbol":"__CFRunLoopRun","symbolLocation":1268,"imageIndex":27},{"imageOffset":243700,"symbol":"_CFRunLoopRunSpecificWithOptions","symbolLocation":344,"imageIndex":27},{"imageOffset":13025520,"symbol":"+[RCTJSThreadManager runRunLoop]","symbolLocation":312,"imageIndex":8},{"imageOffset":2223836,"symbol":"__NSThread__start__","symbolLocation":732,"imageIndex":20},{"imageOffset":16440,"symbol":"_pthread_start","symbolLocation":136,"imageIndex":23},{"imageOffset":2332,"symbol":"thread_start","symbolLocation":8,"imageIndex":23}]},{"id":932705,"name":"hades","threadState":{"x":[{"value":260},{"value":0},{"value":0},{"value":0},{"value":0},{"value":160},{"value":0},{"value":0},{"value":6172749480},{"value":0},{"value":0},{"value":2},{"value":2},{"value":0},{"value":0},{"value":0},{"value":305},{"value":8571811576},{"value":0},{"value":4354910720},{"value":4354910784},{"value":6172750048},{"value":0},{"value":0},{"value":0},{"value":1},{"value":256},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":6818758048},"cpsr":{"value":1610616832},"fp":{"value":6172749600},"sp":{"value":6172749456},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":9899222520},"far":{"value":0}},"frames":[{"imageOffset":26104,"symbol":"__psynch_cvwait","symbolLocation":8,"imageIndex":19},{"imageOffset":7584,"symbol":"_pthread_cond_wait","symbolLocation":980,"imageIndex":23},{"imageOffset":43752,"symbol":"std::__1::condition_variable::wait(std::__1::unique_lock<std::__1::mutex>&)","symbolLocation":32,"imageIndex":30},{"imageOffset":2382600,"symbol":"hermes::vm::HadesGC::Executor::worker()","symbolLocation":108,"imageIndex":14},{"imageOffset":2382448,"symbol":"void* std::__1::__thread_proxy[abi:nn190102]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, hermes::vm::HadesGC::Executor::Executor()::'lambda'()>>(void*)","symbolLocation":44,"imageIndex":14},{"imageOffset":16440,"symbol":"_pthread_start","symbolLocation":136,"imageIndex":23},{"imageOffset":2332,"symbol":"thread_start","symbolLocation":8,"imageIndex":23}]},{"id":932709,"name":"AudioSession - RootQueue","threadState":{"x":[{"value":14},{"value":4294967115611373572},{"value":999999958},{"value":68719460488},{"value":306},{"value":341},{"value":0},{"value":0},{"value":999999958},{"value":12297829382473034411},{"value":13835058055282163714},{"value":80000000},{"value":4603268280},{"value":4603405760},{"value":8539999112,"symbolLocation":0,"symbol":"OBJC_CLASS_$_OS_os_log"},{"value":8539999112,"symbolLocation":0,"symbol":"OBJC_CLASS_$_OS_os_log"},{"value":18446744073709551578},{"value":6173323264},{"value":0},{"value":2094906024832},{"value":4601902784},{"value":19342813113834067},{"value":1000000000},{"value":6173323488},{"value":0},{"value":0},{"value":18446744071411073023},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":7596509432},"cpsr":{"value":2147487744},"fp":{"value":6173323072},"sp":{"value":6173323040},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":9899199592},"far":{"value":0}},"frames":[{"imageOffset":3176,"symbol":"semaphore_timedwait_trap","symbolLocation":8,"imageIndex":19},{"imageOffset":14584,"symbol":"_dispatch_sema4_timedwait","symbolLocation":88,"imageIndex":22},{"imageOffset":16116,"symbol":"_dispatch_semaphore_wait_slow","symbolLocation":64,"imageIndex":22},{"imageOffset":83628,"symbol":"_dispatch_worker_thread","symbolLocation":272,"imageIndex":22},{"imageOffset":16440,"symbol":"_pthread_start","symbolLocation":136,"imageIndex":23},{"imageOffset":2332,"symbol":"thread_start","symbolLocation":8,"imageIndex":23}]}],
+  "usedImages" : [
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4299227136,
+    "size" : 49152,
+    "uuid" : "8bcdfbcb-82f0-3429-8192-0685f1a8dcee",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/LumenFit",
+    "name" : "LumenFit"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4359290880,
+    "size" : 18661376,
+    "uuid" : "f2a52ec3-0961-36fa-b14d-a234a76aacb4",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/LumenFit.debug.dylib",
+    "name" : "LumenFit.debug.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4303847424,
+    "size" : 376832,
+    "uuid" : "cc00550d-28c3-3420-9ac8-e6a0c651ae4d",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/ExpoFileSystem.framework\/ExpoFileSystem",
+    "name" : "ExpoFileSystem"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4299587584,
+    "size" : 65536,
+    "uuid" : "1b8d2591-2070-3c39-b4b1-ac78f294e0f1",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/ExpoFont.framework\/ExpoFont",
+    "name" : "ExpoFont"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4305027072,
+    "size" : 262144,
+    "uuid" : "7bea4073-8446-352b-8991-afbd6fee90f5",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/ExpoImage.framework\/ExpoImage",
+    "name" : "ExpoImage"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4309614592,
+    "size" : 1327104,
+    "uuid" : "72b5fc2f-77ce-38f0-9b64-5462bd046c22",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/ExpoModulesCore.framework\/ExpoModulesCore",
+    "name" : "ExpoModulesCore"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4303224832,
+    "size" : 344064,
+    "uuid" : "fe7c0094-9503-3408-ad39-96c658f5fe1a",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/ExpoModulesJSI.framework\/ExpoModulesJSI",
+    "name" : "ExpoModulesJSI"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4299816960,
+    "size" : 49152,
+    "uuid" : "d29d5584-ecb1-3f6b-afaa-dda8eebc8a09",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/ExpoModulesWorklets.framework\/ExpoModulesWorklets",
+    "name" : "ExpoModulesWorklets"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4486414336,
+    "size" : 17121280,
+    "uuid" : "d24291a8-d2dc-3117-b5de-0f60213b59fb",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/React.framework\/React",
+    "name" : "React"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4307042304,
+    "size" : 540672,
+    "uuid" : "db4e1216-70c6-36f0-8a46-fdd48fcae1f2",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/ReactNativeDependencies.framework\/ReactNativeDependencies",
+    "name" : "ReactNativeDependencies"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4308418560,
+    "size" : 540672,
+    "uuid" : "91f328e5-cf1b-3d2f-b406-96e5c24bd922",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/SDWebImage.framework\/SDWebImage",
+    "name" : "SDWebImage"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4300013568,
+    "size" : 65536,
+    "uuid" : "91fd5381-192c-3566-8230-cd831a98bfd7",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/SDWebImageAVIFCoder.framework\/SDWebImageAVIFCoder",
+    "name" : "SDWebImageAVIFCoder"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4299456512,
+    "size" : 32768,
+    "uuid" : "789a5f6f-475b-3c06-a8ff-8c787fccd48b",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/SDWebImageSVGCoder.framework\/SDWebImageSVGCoder",
+    "name" : "SDWebImageSVGCoder"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4313497600,
+    "size" : 671744,
+    "uuid" : "44cd394b-be39-3ff8-b774-8aaeb3326e9f",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/SDWebImageWebPCoder.framework\/SDWebImageWebPCoder",
+    "name" : "SDWebImageWebPCoder"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4320559104,
+    "size" : 3162112,
+    "uuid" : "868b12bd-f52d-3771-a147-e72deb9807ad",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/hermesvm.framework\/hermesvm",
+    "name" : "hermesvm"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4336058368,
+    "size" : 7536640,
+    "uuid" : "3f0be6d0-bac3-38d2-8c71-078362d797a1",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/38E64B51-6C1C-43AC-BB1A-78C05E5A1D1D\/LumenFit.app\/Frameworks\/libavif.framework\/libavif",
+    "name" : "libavif"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 4301635584,
+    "size" : 49152,
+    "uuid" : "ff574c5a-1c32-369c-8b7a-e4f6eff43026",
+    "path" : "\/private\/preboot\/Cryptexes\/OS\/usr\/lib\/libobjc-trampolines.dylib",
+    "name" : "libobjc-trampolines.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6842716160,
+    "size" : 574392,
+    "uuid" : "1672554c-5c48-3600-aef8-97f330b62c02",
+    "path" : "\/usr\/lib\/swift\/libswift_Concurrency.dylib",
+    "name" : "libswift_Concurrency.dylib"
+  },
+  {
+    "size" : 0,
+    "source" : "A",
+    "base" : 0,
+    "uuid" : "00000000-0000-0000-0000-000000000000"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 9899196416,
+    "size" : 250396,
+    "uuid" : "5a7dc6be-551b-3b29-a928-a4079a90d4d2",
+    "path" : "\/usr\/lib\/system\/libsystem_kernel.dylib",
+    "name" : "libsystem_kernel.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6824665088,
+    "size" : 18047316,
+    "uuid" : "c041f1d0-5ef1-30a3-bf96-830976173b56",
+    "path" : "\/System\/Library\/Frameworks\/Foundation.framework\/Foundation",
+    "name" : "Foundation"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6975365120,
+    "size" : 1425704,
+    "uuid" : "0c7c81a2-e3c9-3110-a424-cd525a5e6e86",
+    "path" : "\/System\/Library\/PrivateFrameworks\/AXCoreUtilities.framework\/AXCoreUtilities",
+    "name" : "AXCoreUtilities"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 7596494848,
+    "size" : 290072,
+    "uuid" : "8cdf4610-f6a5-39cb-94bf-687fe349a4be",
+    "path" : "\/usr\/lib\/system\/libdispatch.dylib",
+    "name" : "libdispatch.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6818750464,
+    "size" : 49736,
+    "uuid" : "694c772a-a9f8-3ac0-9417-7c304043a771",
+    "path" : "\/usr\/lib\/system\/libsystem_pthread.dylib",
+    "name" : "libsystem_pthread.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6817480704,
+    "size" : 318040,
+    "uuid" : "e8ced84c-011d-3351-9180-4127735b298e",
+    "path" : "\/usr\/lib\/libobjc.A.dylib",
+    "name" : "libobjc.A.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 7081705472,
+    "size" : 4304,
+    "uuid" : "3c432887-94a5-3b65-b95c-5bebe151a6ee",
+    "path" : "\/usr\/lib\/objc\/libobjcMsgSend1.dylib",
+    "name" : "libobjcMsgSend1.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 7057145856,
+    "size" : 128344,
+    "uuid" : "d6014f32-13ce-3e3d-b18e-8d90479e46de",
+    "path" : "\/usr\/lib\/system\/libsystem_trace.dylib",
+    "name" : "libsystem_trace.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6819540992,
+    "size" : 5121912,
+    "uuid" : "9426fc9a-b36c-3096-b836-d17d6744a75b",
+    "path" : "\/System\/Library\/Frameworks\/CoreFoundation.framework\/CoreFoundation",
+    "name" : "CoreFoundation"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 9679028224,
+    "size" : 261876,
+    "uuid" : "212da8d1-7539-3df7-bc9f-53eff85e8bb3",
+    "path" : "\/System\/Library\/PrivateFrameworks\/MobileBackup.framework\/MobileBackup",
+    "name" : "MobileBackup"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 9059868672,
+    "size" : 10619632,
+    "uuid" : "72210985-7a2c-32f7-b023-6608fc06ef9a",
+    "path" : "\/System\/Library\/PrivateFrameworks\/AVConference.framework\/AVConference",
+    "name" : "AVConference"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 7206350848,
+    "size" : 614296,
+    "uuid" : "e550c41e-55f6-358a-98b6-18f51ca72123",
+    "path" : "\/usr\/lib\/libc++.1.dylib",
+    "name" : "libc++.1.dylib"
+  }
+],
+  "sharedCache" : {
+  "base" : 6813270016,
+  "size" : 6396346368,
+  "uuid" : "a757941a-ccab-3181-9c03-10ae25fea7b2"
+},
+  "vmSummary" : "ReadOnly portion of Libraries: Total=2.5G resident=0K(0%) swapped_out_or_unallocated=2.5G(100%)\nWritable regions: Total=111.3M written=514K(0%) resident=514K(0%) swapped_out=0K(0%) unallocated=110.8M(100%)\n\n                                VIRTUAL   REGION \nREGION TYPE                        SIZE    COUNT (non-coalesced) \n===========                     =======  ======= \nActivity Tracing                   256K        1 \nAudio                               64K        1 \nCoreAnimation                       48K        3 \nDeferred Reclaim                  64.0M        1 \nDyld Private Memory                320K        2 \nFoundation                          16K        1 \nGuard                            385.0G        1 \nMalloc                            21.3M       12 \nMalloc Guard Page                 4048K        4 \nOS Alloc Once                       32K        1 \nSQLite Page Cache                  256K        2 \nStack                             6416K       10 \nStack Guard                        160K       10 \nUntagged                          17.2M        6 \n__AUTH                            9421K      824 \n__AUTH_CONST                     122.3M     1261 \n__CTF                               824        1 \n__DATA                            55.1M     1284 \n__DATA_CONST                      40.8M     1323 \n__DATA_DIRTY                      18.0M     1176 \n__FONT_DATA                        2352        1 \n__LINKEDIT                       739.0M       18 \n__OBJC_RO                        130.5M        1 \n__OBJC_RW                         3363K        1 \n__TEXT                             1.8G     1362 \n__TPRO_CONST                       132K        4 \nmapped file                       35.6M        7 \npage table in kernel               514K        1 \nshared memory                       96K        4 \n===========                     =======  ======= \nTOTAL                            388.1G     7323 \n",
+  "legacyInfo" : {
+  "threadTriggered" : {
+    "queue" : "com.apple.main-thread"
+  }
+},
+  "logWritingSignature" : "d522c72c5f4d3579dd862ce27da9e368305a9a5c",
+  "roots_installed" : 0,
+  "bug_type" : "309",
+  "trmStatus" : 1,
+  "sandboxProfileName" : "container",
+  "spawnFlags" : 17932,
+  "trialInfo" : {
+  "rollouts" : [
+    {
+      "rolloutId" : "645eb1d0417dab722a215927",
+      "factorPackIds" : [
+        "645eb2f7417dab722a215928"
+      ],
+      "deploymentId" : 240000005
+    },
+    {
+      "rolloutId" : "60f8ddccefea4203d95cbeef",
+      "factorPackIds" : [
+
+      ],
+      "deploymentId" : 240000025
+    }
+  ],
+  "experiments" : [
+    {
+      "treatmentId" : "9c678a34-b9c3-46f3-8670-5e50757abb88",
+      "experimentId" : "6a6bc7c6f647df57f85e970c",
+      "deploymentId" : 4
+    },
+    {
+      "treatmentId" : "b94e9aec-71bd-46f0-b53b-72fe0d8e9aa4",
+      "experimentId" : "67e32776f470dc0e83d9e147",
+      "deploymentId" : 400000014
+    }
+  ]
+}
+}

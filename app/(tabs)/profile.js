@@ -8,7 +8,7 @@ import { Button, Row, Screen, Section, Title } from "../../src/components/ui.js"
 import { useAppState } from "../../src/state/AppState.js";
 import { D } from "../../src/catalog.js";
 import { useStyles, useTheme } from "../../src/theme.js";
-import { requestRestAlertPermission, setRestSoundOn } from "../../src/session/restAlert.js";
+import { setRestSoundOn } from "../../src/session/restAlert.js";
 
 export default function Profile() {
   const { preference } = useTheme();
@@ -77,10 +77,9 @@ export default function Profile() {
         title="Aviso sonoro do intervalo"
         subtitle="Quando o descanso acaba"
         right={<Text style={styles.val}>{state.profile.sound !== false ? "On" : "Off"}</Text>}
-        onPress={async () => {
+        onPress={() => {
           const next = state.profile.sound === false;
           setRestSoundOn(next);
-          if (next) await requestRestAlertPermission();
           SessionService.hasToken() && SessionService.pushProfile(state).catch(() => {});
           refresh();
         }}

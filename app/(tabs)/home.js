@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Share,
@@ -38,6 +39,8 @@ import { useStyles, useTheme } from "../../src/theme.js";
 import { warmGif } from "../../src/media/GifCache.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { api, unwrap } from "@shared/api/client.js";
+import { resolveWebUrl } from "../../src/config.js";
+import { shareTitle } from "../../src/share.js";
 import { NumberWheel } from "../../src/components/NumberWheel.js";
 import { applyLoadToDay, dayMuscles, ensureDay, persistPlan, removeExerciseFromDay, updateDayItem } from "../../src/plan.js";
 
@@ -50,6 +53,7 @@ export default function Home() {
   const [menu, setMenu] = useState(null);
   const [loadEdit, setLoadEdit] = useState(null);
   const [iaBusy, setIaBusy] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const iaRetry = !!(state.plan && state.plan.iaFailed);
   const days = (state.plan && state.plan.split) || [];
   const day = days.length ? days[Math.max(0, Math.min(state.planDay || 0, days.length - 1))] : null;
@@ -115,6 +119,46 @@ export default function Home() {
       sourceId: (day && day.id) || (state.plan && state.plan.id) || null
     });
     if (next) router.push("/session");
+  }
+
+  async function shareDay() {
+    const name = shareTitle(day);
+    if (!items.length || !SessionService.hasToken()) {
+      Share.share({ message: name + " · LumenFit" }).catch(() => {});
+      return;
+    }
+    if (sharing) return;
+    setSharing(true);
+    try {
+      const shared = items.map((it) => {
+        const e = exerciseOf(it.id) || {};
+        const kg = Number(it.kg || e.kg) || 0;
+        const reps = Number(it.reps || e.reps) || 0;
+        const count = Math.max(1, Number(it.sets || e.sets) || 3);
+        const gif = mediaUrl(e, { preferGif: true });
+        return {
+          id: it.id,
+          sourceId: e.externalId || "",
+          name: e.name || it.id,
+          muscle: e.muscle || "",
+          equipment: e.equipment || "",
+          gifUrl: /^https:\/\//.test(gif) ? gif : "",
+          rest: Number(it.rest || e.rest) || 90,
+          sets: Array.from({ length: count }, () => ({ type: "N", kg, reps }))
+        };
+      });
+      const created = unwrap(await api.shares.create({
+        name,
+        author: ((state.profile && state.profile.name) || "").split(" ")[0],
+        items: shared
+      }));
+      const url = resolveWebUrl() + "/t/" + created.id;
+      await Share.share(Platform.OS === "ios" ? { url } : { message: url, title: name });
+    } catch (err) {
+      Alert.alert("Não foi possível compartilhar", "Verifique sua conexão e tente de novo.");
+    } finally {
+      setSharing(false);
+    }
   }
 
   async function saveDayAsWorkout() {
@@ -190,7 +234,7 @@ export default function Home() {
           </HapticPressable>
           <HapticPressable
             style={styles.iconBtn}
-            onPress={() => Share.share({ message: (day && day.name) || "Meu Plano · LumenFit" }).catch(() => {})}
+            onPress={shareDay}
           >
             <Ionicons name="share-outline" size={18} color={colors.text} />
           </HapticPressable>
@@ -351,7 +395,7 @@ export default function Home() {
       <View style={styles.ctaBar}>
         <HapticPressable
           style={styles.share}
-          onPress={() => Share.share({ message: (day && day.name) || "Meu Plano · LumenFit" }).catch(() => {})}
+          onPress={shareDay}
         >
           <Ionicons name="share-outline" size={20} color={colors.text} />
         </HapticPressable>

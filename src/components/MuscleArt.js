@@ -12,14 +12,14 @@ function toPoints(raw) {
   return out.join(" ");
 }
 
-export function MuscleArt({ id, width = 88, height = 88, compact }) {
+export function MuscleArt({ id, width = 88, height = 88, compact, color }) {
   const { colors, scheme } = useTheme();
   const styles = useStyles(styleFactory);
   const art = muscleArt(id);
   const focus = (art && FOCUS[art.id]) || FOCUS.peito;
   const groups = focus.view === "back" ? POSTERIOR : ANTERIOR;
   const body = scheme === "light" ? "#c8d2d5" : "#3a4e53";
-  const hot = colors.red;
+  const hot = color || colors.red;
   const viewBox = compact && focus.crop
     ? focus.crop
     : (focus.view === "back" ? "0 0 100 220" : "0 0 100 200");
