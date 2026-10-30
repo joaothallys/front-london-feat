@@ -20,6 +20,7 @@ yarn-error.*
 .env.*
 !.env.example
 *.tsbuildinfo
-/ios
+/ios/*
+!/ios/ci_scripts/
 /android
 .tmp-biceps-frames/

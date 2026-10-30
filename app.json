@@ -147,7 +147,8 @@
           "project": "lumenfit"
         }
       ],
-      "@sentry/react-native"
+      "@sentry/react-native",
+      "./plugins/withSentryAllowFailure"
     ],
     "experiments": {
       "typedRoutes": false
