@@ -3,6 +3,7 @@ import { BiometricService } from "./BiometricService.js";
 import { catalog as D } from "../../catalog/index.js";
 import { ChestLibraryService } from "../exercises/ChestLibraryService.js";
 import { defaultLocations, ensurePartnerGyms, isLondonFit } from "../../domain/locations.js";
+import { mergeHistory, workoutName } from "../../domain/history.js";
 
 const EQUIPMENT_TO_API = { cabo: "polia", nenhum: "peso-corporal" };
 const EQUIPMENT_OK = { halteres: 1, barra: 1, polia: 1, maquina: 1, banco: 1, elastico: 1, kettlebell: 1, "peso-corporal": 1 };
@@ -169,7 +170,7 @@ function mapHistory(row) {
   return {
     id: first(row, ["id"], ""),
     date: first(row, ["finishedAt", "startedAt", "date", "createdAt"], new Date().toISOString()),
-    name: first(row, ["name"], "Treino"),
+    name: workoutName(first(row, ["name"], "Treino")),
     duration: Number(first(row, ["durationMin", "duration"], 0)) || 0,
     volume: Number(first(row, ["volumeKg", "volume"], 0)) || 0,
     calories: Number(first(row, ["calories"], 0)) || 0,
@@ -251,7 +252,7 @@ export const SessionService = {
           return api.sessions.list("completed");
         }
       }, (data) => {
-        state.history = asList(data).map(mapHistory);
+        state.history = mergeHistory(asList(data).map(mapHistory), state.history);
       }),
       settled("favorites", () => api.favorites.list(), (data) => {
         state.favorites = asList(data).map((row) => typeof row === "string" ? row : first(row, ["exerciseId", "id"], "")).filter(Boolean);

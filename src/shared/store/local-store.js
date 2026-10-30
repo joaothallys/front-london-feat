@@ -29,7 +29,8 @@ function blank() {
     bodyMeasures: { height: null, weight: null, weightGoal: null },
     connectedApps: { appleHealth: "disconnected", strava: "disconnected" },
     planDay: 0,
-    liveSession: null
+    liveSession: null,
+    pendingSessions: []
   };
 }
 
@@ -100,6 +101,12 @@ export const store = {
   },
   logout() {
     state.session = null;
+    save(state);
+  },
+  resetUser() {
+    const keep = Object.assign({}, state.settings);
+    Object.keys(state).forEach((key) => { delete state[key]; });
+    Object.assign(state, blank(), { settings: Object.assign(blank().settings, { theme: keep.theme || "system" }) });
     save(state);
   },
   wipeLocal() {

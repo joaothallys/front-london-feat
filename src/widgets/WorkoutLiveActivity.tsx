@@ -2,29 +2,30 @@ import {
   Button,
   HStack,
   Image,
+  ProgressView,
   Spacer,
   Text,
   VStack
 } from "@expo/ui/swift-ui";
 import {
   activityBackgroundTint,
-  aspectRatio,
-  background,
   buttonBorderShape,
   buttonStyle,
-  clipShape,
   controlSize,
   dynamicTypeSize,
+  fixedSize,
   font,
   foregroundStyle,
   frame,
+  labelsHidden,
   layoutPriority,
   lineLimit,
   minimumScaleFactor,
   monospacedDigit,
   padding,
-  resizable,
-  tint
+  progressViewStyle,
+  tint,
+  truncationMode
 } from "@expo/ui/swift-ui/modifiers";
 import { createLiveActivity } from "expo-widgets";
 
@@ -48,16 +49,26 @@ type WorkoutLiveProps = {
 
 const WorkoutLiveActivityLayout = (props: WorkoutLiveProps, environment: { isLuminanceReduced?: boolean; activityFamily?: "small" | "medium" }) => {
   "widget";
-  // The layout runs isolated inside the widget extension: it cannot see module-level values.
-  const CTA = "#B6FF3B";
-  const CARD = "#0B0B0B";
-  const accent = environment.isLuminanceReduced ? "#FFFFFF" : CTA;
-  const muted = environment.isLuminanceReduced ? "#BBBBBB" : "#9A9A9A";
+  // Layout runs isolated inside the widget extension: it cannot see module-level values.
+  const bg = "#09090B";
+  const red = "#FF6A1A";
+  const white = "#FFFFFF";
+  const muted = "#A1A1AA";
+  const reduced = !!environment.isLuminanceReduced;
+  const accent = reduced ? white : red;
+  const dim = reduced ? "#BBBBBB" : muted;
   const resting = props.phase === "rest" && Number(props.endsAt) > 0;
   const small = environment.activityFamily === "small";
-  const start = new Date(props.startedAt);
-  const end = new Date(props.endsAt);
-  const setsLabel = (props.setIndex || 0) + "/" + (props.setCount || 0) + " Sets";
+  const start = new Date(Number(props.startedAt) || Date.now());
+  const end = new Date(Number(props.endsAt) || Date.now());
+  const setIndex = Number(props.setIndex) || 0;
+  const setCount = Number(props.setCount) || 0;
+  const setsLabel = setCount > 0 ? "Série " + Math.max(1, setIndex) + " de " + setCount : "";
+  // Margens do banner: o sistema não aplica nenhuma com activityBackgroundTint.
+  const pad = small ? padding({ horizontal: 12, vertical: 10 }) : padding({ horizontal: 16, vertical: 14 });
+  const exerciseName = props.exerciseName || "Treino";
+  const restAction = "skip";
+  const workAction = "complete";
 
   function applyAction(action: string) {
     const now = Date.now();
@@ -79,116 +90,158 @@ const WorkoutLiveActivityLayout = (props: WorkoutLiveProps, environment: { isLum
     return { ...props, pendingAction: action };
   }
 
-  const thumb = props.thumbPath ? (
-    <Image
-      uiImage={props.thumbPath}
+  const timerText = (
+    <Text
+      timerInterval={{ lower: start, upper: end }}
+      countsDown
       modifiers={[
-        resizable(),
-        aspectRatio({ contentMode: "fill" }),
-        frame({ width: small ? 36 : 48, height: small ? 36 : 48 }),
-        clipShape("roundedRectangle", 10),
-        background("#FFFFFF")
-      ]}
-    />
-  ) : (
-    <Image
-      systemName="figure.strengthtraining.traditional"
-      color="#111111"
-      size={small ? 16 : 22}
-      modifiers={[
-        frame({ width: small ? 36 : 48, height: small ? 36 : 48 }),
-        background("#FFFFFF"),
-        clipShape("roundedRectangle", 10)
+        font({ weight: "black", design: "rounded", size: small ? 28 : 34 }),
+        monospacedDigit(),
+        foregroundStyle(white),
+        lineLimit(1),
+        minimumScaleFactor(0.7)
       ]}
     />
   );
 
-  const stats = resting ? (
-    <VStack spacing={0} alignment="trailing" modifiers={[layoutPriority(1)]}>
-      <Text modifiers={[font({ weight: "medium", size: 11 }), foregroundStyle(muted)]}>Descanso</Text>
-      <Text
-        timerInterval={{ lower: start, upper: end }}
-        countsDown
-        modifiers={[font({ weight: "black", design: "rounded", size: small ? 20 : 24 }), monospacedDigit(), foregroundStyle("#FFFFFF"), lineLimit(1)]}
-      />
-    </VStack>
-  ) : (
-    <VStack spacing={0} alignment="trailing" modifiers={[layoutPriority(1)]}>
-      <HStack spacing={3} alignment="firstTextBaseline">
-        <Text modifiers={[font({ weight: "bold", size: 16 }), foregroundStyle("#FFFFFF"), lineLimit(1)]}>{props.reps}</Text>
-        <Text modifiers={[font({ size: 12 }), foregroundStyle(muted)]}>reps</Text>
-      </HStack>
-      <HStack spacing={3} alignment="firstTextBaseline">
-        <Text modifiers={[font({ weight: "bold", size: 16 }), foregroundStyle("#FFFFFF"), lineLimit(1)]}>{props.kg}</Text>
-        <Text modifiers={[font({ size: 12 }), foregroundStyle(muted)]}>kg</Text>
-      </HStack>
-    </VStack>
+  const restProgress = (
+    <ProgressView
+      timerInterval={{ lower: start, upper: end }}
+      countsDown={false}
+      modifiers={[progressViewStyle("linear"), labelsHidden(), tint(accent), frame({ maxWidth: 999, minHeight: 4, maxHeight: 4 })]}
+    />
+  );
+
+  const restRing = (
+    <ProgressView
+      timerInterval={{ lower: start, upper: end }}
+      countsDown={false}
+      modifiers={[progressViewStyle("circular"), labelsHidden(), tint(accent), frame({ width: 22, height: 22 })]}
+    />
   );
 
   const cta = (
     <Button
-      label={resting ? "INICIAR PRÓXIMO SET" : "REGISTRAR SET & DESCANSAR"}
-      target={resting ? "skip" : "complete"}
-      onPress={() => applyAction(resting ? "skip" : "complete")}
+      label={resting ? (small ? "PRÓXIMA" : "PRÓXIMA SÉRIE") : small ? "CONCLUIR" : "CONCLUIR SÉRIE"}
+      systemImage="chevron.right"
+      target={resting ? restAction : workAction}
+      onPress={() => applyAction(resting ? restAction : workAction)}
       modifiers={[
         buttonStyle("borderedProminent"),
         buttonBorderShape("capsule"),
-        controlSize(small ? "regular" : "large"),
+        controlSize(small ? "small" : "regular"),
         tint(accent),
-        foregroundStyle("#111111"),
-        font({ weight: "bold", size: small ? 11 : 13 }),
-        frame({ maxWidth: 999 })
+        foregroundStyle(white),
+        font({ weight: "bold", size: small ? 10 : 12 }),
+        lineLimit(1),
+        fixedSize()
       ]}
     />
   );
 
-  const banner = (
+  const restBanner = (
     <VStack
-      spacing={10}
+      spacing={small ? 8 : 10}
       alignment="leading"
-      modifiers={[padding({ horizontal: 6, vertical: 8 }), activityBackgroundTint(CARD), dynamicTypeSize({ max: "large" })]}
+      modifiers={[pad, activityBackgroundTint(bg), dynamicTypeSize({ max: "large" })]}
     >
-      <HStack spacing={10} alignment="center">
-        {thumb}
-        <VStack spacing={2} alignment="leading">
-          <Text modifiers={[font({ weight: "semibold", size: 15 }), foregroundStyle("#FFFFFF"), lineLimit(1), minimumScaleFactor(0.7)]}>
-            {props.exerciseName}
+      <HStack spacing={6} alignment="center">
+        <Image systemName="dumbbell.fill" color={accent} size={11} />
+        <Text modifiers={[font({ weight: "semibold", size: 11 }), foregroundStyle(white), lineLimit(1), minimumScaleFactor(0.8)]}>
+          {small ? "DESCANSO" : "INTERVALO DE DESCANSO"}
+        </Text>
+        <Image systemName="circle.fill" color={accent} size={5} />
+        <Spacer />
+        <Text modifiers={[font({ size: 11 }), foregroundStyle(dim), lineLimit(1), fixedSize()]}>{setsLabel}</Text>
+      </HStack>
+      <HStack spacing={small ? 8 : 12} alignment="center">
+        <VStack spacing={2} alignment="leading" modifiers={[layoutPriority(1)]}>
+          {timerText}
+          <Text modifiers={[font({ size: 13 }), foregroundStyle(dim), lineLimit(1), minimumScaleFactor(0.85), truncationMode("tail")]}>
+            {exerciseName}
           </Text>
-          <Text modifiers={[font({ size: 12 }), foregroundStyle(muted), lineLimit(1)]}>{setsLabel}</Text>
         </VStack>
         <Spacer />
-        {stats}
+        {cta}
       </HStack>
-      {cta}
+      {restProgress}
     </VStack>
   );
+
+  const workBanner = (
+    <VStack
+      spacing={small ? 8 : 10}
+      alignment="leading"
+      modifiers={[pad, activityBackgroundTint(bg), dynamicTypeSize({ max: "large" })]}
+    >
+      <HStack spacing={6} alignment="center">
+        <Image systemName="dumbbell.fill" color={accent} size={11} />
+        <Text modifiers={[font({ weight: "semibold", size: 11 }), foregroundStyle(white), lineLimit(1)]}>TREINO</Text>
+        <Spacer />
+        <Text modifiers={[font({ size: 11 }), foregroundStyle(dim), lineLimit(1), fixedSize()]}>{setsLabel}</Text>
+      </HStack>
+      <HStack spacing={small ? 8 : 12} alignment="center">
+        <VStack spacing={2} alignment="leading" modifiers={[layoutPriority(1)]}>
+          <Text modifiers={[font({ weight: "bold", size: small ? 16 : 18 }), foregroundStyle(white), lineLimit(1), minimumScaleFactor(0.8), truncationMode("tail")]}>
+            {exerciseName}
+          </Text>
+          <Text modifiers={[font({ size: 13 }), foregroundStyle(dim), lineLimit(1)]}>
+            {props.reps} reps · {props.kg} kg
+          </Text>
+        </VStack>
+        <Spacer />
+        {cta}
+      </HStack>
+    </VStack>
+  );
+
+  const banner = resting ? restBanner : workBanner;
 
   const compactTimer = resting ? (
     <Text
       timerInterval={{ lower: start, upper: end }}
       countsDown
-      modifiers={[font({ weight: "bold", design: "rounded", size: 16 }), monospacedDigit(), foregroundStyle(accent), lineLimit(1)]}
+      modifiers={[font({ weight: "bold", design: "rounded", size: 15 }), monospacedDigit(), foregroundStyle(accent), lineLimit(1)]}
     />
   ) : (
-    <Text modifiers={[font({ weight: "bold", size: 14 }), foregroundStyle(accent)]}>
-      {props.setIndex}/{props.setCount}
+    <Text modifiers={[font({ weight: "bold", size: 13 }), foregroundStyle(accent)]}>
+      {setIndex}/{setCount}
+    </Text>
+  );
+
+  const islandTimer = resting ? (
+    <Text
+      timerInterval={{ lower: start, upper: end }}
+      countsDown
+      modifiers={[font({ weight: "black", design: "rounded", size: 22 }), monospacedDigit(), foregroundStyle(white), lineLimit(1)]}
+    />
+  ) : (
+    <Text modifiers={[font({ weight: "black", size: 18 }), foregroundStyle(white)]}>
+      {props.reps}
     </Text>
   );
 
   return {
     banner,
     bannerSmall: banner,
-    compactLeading: <Image systemName={resting ? "timer" : "figure.strengthtraining.traditional"} color={accent} size={16} />,
+    compactLeading: resting ? restRing : <Image systemName="dumbbell.fill" color={accent} size={16} />,
     compactTrailing: compactTimer,
-    minimal: <Image systemName={resting ? "timer" : "dumbbell.fill"} color={accent} size={14} />,
-    expandedLeading: thumb,
-    expandedTrailing: stats,
+    minimal: resting ? restRing : <Image systemName="dumbbell.fill" color={accent} size={14} />,
+    expandedLeading: resting ? restRing : <Image systemName="dumbbell.fill" color={accent} size={18} />,
+    expandedTrailing: islandTimer,
     expandedBottom: (
       <VStack spacing={8} alignment="leading" modifiers={[dynamicTypeSize({ max: "large" })]}>
-        <Text modifiers={[font({ weight: "semibold", size: 14 }), foregroundStyle("#FFFFFF"), lineLimit(1), minimumScaleFactor(0.7)]}>
-          {props.exerciseName}
+        <HStack spacing={6} alignment="center">
+          <Text modifiers={[font({ weight: "semibold", size: 11 }), foregroundStyle(dim)]}>
+            {resting ? "DESCANSO" : "TREINO"}
+          </Text>
+          <Spacer />
+          <Text modifiers={[font({ size: 11 }), foregroundStyle(dim)]}>{setsLabel}</Text>
+        </HStack>
+        {resting ? restProgress : null}
+        <Text modifiers={[font({ weight: "semibold", size: 14 }), foregroundStyle(white), lineLimit(1), minimumScaleFactor(0.7)]}>
+          {exerciseName}
         </Text>
-        <Text modifiers={[font({ size: 12 }), foregroundStyle(muted)]}>{setsLabel}</Text>
         {cta}
       </VStack>
     )

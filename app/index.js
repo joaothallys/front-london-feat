@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SessionService } from "@shared/services/account/SessionService.js";
 import { Button } from "../src/components/ui.js";
 import { useAppState } from "../src/state/AppState.js";
 import { useStyles, useTheme } from "../src/theme.js";
@@ -10,6 +11,7 @@ export default function Splash() {
   const { colors } = useTheme();
   const styles = useStyles(styleFactory);
   const { state } = useAppState();
+  const signedIn = !!state.session && SessionService.hasToken();
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.82)).current;
 
@@ -19,6 +21,8 @@ export default function Splash() {
       Animated.spring(scale, { toValue: 1, friction: 6.2, useNativeDriver: true })
     ]).start();
   }, [opacity, scale]);
+
+  if (signedIn) return <Redirect href={state.onboardingDone ? "/(tabs)/home" : "/onboarding"} />;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -32,11 +36,7 @@ export default function Splash() {
       </View>
       <Button
         label="Começar"
-        onPress={() => {
-          if (state.session && state.onboardingDone) router.replace("/(tabs)/home");
-          else if (state.session) router.replace("/onboarding");
-          else router.push("/login");
-        }}
+        onPress={() => router.push("/login")}
       />
     </SafeAreaView>
   );

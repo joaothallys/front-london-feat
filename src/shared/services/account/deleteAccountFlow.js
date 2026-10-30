@@ -6,8 +6,8 @@ import { store } from "../../store/local-store.js";
 export function confirmDeleteAccount({ deleting, setDeleting, refresh }) {
   if (deleting) return;
   Alert.alert(
-    "Excluir conta?",
-    "Seus treinos, histórico e dados no servidor serão apagados. Essa ação não pode ser desfeita.",
+    "Excluir minha conta?",
+    "A exclusão é permanente. Seu perfil, treinos, histórico, medidas e o vínculo com Apple ou Google serão apagados. Não dá para recuperar esses dados.",
     [
       { text: "Cancelar", style: "cancel" },
       {
@@ -15,10 +15,10 @@ export function confirmDeleteAccount({ deleting, setDeleting, refresh }) {
         style: "destructive",
         onPress: () => Alert.alert(
           "Confirmar exclusão",
-          "Tem certeza? Sua conta LumenFit será excluída agora.",
+          "Sua conta será excluída agora. O app volta para a tela de entrada e essa conta deixa de existir.",
           [
             { text: "Cancelar", style: "cancel" },
-            { text: "Excluir conta", style: "destructive", onPress: () => runDeleteAccount({ setDeleting, refresh }) }
+            { text: "Excluir minha conta", style: "destructive", onPress: () => runDeleteAccount({ setDeleting, refresh }) }
           ]
         )
       }
@@ -34,7 +34,8 @@ async function runDeleteAccount({ setDeleting, refresh }) {
     refresh();
     router.replace("/login");
   } catch (err) {
-    Alert.alert("Não foi possível excluir", "Tente de novo em instantes.");
+    const raw = err && err.body && (err.body.error || err.body.message);
+    Alert.alert("Não foi possível excluir", raw || "Tente de novo em instantes.");
     setDeleting(false);
   }
 }

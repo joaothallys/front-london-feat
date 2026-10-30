@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { ChestLibraryService } from "@shared/services/exercises/ChestLibraryService.js";
 import { ensure } from "@shared/services/exercises/LondonExercise.js";
@@ -8,7 +8,7 @@ import { fetchExerciseMedia, pickDetailUrl } from "@shared/services/media/London
 import { FavoriteService } from "@shared/services/favorites/FavoriteService.js";
 import { FeedbackService } from "@shared/services/feedback/FeedbackService.js";
 import { Button, Chip, Screen, Section, Segmented, TopBar } from "../../src/components/ui.js";
-import { useLive } from "../../src/state/LiveSession.js";
+import { useStartWorkout } from "../../src/session/useStartWorkout.js";
 import { useAppState } from "../../src/state/AppState.js";
 import { exerciseOf, mediaUrl } from "../../src/catalog.js";
 import { useStyles, useTheme } from "../../src/theme.js";
@@ -18,7 +18,7 @@ export default function ExerciseDetail() {
   const styles = useStyles(styleFactory);
   const { id } = useLocalSearchParams();
   const { state, refresh } = useAppState();
-  const { start } = useLive();
+  const startWorkout = useStartWorkout();
   const [tab, setTab] = useState("muscle");
   const [view, setView] = useState(() => exerciseOf(id));
   const [uri, setUri] = useState(() => mediaUrl(exerciseOf(id)));
@@ -63,8 +63,7 @@ export default function ExerciseDetail() {
 
   function begin() {
     const e = view || { id, sets: 3, reps: 12, kg: 0, rest: 60, name };
-    const live = start(name, [{ id: e.id, sets: e.sets, reps: e.reps, kg: e.kg, rest: e.rest }], { sourceType: "single", sourceId: e.id });
-    if (live) router.push("/session");
+    startWorkout(name, [{ id: e.id, sets: e.sets, reps: e.reps, kg: e.kg, rest: e.rest }], { sourceType: "single", sourceId: e.id });
   }
 
   return (

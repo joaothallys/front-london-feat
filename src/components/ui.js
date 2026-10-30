@@ -1,11 +1,13 @@
 import React from "react";
-import { ActivityIndicator, ScrollView, Switch, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useStyles, useTheme } from "../theme.js";
 import { HapticPressable } from "./HapticPressable.js";
 
 function styleFactory(c) {
+  const hair = StyleSheet.hairlineWidth;
   return {
     safe: { flex: 1, backgroundColor: c.bg },
     flex: { flex: 1 },
@@ -13,50 +15,47 @@ function styleFactory(c) {
     top: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 },
     topStack: { marginBottom: 18 },
     topRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 },
-    back: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" },
-    backTxt: { color: c.text, fontSize: 28, marginTop: -4 },
-    title: { color: c.text, fontSize: 22, fontWeight: "800", letterSpacing: 0.4, textTransform: "uppercase", flex: 1 },
-    titleStack: { color: c.text, fontSize: 28, fontWeight: "800", letterSpacing: 0.4, textTransform: "uppercase", lineHeight: 34 },
+    back: { width: 40, height: 40, borderRadius: 20, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" },
+    title: { color: c.text, fontSize: 28, fontWeight: "800", letterSpacing: -0.6, flex: 1 },
+    titleStack: { color: c.text, fontSize: 32, fontWeight: "800", letterSpacing: -0.8, lineHeight: 38 },
     muted: { color: c.muted, fontSize: 14, lineHeight: 20 },
-    kicker: { color: c.red, fontSize: 12, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 },
-    section: { color: c.muted2, fontSize: 13, fontWeight: "700", marginTop: 18, marginBottom: 10, textTransform: "uppercase" },
-    btn: { backgroundColor: c.red, borderRadius: 14, paddingVertical: 14, alignItems: "center", marginTop: 8 },
+    kicker: { color: c.accent, fontSize: 12, fontWeight: "700", letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 6 },
+    section: { color: c.text, fontSize: 18, fontWeight: "700", letterSpacing: -0.3, marginTop: 24, marginBottom: 10 },
+    btn: { backgroundColor: c.accent, borderRadius: 16, minHeight: 52, paddingVertical: 14, paddingHorizontal: 20, alignItems: "center", justifyContent: "center", marginTop: 8 },
     block: { alignSelf: "stretch" },
-    ghost: { backgroundColor: "transparent", borderWidth: 1, borderColor: c.line },
-    dangerBtn: {},
-    disabled: { opacity: 0.5 },
-    btnTxt: { color: "#ffffff", fontWeight: "800", fontSize: 16 },
+    ghost: { backgroundColor: c.surface2 },
+    dangerBtn: { backgroundColor: c.dangerSoft },
+    disabled: { opacity: 0.45 },
+    btnTxt: { color: c.onAccent, fontWeight: "700", fontSize: 16, letterSpacing: -0.2 },
     ghostTxt: { color: c.text },
-    dangerTxt: { color: c.red },
+    dangerTxt: { color: c.danger },
     field: { marginBottom: 12 },
-    label: { color: c.muted, fontSize: 12, fontWeight: "600", marginBottom: 6 },
-    input: { backgroundColor: c.surface, borderRadius: 12, borderWidth: 1, borderColor: c.line, color: c.text, paddingHorizontal: 14, paddingVertical: 12, fontSize: 16 },
-    chip: { alignSelf: "flex-start", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: c.surface, borderWidth: 1, borderColor: c.line, marginRight: 8, marginBottom: 8 },
-    chipOn: { backgroundColor: c.redSoft, borderColor: c.red },
-    chipTxt: { color: c.muted2, fontWeight: "600" },
-    chipTxtOn: { color: c.text },
-    group: { backgroundColor: c.surface, borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: c.line, marginBottom: 4 },
-    cell: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14, minHeight: 52 },
-    cellBorder: { borderBottomWidth: 1, borderBottomColor: c.line },
-    cellTitle: { color: c.text, fontWeight: "600", fontSize: 16 },
-    cellSub: { color: c.muted, fontSize: 12, marginTop: 2 },
-    cellValue: { color: c.muted, fontWeight: "600", fontSize: 15 },
+    label: { color: c.muted, fontSize: 13, fontWeight: "600", marginBottom: 6 },
+    input: { backgroundColor: c.surface2, borderRadius: 14, color: c.text, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16 },
+    chip: { alignSelf: "flex-start", paddingHorizontal: 14, height: 36, justifyContent: "center", borderRadius: 18, backgroundColor: c.surface2, marginRight: 8, marginBottom: 8 },
+    chipOn: { backgroundColor: c.accent },
+    chipTxt: { color: c.muted2, fontWeight: "600", fontSize: 14 },
+    chipTxtOn: { color: c.onAccent },
+    group: { backgroundColor: c.surface, borderRadius: 18, overflow: "hidden", marginBottom: 4 },
+    cell: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14, minHeight: 54 },
+    cellBorder: { borderBottomWidth: hair, borderBottomColor: c.line },
+    cellTitle: { color: c.text, fontWeight: "500", fontSize: 16 },
+    cellSub: { color: c.muted, fontSize: 13, marginTop: 2 },
+    cellValue: { color: c.muted, fontWeight: "500", fontSize: 15 },
     seg: { flexDirection: "row", backgroundColor: c.surface2, borderRadius: 12, padding: 3, marginBottom: 12 },
-    segItem: { flex: 1, paddingVertical: 9, borderRadius: 9, alignItems: "center", justifyContent: "center" },
-    segOn: { backgroundColor: c.surface3 },
-    segTxt: { color: c.muted, fontWeight: "700", fontSize: 13 },
+    segItem: { flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+    segOn: { backgroundColor: c.raised, shadowColor: "#000", shadowOpacity: 0.12, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
+    segTxt: { color: c.muted, fontWeight: "600", fontSize: 13 },
     segTxtOn: { color: c.text },
     step: { flexDirection: "row", alignItems: "center", gap: 8 },
-    stepBtn: { width: 32, height: 32, borderRadius: 10, backgroundColor: c.surface2, alignItems: "center", justifyContent: "center" },
-    stepBtnTxt: { color: c.text, fontSize: 18, fontWeight: "700", marginTop: -1 },
-    stepVal: { color: c.text, fontWeight: "800", fontSize: 16, minWidth: 44, textAlign: "center" },
-    card: { backgroundColor: c.surface, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: c.line, marginBottom: 10 },
-    row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 16, padding: 12, borderWidth: 1, borderColor: c.line, marginBottom: 8 },
+    stepBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: c.surface2, alignItems: "center", justifyContent: "center" },
+    stepVal: { color: c.text, fontWeight: "700", fontSize: 16, minWidth: 44, textAlign: "center", fontVariant: ["tabular-nums"] },
+    card: { backgroundColor: c.surface, borderRadius: 18, padding: 16, marginBottom: 10 },
+    row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 18, padding: 12, marginBottom: 8 },
     rowMain: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
     grow: { flex: 1 },
-    rowTitle: { color: c.text, fontWeight: "700", fontSize: 15 },
-    rowSub: { color: c.muted, fontSize: 12, marginTop: 2 },
-    chev: { color: c.muted, fontSize: 22 },
+    rowTitle: { color: c.text, fontWeight: "600", fontSize: 15 },
+    rowSub: { color: c.muted, fontSize: 13, marginTop: 2 },
     empty: { padding: 24, alignItems: "center" }
   };
 }
@@ -80,11 +79,12 @@ export function Screen({ children, padded = true, noNav = false }) {
 }
 
 export function TopBar({ title, back, right, stacked }) {
+  const { colors } = useTheme();
   const styles = useStyles(styleFactory);
   const goBack = () => (typeof back === "string" ? router.push(back) : router.back());
   const backBtn = back ? (
-    <HapticPressable onPress={goBack} style={styles.back}>
-      <Text style={styles.backTxt}>‹</Text>
+    <HapticPressable onPress={goBack} style={styles.back} accessibilityLabel="Voltar">
+      <Ionicons name="chevron-back" size={22} color={colors.text} />
     </HapticPressable>
   ) : null;
   if (stacked) {
@@ -177,13 +177,13 @@ export function Group({ children, style }) {
   return <View style={[styles.group, style]}>{children}</View>;
 }
 
-export function Cell({ title, subtitle, value, onPress, switchOn, onSwitch, last, right }) {
+export function Cell({ title, subtitle, value, onPress, switchOn, onSwitch, last, right, danger }) {
   const { colors } = useTheme();
   const styles = useStyles(styleFactory);
   const body = (
     <>
       <View style={styles.grow}>
-        <Text style={styles.cellTitle}>{title}</Text>
+        <Text style={[styles.cellTitle, danger && { color: colors.danger }]}>{title}</Text>
         {subtitle ? <Text style={styles.cellSub}>{subtitle}</Text> : null}
       </View>
       {value != null && value !== "" ? <Text style={styles.cellValue}>{value}</Text> : null}
@@ -192,12 +192,12 @@ export function Cell({ title, subtitle, value, onPress, switchOn, onSwitch, last
         <Switch
           value={!!switchOn}
           onValueChange={onSwitch}
-          trackColor={{ false: colors.line, true: colors.red }}
+          trackColor={{ false: colors.surface3, true: colors.accent }}
           thumbColor="#ffffff"
-          ios_backgroundColor={colors.line}
+          ios_backgroundColor={colors.surface3}
         />
       ) : null}
-      {onPress && !onSwitch ? <Text style={styles.chev}>›</Text> : null}
+      {onPress && !onSwitch ? <Ionicons name="chevron-forward" size={18} color={colors.muted} /> : null}
     </>
   );
   const box = [styles.cell, !last && styles.cellBorder];
@@ -226,15 +226,16 @@ export function Segmented({ options, value, onChange }) {
 }
 
 export function Stepper({ value, onMinus, onPlus, suffix }) {
+  const { colors } = useTheme();
   const styles = useStyles(styleFactory);
   return (
     <View style={styles.step}>
       <HapticPressable onPress={onMinus} style={styles.stepBtn}>
-        <Text style={styles.stepBtnTxt}>−</Text>
+        <Ionicons name="remove" size={18} color={colors.text} />
       </HapticPressable>
       <Text style={styles.stepVal}>{value}{suffix || ""}</Text>
       <HapticPressable onPress={onPlus} style={styles.stepBtn}>
-        <Text style={styles.stepBtnTxt}>+</Text>
+        <Ionicons name="add" size={18} color={colors.text} />
       </HapticPressable>
     </View>
   );
@@ -248,6 +249,7 @@ export function Card({ children, onPress, style }) {
 }
 
 export function Row({ title, subtitle, onPress, right, thumb }) {
+  const { colors } = useTheme();
   const styles = useStyles(styleFactory);
   const main = (
     <>
@@ -256,7 +258,7 @@ export function Row({ title, subtitle, onPress, right, thumb }) {
         <Text style={styles.rowTitle}>{title}</Text>
         {subtitle ? <Text style={styles.rowSub}>{subtitle}</Text> : null}
       </View>
-      {right ? null : <Text style={styles.chev}>›</Text>}
+      {right ? null : <Ionicons name="chevron-forward" size={18} color={colors.muted} />}
     </>
   );
   return (
@@ -278,5 +280,5 @@ export function Empty({ children }) {
 
 export function Busy() {
   const { colors } = useTheme();
-  return <ActivityIndicator color={colors.red} style={{ marginVertical: 24 }} />;
+  return <ActivityIndicator color={colors.accent} style={{ marginVertical: 24 }} />;
 }

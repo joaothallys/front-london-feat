@@ -2,40 +2,54 @@ import React, { createContext, useContext, useMemo } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
 import { useAppState } from "./state/AppState.js";
 
+// Paleta "Zinco e Laranja": cinzas neutros (sem o tom azulado antigo) e laranja de destaque.
+// Os nomes red/red2/redSoft/cta ficaram por compatibilidade: hoje são o laranja da marca.
+// Para excluir e outras ações destrutivas use `danger`, que continua vermelho.
 export const darkColors = {
-  bg: "#001013",
-  bg2: "#000000",
-  surface: "#0a181b",
-  surface2: "#0f2024",
-  surface3: "#163036",
-  line: "#1d3a40",
-  text: "#ffffff",
-  muted: "#8a8a8a",
-  muted2: "#d9d9d9",
-  red: "#e10600",
-  red2: "#b80000",
-  redSoft: "rgba(225, 6, 0, 0.16)",
-  green: "#22c55e",
-  cta: "#e10600",
-  amber: "#f5b942"
+  bg: "#09090B",
+  bg2: "#111113",
+  surface: "#18181B",
+  surface2: "#1F1F23",
+  surface3: "#27272A",
+  raised: "#3F3F46",
+  line: "#2E2E33",
+  text: "#FAFAFA",
+  muted: "#A1A1AA",
+  muted2: "#D4D4D8",
+  accent: "#FF6A1A",
+  onAccent: "#FFFFFF",
+  red: "#FF6A1A",
+  red2: "#E5560A",
+  redSoft: "rgba(255, 106, 26, 0.16)",
+  danger: "#EF4444",
+  dangerSoft: "rgba(239, 68, 68, 0.14)",
+  green: "#22C55E",
+  cta: "#FF6A1A",
+  amber: "#F5B942"
 };
 
 export const lightColors = {
-  bg: "#f3f6f7",
-  bg2: "#ffffff",
-  surface: "#ffffff",
-  surface2: "#eef2f3",
-  surface3: "#e3eaec",
-  line: "#d2dcdf",
-  text: "#0b1a1c",
-  muted: "#6b7a7d",
-  muted2: "#3d4c4f",
-  red: "#e10600",
-  red2: "#b80000",
-  redSoft: "rgba(225, 6, 0, 0.10)",
-  green: "#16a34a",
-  cta: "#e10600",
-  amber: "#c48a12"
+  // Fundo um pouco mais escuro que os cartões: sem borda, é o tom que separa.
+  bg: "#F2F2F4",
+  bg2: "#FFFFFF",
+  surface: "#FFFFFF",
+  surface2: "#ECECEF",
+  surface3: "#E2E2E6",
+  raised: "#FFFFFF",
+  line: "#E4E4E7",
+  text: "#09090B",
+  muted: "#71717A",
+  muted2: "#3F3F46",
+  accent: "#F25C05",
+  onAccent: "#FFFFFF",
+  red: "#F25C05",
+  red2: "#D94F00",
+  redSoft: "rgba(242, 92, 5, 0.10)",
+  danger: "#DC2626",
+  dangerSoft: "rgba(220, 38, 38, 0.10)",
+  green: "#16A34A",
+  cta: "#F25C05",
+  amber: "#C48A12"
 };
 
 export const colors = darkColors;

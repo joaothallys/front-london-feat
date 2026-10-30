@@ -44,6 +44,16 @@ export function AppLock({ children }) {
   }, []);
 
   useEffect(() => {
+    let live = true;
+    (async () => {
+      if (!(await shouldLock()) || !live) return;
+      setLocked(true);
+      await unlock();
+    })();
+    return () => { live = false; };
+  }, [shouldLock, unlock]);
+
+  useEffect(() => {
     const sub = AppState.addEventListener("change", async (next) => {
       if (next !== "active") {
         if (!leftAt.current) leftAt.current = Date.now();

@@ -3,6 +3,7 @@ import {
   HStack,
   Image,
   ProgressView,
+  Spacer,
   Text,
   VStack,
   ZStack
@@ -10,6 +11,7 @@ import {
 import {
   font,
   foregroundStyle,
+  frame,
   lineLimit,
   minimumScaleFactor,
   monospacedDigit,
@@ -36,17 +38,22 @@ type WorkoutLockProps = {
 
 const WorkoutLockWidgetView = (props: WorkoutLockProps, environment: WidgetEnvironment) => {
   "widget";
+  const red = "#FF6A1A";
+  const white = "#FFFFFF";
+  const muted = "#A1A1AA";
   const resting = props.phase === "rest" && Number(props.endsAt) > 0;
   const start = new Date(Number(props.startedAt) || Date.now());
   const end = new Date(Number(props.endsAt) || Date.now());
   const vibrant = environment.widgetRenderingMode === "vibrant";
-  const accent = vibrant ? "#FFFFFF" : "#E10600";
+  const accent = vibrant ? white : red;
+  const dim = vibrant ? white : muted;
   const family = environment.widgetFamily;
   const exerciseName = props.exerciseName || "LumenFit";
   const exerciseIndex = Number(props.exerciseIndex) || 1;
   const exerciseCount = Number(props.exerciseCount) || 1;
   const setIndex = Number(props.setIndex) || 0;
   const setCount = Number(props.setCount) || 0;
+  const setsLabel = "Série " + setIndex + " de " + setCount;
 
   if (family === "accessoryInline") {
     return (
@@ -68,7 +75,7 @@ const WorkoutLockWidgetView = (props: WorkoutLockProps, environment: WidgetEnvir
         {resting ? (
           <ProgressView
             timerInterval={{ lower: start, upper: end }}
-            countsDown
+            countsDown={false}
             modifiers={[progressViewStyle("circular"), tint(accent), padding({ all: 4 })]}
           />
         ) : (
@@ -87,57 +94,62 @@ const WorkoutLockWidgetView = (props: WorkoutLockProps, environment: WidgetEnvir
     return (
       <VStack spacing={2} alignment="leading" modifiers={[widgetURL("londonfitness://session")]}>
         <HStack spacing={4}>
-          <Image systemName={resting ? "timer" : "figure.strengthtraining.traditional"} color={accent} size={12} />
+          <Image systemName={resting ? "dumbbell.fill" : "figure.strengthtraining.traditional"} color={accent} size={12} />
           <Text modifiers={[font({ weight: "semibold", size: 12 }), foregroundStyle(accent)]}>
-            {resting ? "Intervalo" : "LumenFit"}
+            {resting ? "DESCANSO" : "TREINO"}
           </Text>
         </HStack>
         {resting ? (
           <Text
             timerInterval={{ lower: start, upper: end }}
             countsDown
-            modifiers={[font({ weight: "bold", design: "rounded", size: 22 }), monospacedDigit()]}
+            modifiers={[font({ weight: "black", design: "rounded", size: 22 }), monospacedDigit(), foregroundStyle(white)]}
           />
         ) : (
-          <Text modifiers={[font({ weight: "bold", size: 15 }), lineLimit(1), minimumScaleFactor(0.7)]}>{exerciseName}</Text>
+          <Text modifiers={[font({ weight: "bold", size: 15 }), foregroundStyle(white), lineLimit(1), minimumScaleFactor(0.7)]}>
+            {exerciseName}
+          </Text>
         )}
-        <Text modifiers={[font({ size: 11 }), lineLimit(1), minimumScaleFactor(0.75)]}>
-          {resting ? exerciseName : exerciseIndex + "/" + exerciseCount}
+        <Text modifiers={[font({ size: 11 }), foregroundStyle(dim), lineLimit(1), minimumScaleFactor(0.75)]}>
+          {resting ? exerciseName : setsLabel}
         </Text>
       </VStack>
     );
   }
 
   return (
-    <VStack
-      spacing={8}
-      alignment="leading"
-      modifiers={[padding({ all: 14 }), widgetURL("londonfitness://session")]}
-    >
-      <HStack>
-        <Image systemName="dumbbell.fill" color={accent} size={16} />
-        <Text modifiers={[font({ weight: "bold", size: 12 }), foregroundStyle(accent)]}>LUMENFIT</Text>
+    <VStack spacing={8} alignment="leading" modifiers={[padding({ all: 14 }), widgetURL("londonfitness://session")]}>
+      <HStack spacing={6}>
+        <Image systemName="dumbbell.fill" color={accent} size={14} />
+        <Text modifiers={[font({ weight: "bold", size: 11 }), foregroundStyle(white)]}>
+          {resting ? "INTERVALO DE DESCANSO" : "TREINO"}
+        </Text>
+        <Spacer />
+        <Text modifiers={[font({ size: 11 }), foregroundStyle(dim)]}>{setsLabel}</Text>
       </HStack>
-      <Text modifiers={[font({ weight: "heavy", design: "rounded", size: family === "systemMedium" ? 22 : 18 }), lineLimit(2), minimumScaleFactor(0.7)]}>
-        {exerciseName}
-      </Text>
       {resting ? (
-        <VStack spacing={4} alignment="leading">
+        <VStack spacing={6} alignment="leading">
           <Text
             timerInterval={{ lower: start, upper: end }}
             countsDown
-            modifiers={[font({ weight: "black", design: "rounded", size: 34 }), monospacedDigit(), foregroundStyle(accent)]}
+            modifiers={[font({ weight: "black", design: "rounded", size: family === "systemMedium" ? 36 : 30 }), monospacedDigit(), foregroundStyle(white)]}
           />
+          <Text modifiers={[font({ size: 13 }), foregroundStyle(dim), lineLimit(1), minimumScaleFactor(0.7)]}>{exerciseName}</Text>
           <ProgressView
             timerInterval={{ lower: start, upper: end }}
-            countsDown
-            modifiers={[progressViewStyle("linear"), tint(accent)]}
+            countsDown={false}
+            modifiers={[progressViewStyle("linear"), tint(accent), frame({ maxWidth: 999, minHeight: 4, maxHeight: 4 })]}
           />
         </VStack>
       ) : (
-        <Text modifiers={[font({ size: 13 })]}>
-          Exercício {exerciseIndex}/{exerciseCount} · série {setIndex}/{setCount}
-        </Text>
+        <VStack spacing={4} alignment="leading">
+          <Text modifiers={[font({ weight: "heavy", design: "rounded", size: family === "systemMedium" ? 22 : 18 }), foregroundStyle(white), lineLimit(2), minimumScaleFactor(0.7)]}>
+            {exerciseName}
+          </Text>
+          <Text modifiers={[font({ size: 13 }), foregroundStyle(dim)]}>
+            Exercício {exerciseIndex}/{exerciseCount}
+          </Text>
+        </VStack>
       )}
     </VStack>
   );

@@ -58,6 +58,17 @@ export function updateDayItem(state, index, patch) {
   persistPlan(state);
 }
 
+export function updatePlanItemLoad(state, dayIndex, exerciseId, patch) {
+  const split = state.plan && state.plan.split;
+  const day = split && split[dayIndex];
+  if (!day || !Array.isArray(day.items)) return false;
+  const idx = day.items.findIndex((row) => row.id === exerciseId);
+  if (idx < 0) return false;
+  day.items[idx] = Object.assign({}, day.items[idx], patch);
+  persistPlan(state);
+  return true;
+}
+
 export function reorderDayItems(state, from, to) {
   const day = ensureDay(state);
   const items = day.items || [];

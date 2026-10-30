@@ -36,7 +36,7 @@ export function socialAuthMessage(err) {
     return "Esta conta usa login social. Entre com Google ou Apple.";
   }
   if (status === 401) return "Não foi possível validar o login. Tente de novo.";
-  if (status === 403) return "Esta conta foi excluída. Restaure a conta para entrar.";
+  if (status === 403) return "Esta conta foi excluída.";
   if (status === 409) return "Este e-mail já está vinculado a outra conta.";
   if (status === 503) return "Login social temporariamente indisponível.";
   if (status === 400) return "Não foi possível concluir o login. Tente de novo.";

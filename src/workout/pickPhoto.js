@@ -1,5 +1,6 @@
 import { Alert, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system/legacy";
 
 let inflight = false;
 
@@ -60,5 +61,22 @@ export async function pickWorkoutPhoto(source) {
     return null;
   } finally {
     inflight = false;
+  }
+}
+
+const PHOTO_DIR = FileSystem.documentDirectory ? FileSystem.documentDirectory + "workout-photos/" : null;
+
+// A câmera devolve um arquivo no cache, que o iOS apaga quando quer.
+// Copia para Documents para a foto continuar no histórico.
+export async function keepWorkoutPhoto(uri) {
+  if (!uri || !PHOTO_DIR || uri.indexOf(PHOTO_DIR) === 0) return uri || null;
+  try {
+    await FileSystem.makeDirectoryAsync(PHOTO_DIR, { intermediates: true }).catch(() => {});
+    const ext = (uri.split("?")[0].match(/\.(jpe?g|png|heic|webp)$/i) || [".jpg"])[0];
+    const dest = PHOTO_DIR + Date.now() + ext;
+    await FileSystem.copyAsync({ from: uri, to: dest });
+    return dest;
+  } catch (err) {
+    return uri;
   }
 }

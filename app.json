@@ -26,7 +26,12 @@
         "NSCameraUsageDescription": "O LumenFit usa a câmera para a foto do seu treino.",
         "NSPhotoLibraryUsageDescription": "O LumenFit acessa suas fotos para montar o card do treino.",
         "NSPhotoLibraryAddUsageDescription": "O LumenFit salva a montagem do treino na sua galeria.",
+        "NSBonjourServices": [
+          "_http._tcp",
+          "_expo._tcp"
+        ],
         "NSFaceIDUsageDescription": "O LumenFit usa o Face ID para desbloquear o app no iPhone.",
+        "NSLocalNetworkUsageDescription": "O LumenFit usa a rede local para carregar o app a partir do computador de desenvolvimento.",
         "ITSAppUsesNonExemptEncryption": false,
         "NSSupportsLiveActivities": true,
         "NSSupportsLiveActivitiesFrequentUpdates": true,
@@ -61,6 +66,14 @@
     "plugins": [
       "expo-router",
       "expo-asset",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "O LumenFit acessa suas fotos para montar o card do treino.",
+          "savePhotosPermission": "O LumenFit salva a montagem do treino na sua galeria.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ],
       [
         "expo-image-picker",
         {
@@ -133,7 +146,8 @@
           "organization": "minha-empresa-dt",
           "project": "lumenfit"
         }
-      ]
+      ],
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": false

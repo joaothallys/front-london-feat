@@ -126,7 +126,7 @@ export default function Recovery() {
 
 function styleFactory(c) {
   return {
-  hero: { backgroundColor: c.surface, borderRadius: 20, padding: 18, borderWidth: 1, borderColor: c.line, marginTop: 4 },
+  hero: { backgroundColor: c.surface, borderRadius: 20, padding: 18, borderWidth: 1, borderColor: "transparent", marginTop: 4 },
   heroTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   heroKicker: { color: c.muted, fontSize: 12, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.8 },
   heroTitle: { color: c.text, fontSize: 18, fontWeight: "800", marginTop: 4 },
@@ -138,8 +138,8 @@ function styleFactory(c) {
   dot: { width: 8, height: 8, borderRadius: 4 },
   statNum: { color: c.text, fontWeight: "900", fontSize: 20 },
   statLbl: { color: c.muted, fontSize: 12, marginTop: 2 },
-  section: { color: c.muted, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.8, marginTop: 24, marginBottom: 8, marginLeft: 4 },
-  group: { backgroundColor: c.surface, borderRadius: 18, borderWidth: 1, borderColor: c.line, paddingHorizontal: 14 },
+  section: { color: c.text, fontSize: 17, fontWeight: "700", letterSpacing: -0.2, marginTop: 24, marginBottom: 8, marginLeft: 4 },
+  group: { backgroundColor: c.surface, borderRadius: 18, borderWidth: 1, borderColor: "transparent", paddingHorizontal: 14 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
   rowLine: { borderBottomWidth: 1, borderColor: c.line },
   art: { width: 48, height: 48, borderRadius: 12, backgroundColor: c.surface2, alignItems: "center", justifyContent: "center" },

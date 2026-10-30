@@ -1,4 +1,5 @@
 import React from "react";
+import { StyleSheet } from "react-native";
 import { Tabs } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../../src/theme.js";
@@ -10,14 +11,15 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.bg2,
+          backgroundColor: colors.bg,
           borderTopColor: colors.line,
+          borderTopWidth: StyleSheet.hairlineWidth,
           height: 78,
           paddingTop: 6
         },
-        tabBarActiveTintColor: colors.red,
+        tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "700" }
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" }
       }}
     >
       <Tabs.Screen name="home" options={{ title: "Meu Plano", tabBarIcon: ic("barbell") }} />
@@ -29,6 +31,7 @@ export default function TabsLayout() {
   );
 }
 
+// Ícone cheio na aba ativa, contorno nas outras.
 function ic(name) {
-  return ({ color, size }) => <Ionicons name={name} size={size} color={color} />;
+  return ({ color, size, focused }) => <Ionicons name={focused ? name : name + "-outline"} size={size} color={color} />;
 }

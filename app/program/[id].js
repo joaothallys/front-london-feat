@@ -5,7 +5,7 @@ import { api, unwrap } from "@shared/api/client.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { Button, Card, Screen, TopBar } from "../../src/components/ui.js";
 import { useAppState } from "../../src/state/AppState.js";
-import { useLive } from "../../src/state/LiveSession.js";
+import { useStartWorkout } from "../../src/session/useStartWorkout.js";
 import { D, exerciseOf } from "../../src/catalog.js";
 import { useTheme } from "../../src/theme.js";
 
@@ -13,7 +13,7 @@ export default function Program() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams();
   const { state, refresh } = useAppState();
-  const { start } = useLive();
+  const startWorkout = useStartWorkout();
   const p = D.programs.find((x) => x.id === id);
   if (!p) return <Screen><TopBar title="Programa" back /><Text style={{ color: colors.muted }}>Não encontrado.</Text></Screen>;
 
@@ -47,8 +47,7 @@ export default function Program() {
             {d.items.map((it) => (exerciseOf(it.id) && exerciseOf(it.id).name) || it.id).join(" · ")}
           </Text>
           <Button label="Iniciar este dia" onPress={() => {
-            const live = start(d.name, d.items, { sourceType: "plan_day", sourceId: p.id });
-            if (live) router.push("/session");
+            startWorkout(d.name, d.items, { sourceType: "plan_day", sourceId: p.id });
           }} />
         </Card>
       ))}

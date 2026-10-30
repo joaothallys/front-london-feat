@@ -2,17 +2,19 @@ import React, { useMemo, useState } from "react";
 import { Alert, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { ScrollView, Swipeable } from "react-native-gesture-handler";
+import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Empty, Row } from "../../src/components/ui.js";
 import { ExerciseThumb } from "../../src/components/ExerciseThumb.js";
 import { HapticPressable } from "../../src/components/HapticPressable.js";
+import Swipeable from "../../src/components/Swipeable.js";
 import { useAppState } from "../../src/state/AppState.js";
-import { useLive } from "../../src/state/LiveSession.js";
+import { useStartWorkout } from "../../src/session/useStartWorkout.js";
 import { D, exerciseOf } from "../../src/catalog.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { api } from "@shared/api/client.js";
 import { removePlan, removePlanDay } from "../../src/plan.js";
+import { fmtInt } from "../../src/workout/stats.js";
 import { useStyles, useTheme } from "../../src/theme.js";
 
 const TABS = [
@@ -51,7 +53,7 @@ export default function Workouts() {
   const styles = useStyles(styleFactory);
   const params = useLocalSearchParams();
   const { state, refresh } = useAppState();
-  const { start } = useLive();
+  const startWorkout = useStartWorkout();
   const [tab, setTab] = useState(params.open === "saved" ? "saved" : "done");
   const saved = state.custom || [];
   const programs = D.programs || [];
@@ -61,9 +63,8 @@ export default function Workouts() {
     });
   }, [state.history]);
 
-  function startSplit(day) {
-    const live = start(day.name, day.items, { sourceType: "plan_day", sourceId: day.id || (state.plan && state.plan.id) || null });
-    if (live) router.push("/session");
+  function startSplit(day, dayIndex) {
+    startWorkout(day.name, day.items, { sourceType: "plan_day", sourceId: day.id || (state.plan && state.plan.id) || null, dayIndex });
   }
 
   function removeSaved(workout) {
@@ -119,6 +120,7 @@ export default function Workouts() {
         style: "destructive",
         onPress: () => {
           state.history = (state.history || []).filter((item) => String(item.id) !== String(row.id));
+          state.pendingSessions = (state.pendingSessions || []).filter((job) => String(job.localId) !== String(row.id));
           refresh();
           if (SessionService.hasToken() && row.id && String(row.id).indexOf("local-") !== 0 && String(row.id).indexOf("w") !== 0) {
             api.history.remove(row.id).catch(() => {});
@@ -172,8 +174,14 @@ export default function Workouts() {
                       <View style={styles.grow}>
                         <Text style={styles.savedName}>{h.name || "Treino"}</Text>
                         <Text style={styles.savedMeta}>
-                          {fmtDate(h.date) + " · " + (h.duration || 0) + " min · " + Math.round(h.volume || 0) + " kg"}
+                          {fmtDate(h.date) + " · " + (h.duration || 0) + " min · " + fmtInt(h.volume) + " kg"}
                         </Text>
+                        {h.pendingSync ? (
+                          <View style={styles.pending}>
+                            <Ionicons name="cloud-upload-outline" size={12} color={colors.amber} />
+                            <Text style={styles.pendingTxt}>Aguardando conexão para sincronizar</Text>
+                          </View>
+                        ) : null}
                       </View>
                     </HapticPressable>
                     <EditBtn
@@ -265,7 +273,7 @@ export default function Workouts() {
                     title={d.name}
                     subtitle={(d.items || []).length + " exercício" + ((d.items || []).length === 1 ? "" : "s")}
                     thumb={<ExerciseThumb exercise={exerciseOf(d.items && d.items[0] && d.items[0].id)} />}
-                    onPress={() => startSplit(d)}
+                    onPress={() => startSplit(d, i)}
                     right={
                       <EditBtn
                         styles={styles}
@@ -277,7 +285,7 @@ export default function Workouts() {
                 </Swipeable>
               ))}
               <HapticPressable style={styles.wipe} onPress={removeWholePlan}>
-                <Ionicons name="trash-outline" size={16} color={colors.red} />
+                <Ionicons name="trash-outline" size={16} color={colors.danger} />
                 <Text style={styles.wipeTxt}>Apagar plano inteiro</Text>
               </HapticPressable>
             </View>
@@ -316,34 +324,36 @@ function styleFactory(c) {
     flex: { flex: 1 },
     pad: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 108 },
     head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 18 },
-    title: { color: c.text, fontSize: 26, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
-    fast: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: c.surface, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: c.line },
+    title: { color: c.text, fontSize: 28, fontWeight: "800", letterSpacing: -0.6 },
+    fast: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: c.surface, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: "transparent" },
     fastTxt: { color: c.text, fontWeight: "700", fontSize: 13 },
-    tabs: { flexDirection: "row", backgroundColor: c.surface, borderRadius: 14, padding: 4, marginBottom: 20, borderWidth: 1, borderColor: c.line },
+    tabs: { flexDirection: "row", backgroundColor: c.surface, borderRadius: 14, padding: 4, marginBottom: 20, borderWidth: 1, borderColor: "transparent" },
     tab: { flex: 1, alignItems: "center", paddingVertical: 8, borderRadius: 11, gap: 2 },
     tabOn: { backgroundColor: c.surface3 },
     tabTxt: { color: c.muted, fontWeight: "800", fontSize: 10, letterSpacing: 0.2 },
     tabTxtOn: { color: c.text },
     tabN: { color: c.muted, fontSize: 11, fontWeight: "700" },
     tabNOn: { color: c.red },
-    create: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 18, padding: 14, marginBottom: 22, borderWidth: 1, borderColor: c.line },
+    create: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 18, padding: 14, marginBottom: 22, borderWidth: 1, borderColor: "transparent" },
     createIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: c.red, alignItems: "center", justifyContent: "center" },
     grow: { flex: 1 },
     createT: { color: c.text, fontWeight: "800", fontSize: 16 },
     createS: { color: c.muted, fontSize: 12, marginTop: 3, lineHeight: 16 },
-    section: { color: c.muted, fontSize: 11, fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 10 },
+    section: { color: c.text, fontSize: 17, fontWeight: "700", letterSpacing: -0.2, marginBottom: 10 },
     list: { gap: 8 },
-    savedRow: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 16, padding: 12, borderWidth: 1, borderColor: c.line },
+    savedRow: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 16, padding: 12, borderWidth: 1, borderColor: "transparent" },
     savedMain: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
     savedName: { color: c.text, fontWeight: "700", fontSize: 15 },
     savedMeta: { color: c.muted, fontSize: 12, marginTop: 2 },
+    pending: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
+    pendingTxt: { color: c.amber, fontSize: 11, fontWeight: "700" },
     editBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surface3, alignItems: "center", justifyContent: "center" },
     wipe: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14, marginTop: 8 },
     wipeTxt: { color: c.red, fontWeight: "800", fontSize: 13 },
-    delete: { backgroundColor: c.red, width: 88, alignItems: "center", justifyContent: "center", borderRadius: 16, marginLeft: 8 },
+    delete: { backgroundColor: c.danger, width: 88, alignItems: "center", justifyContent: "center", borderRadius: 16, marginLeft: 8 },
     deleteTxt: { color: "#fff", fontWeight: "800", fontSize: 11, marginTop: 4, textTransform: "uppercase" },
     blank: { alignItems: "center", paddingVertical: 36, paddingHorizontal: 24 },
-    blankIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: c.surface, alignItems: "center", justifyContent: "center", marginBottom: 14, borderWidth: 1, borderColor: c.line },
+    blankIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: c.surface, alignItems: "center", justifyContent: "center", marginBottom: 14, borderWidth: 1, borderColor: "transparent" },
     blankT: { color: c.text, fontWeight: "800", fontSize: 17 },
     blankS: { color: c.muted, fontSize: 13, lineHeight: 19, textAlign: "center", marginTop: 6, maxWidth: 260 }
   };

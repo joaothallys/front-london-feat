@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -13,7 +14,7 @@ import {
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Gesture, GestureDetector, GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, {
   Easing,
   Extrapolation,
@@ -39,10 +40,16 @@ import { useStyles, useTheme } from "../../src/theme.js";
 import { warmGif } from "../../src/media/GifCache.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { api, unwrap } from "@shared/api/client.js";
-import { resolveWebUrl } from "../../src/config.js";
 import { shareTitle } from "../../src/share.js";
-import { NumberWheel } from "../../src/components/NumberWheel.js";
+import { createShareLink, shareItem } from "../../src/session/shareLink.js";
+import { NumberPad } from "../../src/components/NumberPad.js";
+import Swipeable from "../../src/components/Swipeable.js";
 import { applyLoadToDay, dayMuscles, ensureDay, persistPlan, removeExerciseFromDay, updateDayItem } from "../../src/plan.js";
+import { computeWorkoutStats } from "../../src/workout/stats.js";
+import { finishBody } from "../../src/session/finishPayload.js";
+import { isRetryable, queueSession } from "../../src/session/pendingSync.js";
+
+const REST_STEPS = [30, 45, 60, 90, 120, 180];
 
 export default function Home() {
   const { colors } = useTheme();
@@ -56,7 +63,8 @@ export default function Home() {
   const [sharing, setSharing] = useState(false);
   const iaRetry = !!(state.plan && state.plan.iaFailed);
   const days = (state.plan && state.plan.split) || [];
-  const day = days.length ? days[Math.max(0, Math.min(state.planDay || 0, days.length - 1))] : null;
+  const dayIndex = days.length ? Math.max(0, Math.min(state.planDay || 0, days.length - 1)) : 0;
+  const day = days.length ? days[dayIndex] : null;
   const items = (day && day.items) || [];
   const loc = (state.locations || []).find((l) => l.id === state.activeLocationId) || (state.locations || [])[0];
   const unique = useMemo(() => dayMuscles(day).filter((m) => muscleArt(m)), [day, items.length]);
@@ -116,7 +124,8 @@ export default function Home() {
     }
     const next = start(day.name || "Meu Plano", items, {
       sourceType: "plan_day",
-      sourceId: (day && day.id) || (state.plan && state.plan.id) || null
+      sourceId: (day && day.id) || (state.plan && state.plan.id) || null,
+      dayIndex
     });
     if (next) router.push("/session");
   }
@@ -135,24 +144,13 @@ export default function Home() {
         const kg = Number(it.kg || e.kg) || 0;
         const reps = Number(it.reps || e.reps) || 0;
         const count = Math.max(1, Number(it.sets || e.sets) || 3);
-        const gif = mediaUrl(e, { preferGif: true });
-        return {
-          id: it.id,
-          sourceId: e.externalId || "",
-          name: e.name || it.id,
-          muscle: e.muscle || "",
-          equipment: e.equipment || "",
-          gifUrl: /^https:\/\//.test(gif) ? gif : "",
-          rest: Number(it.rest || e.rest) || 90,
-          sets: Array.from({ length: count }, () => ({ type: "N", kg, reps }))
-        };
+        return shareItem(it.id, Array.from({ length: count }, () => ({ type: "N", kg, reps })), it.rest);
       });
-      const created = unwrap(await api.shares.create({
+      const { url } = await createShareLink({
         name,
         author: ((state.profile && state.profile.name) || "").split(" ")[0],
         items: shared
-      }));
-      const url = resolveWebUrl() + "/t/" + created.id;
+      });
       await Share.share(Platform.OS === "ios" ? { url } : { message: url, title: name });
     } catch (err) {
       Alert.alert("Não foi possível compartilhar", "Verifique sua conexão e tente de novo.");
@@ -194,28 +192,76 @@ export default function Home() {
   }
 
   function logWorkout() {
-    if (!items.length) return;
-    const rec = {
-      id: "w" + Date.now(),
-      date: new Date().toISOString(),
+    if (!items.length || live) return;
+    Alert.alert("Registrar treino?", "Marca " + ((day && day.name) || "este treino") + " como feito hoje, com as cargas do plano.", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Registrar", onPress: registerDay }
+    ]);
+  }
+
+  async function registerDay() {
+    const duration = Number(state.profile.sessionDuration) || 60;
+    const done = {
       name: (day && day.name) || "Treino",
-      duration: state.profile.sessionDuration || 60,
-      volume: 0,
-      calories: Math.round((state.profile.sessionDuration || 60) * 8.2),
-      exercises: items.length,
-      sets: items.reduce((a, it) => a + (it.sets || 3), 0)
+      startedAt: Date.now() - duration * 60000,
+      meta: { sourceType: "plan_day", sourceId: (day && day.id) || null },
+      items: items.filter((it) => exerciseOf(it.id)).map((it) => {
+        const e = exerciseOf(it.id);
+        const kg = Number(it.kg || e.kg) || 0;
+        const reps = Number(it.reps || e.reps) || 10;
+        const count = Math.max(1, Number(it.sets || e.sets) || 3);
+        return {
+          id: it.id,
+          rest: Number(it.rest || e.rest) || 90,
+          sets: Array.from({ length: count }, () => ({ type: "N", kg, reps, done: true }))
+        };
+      })
     };
-    state.history.push(rec);
+    const stats = computeWorkoutStats(done, duration);
+    let rec = {
+      id: "local-" + Date.now(),
+      date: new Date().toISOString(),
+      name: done.name,
+      duration: stats.duration,
+      volume: stats.volume,
+      calories: stats.calories,
+      exercises: stats.completedCount,
+      sets: stats.doneSets,
+      totalReps: stats.reps,
+      muscles: stats.muscleLabels,
+      lines: stats.lines
+    };
+    stats.muscles.forEach((m) => { state.recovery[m] = Date.now(); });
+    if (SessionService.hasToken()) {
+      const body = finishBody(done, { durationMin: stats.duration, muscles: stats.muscles });
+      try {
+        const mapped = SessionService.mapHistory(unwrap(await api.sessions.finish(body)) || {});
+        rec = Object.assign({}, rec, mapped, {
+          id: mapped.id || rec.id,
+          volume: mapped.volume || rec.volume,
+          exercises: mapped.exercises || rec.exercises,
+          sets: mapped.sets || rec.sets
+        });
+      } catch (err) {
+        if (isRetryable(err)) {
+          rec.pendingSync = true;
+          queueSession(rec.id, body);
+        }
+      }
+    }
+    state.history = [rec].concat(state.history || []);
     refresh();
     Alert.alert("Treino registrado", rec.name + " foi salvo no histórico.");
   }
 
-  function applyLoad() {
+  function applyLoad(toAll) {
     if (!loadEdit) return;
-    applyLoadToDay(state, { kg: loadEdit.kg, reps: loadEdit.reps });
+    const patch = { kg: loadEdit.kg, reps: loadEdit.reps };
+    if (toAll || !menu || menu.type !== "item") applyLoadToDay(state, patch);
+    else updateDayItem(state, menu.index, patch);
     refresh();
     if (menu && menu.type === "item") {
-      setMenu(Object.assign({}, menu, { item: Object.assign({}, menu.item, { kg: loadEdit.kg, reps: loadEdit.reps }) }));
+      setMenu(Object.assign({}, menu, { item: Object.assign({}, menu.item, patch) }));
     }
     setLoadEdit(null);
   }
@@ -223,20 +269,17 @@ export default function Home() {
   const listHeader = (
     <View>
       <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <Ionicons name="barbell" size={18} color={colors.text} />
-          <Text style={styles.title}>Meu Plano</Text>
-          <Ionicons name="chevron-down" size={16} color={colors.muted} />
+        <View style={styles.grow}>
+          <Text style={styles.kicker}>{greeting(state.profile.name)}</Text>
+          <Text style={styles.title} numberOfLines={1}>{(state.plan && state.plan.name) || "Meu Plano"}</Text>
         </View>
         <View style={styles.headerBtns}>
-          <HapticPressable style={styles.iconBtn} onPress={() => router.push("/recovery")}>
-            <Ionicons name="flame" size={18} color={colors.red} />
-          </HapticPressable>
           <HapticPressable
             style={styles.iconBtn}
-            onPress={shareDay}
+            onPress={() => router.push("/recovery")}
+            accessibilityLabel="Recuperação muscular"
           >
-            <Ionicons name="share-outline" size={18} color={colors.text} />
+            <Ionicons name="flame" size={18} color={colors.red} />
           </HapticPressable>
         </View>
       </View>
@@ -256,7 +299,7 @@ export default function Home() {
       {days.length ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.days}>
           {days.map((d, idx) => {
-            const on = idx === (state.planDay || 0);
+            const on = idx === dayIndex;
             return (
               <HapticPressable
                 key={idx}
@@ -264,6 +307,7 @@ export default function Home() {
                 onPress={() => { state.planDay = idx; refresh(); }}
               >
                 <Text style={[styles.dayTxt, on && styles.dayTxtOn]}>DIA {idx + 1}</Text>
+                {d.name ? <Text style={[styles.dayName, on && styles.dayNameOn]} numberOfLines={1}>{shortDayName(d.name)}</Text> : null}
               </HapticPressable>
             );
           })}
@@ -272,7 +316,8 @@ export default function Home() {
 
       <View style={styles.filters}>
         <FilterChip
-          label={(state.profile.sessionDuration || 60) + "min"}
+          icon="time-outline"
+          label={(state.profile.sessionDuration || 60) + " min"}
           onPress={() => {
             const opts = SESSION_DURATIONS;
             const cur = opts.indexOf(Number(state.profile.sessionDuration) || 60);
@@ -280,8 +325,9 @@ export default function Home() {
             refresh();
           }}
         />
-        <FilterChip label={unique.length + " Músculo" + (unique.length === 1 ? "" : "s")} />
+        <FilterChip icon="body-outline" label={unique.length + " músculo" + (unique.length === 1 ? "" : "s")} />
         <FilterChip
+          icon="location-outline"
           label={(loc && loc.name) || "Local"}
           onPress={() => router.push("/locations")}
         />
@@ -323,13 +369,18 @@ export default function Home() {
         <Text style={styles.actionTxt}>Adicionar exercício</Text>
         <Ionicons name="chevron-forward" size={18} color={colors.muted} />
       </HapticPressable>
-      <HapticPressable style={styles.action} onPress={logWorkout}>
-        <View style={styles.actionIcon}>
-          <Ionicons name="checkmark-done" size={18} color={colors.text} />
-        </View>
-        <Text style={styles.actionTxt}>Registrar treino</Text>
-        <Ionicons name="chevron-forward" size={18} color={colors.muted} />
-      </HapticPressable>
+      {items.length && !live ? (
+        <HapticPressable style={styles.action} onPress={logWorkout}>
+          <View style={styles.actionIcon}>
+            <Ionicons name="checkmark-done" size={18} color={colors.text} />
+          </View>
+          <View style={styles.grow}>
+            <Text style={styles.actionTxt}>Registrar treino</Text>
+            <Text style={styles.actionSub}>Já treinou sem o app? Salve no histórico.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+        </HapticPressable>
+      ) : null}
       <View style={{ height: 88 }} />
     </View>
   );
@@ -358,6 +409,7 @@ export default function Home() {
             <ScaleDecorator>
               <Swipeable
                 enabled={!isActive}
+                childrenContainerStyle={styles.rowCover}
                 renderRightActions={() => (
                   <HapticPressable
                     style={styles.delete}
@@ -368,24 +420,28 @@ export default function Home() {
                   </HapticPressable>
                 )}
               >
-                <HapticPressable
-                  style={[styles.row, isActive && styles.rowActive]}
-                  onPress={() => setMenu({ type: "item", index, exercise: e, item: it })}
-                >
-                  <ExerciseThumb
-                    exercise={e}
-                    onPress={() => setGif({ uri: mediaUrl(e), title: e.name, id: e.id })}
-                  />
-                  <View style={styles.grow}>
-                    <Text style={styles.exName}>{e.name}</Text>
-                    <Text style={styles.exMeta}>
-                      {it.sets || e.sets || 3} sets  •  {it.reps || e.reps || 12} reps  •  {it.kg || e.kg || 0} kg
-                    </Text>
-                  </View>
-                  <Pressable onPressIn={drag} style={styles.handle} hitSlop={8}>
-                    <Ionicons name="reorder-three-outline" size={24} color={colors.muted} />
-                  </Pressable>
-                </HapticPressable>
+                <View style={styles.rowCover}>
+                  <HapticPressable
+                    style={[styles.row, isActive && styles.rowActive]}
+                    pressScale={false}
+                    pressOpacity={false}
+                    onPress={() => setMenu({ type: "item", index, exercise: e, item: it })}
+                  >
+                    <ExerciseThumb
+                      exercise={e}
+                      onPress={() => setGif({ uri: mediaUrl(e), title: e.name, id: e.id })}
+                    />
+                    <View style={styles.grow}>
+                      <Text style={styles.exName}>{e.name}</Text>
+                      <Text style={styles.exMeta}>
+                        {it.sets || e.sets || 3} sets  •  {it.reps || e.reps || 12} reps  •  {it.kg || e.kg || 0} kg
+                      </Text>
+                    </View>
+                    <Pressable onPressIn={drag} style={styles.handle} hitSlop={8}>
+                      <Ionicons name="reorder-three-outline" size={24} color={colors.muted} />
+                    </Pressable>
+                  </HapticPressable>
+                </View>
               </Swipeable>
             </ScaleDecorator>
           );
@@ -396,11 +452,14 @@ export default function Home() {
         <HapticPressable
           style={styles.share}
           onPress={shareDay}
+          disabled={sharing}
+          accessibilityLabel="Compartilhar treino"
         >
           <Ionicons name="share-outline" size={20} color={colors.text} />
         </HapticPressable>
         <HapticPressable style={styles.cta} onPress={begin}>
-          <Text style={styles.ctaTxt}>{live ? "Continuar treino" : "Iniciar treino"}</Text>
+          {live ? <Ionicons name="play" size={16} color="#fff" /> : null}
+          <Text style={styles.ctaTxt}>{live ? "Continuar treino" : items.length ? "Iniciar treino" : "Montar treino"}</Text>
         </HapticPressable>
       </View>
 
@@ -431,13 +490,13 @@ export default function Home() {
           right={(menu.item.kg || 0) + " kg · " + (menu.item.reps || 12)}
           onPress={() => setLoadEdit({ kg: Number(menu.item.kg) || 0, reps: Number(menu.item.reps) || 12 })}
         />
-        <Text style={styles.sheetHint}>Ao definir, vale para todos os exercícios do dia.</Text>
         <SheetRow
           icon="timer-outline"
           label="Editar tempo de descanso"
-          right={(menu.item.rest || 45) + "s"}
+          right={(menu.item.rest || 60) + "s"}
           onPress={() => {
-            const next = menu.item.rest >= 90 ? 45 : (menu.item.rest || 45) + 15;
+            const cur = Number(menu.item.rest) || 60;
+            const next = REST_STEPS.find((n) => n > cur) || REST_STEPS[0];
             updateDayItem(state, menu.index, { rest: next });
             persistPlan(state);
             refresh();
@@ -461,44 +520,34 @@ export default function Home() {
       ) : null}
 
       <Modal visible={!!loadEdit} transparent animationType="slide" onRequestClose={() => setLoadEdit(null)}>
-        <GestureHandlerRootView style={styles.loadModal}>
+        <KeyboardAvoidingView style={styles.loadModal} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <Pressable style={styles.loadDim} onPress={() => setLoadEdit(null)} />
           <View style={styles.loadSheet}>
             <View style={styles.sheetHead}>
-              <Text style={styles.sheetTitle}>Peso e reps de todos</Text>
-              <HapticPressable onPress={applyLoad}>
-                <Text style={styles.sheetDone}>Pronto</Text>
+              <Text style={styles.sheetTitle} numberOfLines={1}>
+                {menu && menu.type === "item" ? menu.exercise.name : "Peso e reps de todos"}
+              </Text>
+              <HapticPressable onPress={() => applyLoad(false)} hitSlop={10}>
+                <Text style={styles.sheetDone}>Salvar</Text>
               </HapticPressable>
             </View>
-            <Text style={styles.sheetHintModal}>Esse valor entra em todos os exercícios deste dia.</Text>
             {loadEdit ? (
-              <View style={styles.wheels}>
-                <View style={styles.wheelCol}>
-                  <Text style={styles.wheelLbl}>kg</Text>
-                  <NumberWheel
-                    key={"plan-kg"}
-                    value={loadEdit.kg}
-                    min={0}
-                    max={200}
-                    step={0.5}
-                    onChange={(kg) => setLoadEdit((cur) => ({ ...cur, kg }))}
-                  />
-                </View>
-                <View style={styles.wheelCol}>
-                  <Text style={styles.wheelLbl}>Reps</Text>
-                  <NumberWheel
-                    key={"plan-reps"}
-                    value={loadEdit.reps}
-                    min={1}
-                    max={40}
-                    step={1}
-                    onChange={(reps) => setLoadEdit((cur) => ({ ...cur, reps }))}
-                  />
-                </View>
-              </View>
+              <NumberPad
+                kg={loadEdit.kg}
+                reps={loadEdit.reps}
+                focus={loadEdit.field === "reps" ? "reps" : "kg"}
+                onFocus={(field) => setLoadEdit((cur) => ({ ...cur, field }))}
+                onChangeKg={(kg) => setLoadEdit((cur) => ({ ...cur, kg }))}
+                onChangeReps={(reps) => setLoadEdit((cur) => ({ ...cur, reps }))}
+              />
+            ) : null}
+            {menu && menu.type === "item" && items.length > 1 ? (
+              <HapticPressable style={styles.applyAll} onPress={() => applyLoad(true)}>
+                <Text style={styles.applyAllTxt}>Aplicar a todos os exercícios do dia</Text>
+              </HapticPressable>
             ) : null}
           </View>
-        </GestureHandlerRootView>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
@@ -587,13 +636,26 @@ function DismissSheet({ onClose, children }) {
   );
 }
 
-function FilterChip({ label, onPress }) {
+function greeting(name) {
+  const h = new Date().getHours();
+  const hi = h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+  const first = String(name || "").trim().split(" ")[0];
+  return first ? hi + ", " + first : hi;
+}
+
+function shortDayName(name) {
+  const text = String(name || "").replace(/^[A-Z]\s*[·\-–]\s*/, "");
+  return text.length > 18 ? text.slice(0, 17) + "…" : text;
+}
+
+function FilterChip({ label, onPress, icon }) {
   const { colors } = useTheme();
   const styles = useStyles(styleFactory);
   return (
-    <HapticPressable style={styles.chip} onPress={onPress}>
-      <Text style={styles.chipTxt}>{label}</Text>
-      <Ionicons name="chevron-down" size={12} color={colors.muted} />
+    <HapticPressable style={styles.chip} onPress={onPress} disabled={!onPress}>
+      {icon ? <Ionicons name={icon} size={13} color={colors.muted2} /> : null}
+      <Text style={styles.chipTxt} numberOfLines={1}>{label}</Text>
+      {onPress ? <Ionicons name="chevron-forward" size={12} color={colors.muted} /> : null}
     </HapticPressable>
   );
 }
@@ -604,9 +666,9 @@ function SheetRow({ icon, label, right, onPress, danger }) {
   return (
     <HapticPressable style={styles.sheetRow} onPress={onPress}>
       <View style={styles.actionIcon}>
-        <Ionicons name={icon} size={18} color={danger ? colors.red : colors.text} />
+        <Ionicons name={icon} size={18} color={danger ? colors.danger : colors.text} />
       </View>
-      <Text style={[styles.actionTxt, danger && { color: colors.red }]}>{label}</Text>
+      <Text style={[styles.actionTxt, danger && { color: colors.danger }]}>{label}</Text>
       {right ? <Text style={styles.sheetRight}>{right}</Text> : <Ionicons name="chevron-forward" size={18} color={colors.muted} />}
     </HapticPressable>
   );
@@ -618,25 +680,27 @@ function styleFactory(c) {
   list: { flex: 1 },
   scroll: { paddingHorizontal: 16, paddingBottom: 24 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 },
-  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  title: { color: c.text, fontSize: 22, fontWeight: "800" },
+  kicker: { color: c.muted, fontSize: 13, fontWeight: "600", marginBottom: 2 },
+  title: { color: c.text, fontSize: 24, fontWeight: "800" },
   headerBtns: { flexDirection: "row", gap: 8 },
   iconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" },
-  iaBanner: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 16, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: c.line },
+  iaBanner: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 16, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "transparent" },
   iaTitle: { color: c.text, fontWeight: "800", fontSize: 14 },
   iaTxt: { color: c.muted, fontSize: 12, lineHeight: 17, marginTop: 4 },
   iaBtn: { backgroundColor: c.red, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10 },
   iaBtnTxt: { color: "#fff", fontWeight: "800", fontSize: 12 },
   days: { gap: 8, paddingBottom: 12 },
-  dayTab: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999 },
-  dayTabOn: { backgroundColor: c.surface3 },
-  dayTxt: { color: c.muted, fontWeight: "800", fontSize: 12, letterSpacing: 0.6 },
+  dayTab: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, backgroundColor: c.surface, borderWidth: 1, borderColor: "transparent", minWidth: 64 },
+  dayTabOn: { backgroundColor: c.redSoft, borderColor: c.red },
+  dayTxt: { color: c.muted, fontWeight: "800", fontSize: 11, letterSpacing: 0.6 },
   dayTxtOn: { color: c.text },
+  dayName: { color: c.muted, fontSize: 12, fontWeight: "600", marginTop: 2, maxWidth: 140 },
+  dayNameOn: { color: c.muted2 },
   filters: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 8 },
-  chip: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: c.surface, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
-  chipTxt: { color: c.text, fontWeight: "700", fontSize: 13 },
-  section: { color: c.muted, fontSize: 11, fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase", marginTop: 10, marginBottom: 10 },
-  sectionInline: { color: c.muted, fontSize: 11, fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase" },
+  chip: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: c.surface, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: "transparent", maxWidth: "100%" },
+  chipTxt: { color: c.text, fontWeight: "700", fontSize: 13, flexShrink: 1 },
+  section: { color: c.text, fontSize: 17, fontWeight: "700", letterSpacing: -0.2, marginTop: 10, marginBottom: 10 },
+  sectionInline: { color: c.text, fontSize: 17, fontWeight: "700", letterSpacing: -0.2 },
   muscles: { gap: 10, paddingBottom: 8 },
   muscleCard: { width: 100, alignItems: "center" },
   muscleLbl: { color: c.muted2, fontSize: 12, marginTop: 6, fontWeight: "600" },
@@ -644,21 +708,23 @@ function styleFactory(c) {
   exHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8, marginBottom: 10 },
   exHeadBtns: { flexDirection: "row", gap: 8 },
   round: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" },
+  rowCover: { backgroundColor: c.bg },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, backgroundColor: c.bg },
   rowActive: { opacity: 0.88 },
   handle: { paddingHorizontal: 4, paddingVertical: 8 },
   grow: { flex: 1 },
   exName: { color: c.text, fontSize: 16, fontWeight: "700" },
   exMeta: { color: c.muted, marginTop: 4, fontSize: 13 },
-  delete: { backgroundColor: c.red, width: 88, alignItems: "center", justifyContent: "center" },
+  delete: { backgroundColor: c.danger, width: 88, alignItems: "center", justifyContent: "center" },
   deleteTxt: { color: "#fff", fontWeight: "800", fontSize: 11, marginTop: 4, textTransform: "uppercase" },
   action: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14 },
-  actionIcon: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: c.line, alignItems: "center", justifyContent: "center" },
-  actionTxt: { flex: 1, color: c.text, fontWeight: "800", letterSpacing: 0.4, textTransform: "uppercase", fontSize: 13 },
+  actionIcon: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: "transparent", alignItems: "center", justifyContent: "center" },
+  actionTxt: { flex: 1, color: c.text, fontWeight: "600", fontSize: 15 },
+  actionSub: { color: c.muted, fontSize: 12, marginTop: 2 },
   ctaBar: { position: "absolute", left: 16, right: 16, bottom: 12, flexDirection: "row", alignItems: "center", gap: 10 },
-  share: { width: 52, height: 52, borderRadius: 26, backgroundColor: c.surface3, alignItems: "center", justifyContent: "center" },
-  cta: { flex: 1, height: 52, borderRadius: 26, backgroundColor: c.red, alignItems: "center", justifyContent: "center" },
-  ctaTxt: { color: "#fff", fontWeight: "900", letterSpacing: 0.8, textTransform: "uppercase" },
+  share: { width: 52, height: 52, borderRadius: 16, backgroundColor: c.surface3, alignItems: "center", justifyContent: "center" },
+  cta: { flex: 1, height: 52, borderRadius: 16, backgroundColor: c.red, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: 8, shadowColor: c.red, shadowOpacity: 0.35, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } },
+  ctaTxt: { color: "#fff", fontWeight: "700", fontSize: 16, letterSpacing: -0.2 },
   sheetModal: { flex: 1, justifyContent: "flex-end" },
   sheetDim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.55)" },
   sheet: { backgroundColor: c.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingBottom: 28 },
@@ -666,15 +732,12 @@ function styleFactory(c) {
   grabber: { width: 40, height: 5, borderRadius: 3, backgroundColor: c.line },
   sheetHead: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12 },
   sheetTitle: { color: c.text, fontSize: 18, fontWeight: "800", flex: 1 },
-  sheetHint: { color: c.muted, fontSize: 12, marginBottom: 8, marginLeft: 48 },
-  sheetHintModal: { color: c.muted, fontSize: 12, marginBottom: 8 },
+  applyAll: { alignItems: "center", paddingVertical: 12, marginTop: 4 },
+  applyAllTxt: { color: c.muted2, fontWeight: "700", fontSize: 13 },
   sheetDone: { color: c.red, fontWeight: "800" },
   loadModal: { flex: 1, justifyContent: "flex-end" },
   loadDim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.55)" },
   loadSheet: { backgroundColor: c.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, paddingBottom: 28 },
-  wheels: { flexDirection: "row", gap: 12, marginTop: 8 },
-  wheelCol: { flex: 1 },
-  wheelLbl: { color: c.muted, textAlign: "center", fontWeight: "700", marginBottom: 4, textTransform: "uppercase", fontSize: 11, letterSpacing: 0.6 },
   sheetRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
   sheetRight: { color: c.muted2, fontWeight: "700" }
 };

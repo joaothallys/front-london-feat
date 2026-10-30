@@ -120,29 +120,23 @@ export default function Progress() {
       return;
     }
     setBusy(true);
-    try {
-      const muscleRange = range === "week" ? "month" : range;
-      const [p, cal, ex, mus, body] = await Promise.all([
-        api.progress.get(range).then(unwrap),
-        api.progress.calendar(cursor.y, cursor.m + 1).then(unwrap),
-        api.progress.exercises("all").then(unwrap),
-        api.progress.muscles(muscleRange).then(unwrap),
-        api.body.get().then(unwrap).catch(() => null)
-      ]);
-      setDash(p && p.data ? p.data : p);
-      setCalendar(asList(cal && cal.data ? cal.data : cal));
-      setExercises(asList(ex && ex.data ? ex.data : ex));
-      setMuscles(asList(mus && mus.data ? mus.data : mus));
-      const bodyList = asList(body && body.history ? body.history : body);
-      setWeights(bodyList.filter((row) => row && (row.weightKg || row.weight)).slice(-12));
-    } catch (err) {
-      setDash(null);
-      setCalendar([]);
-      setExercises([]);
-      setMuscles([]);
-    } finally {
-      setBusy(false);
-    }
+    const muscleRange = range === "week" ? "month" : range;
+    const pick = (res) => (res.status === "fulfilled" ? res.value : null);
+    const inner = (v) => (v && v.data ? v.data : v);
+    const [p, cal, ex, mus, body] = (await Promise.allSettled([
+      api.progress.get(range).then(unwrap),
+      api.progress.calendar(cursor.y, cursor.m + 1).then(unwrap),
+      api.progress.exercises("all").then(unwrap),
+      api.progress.muscles(muscleRange).then(unwrap),
+      api.body.get().then(unwrap)
+    ])).map(pick);
+    setDash(inner(p) || null);
+    setCalendar(asList(inner(cal)));
+    setExercises(asList(inner(ex)));
+    setMuscles(asList(inner(mus)));
+    const bodyList = asList(body && body.history ? body.history : body);
+    setWeights(bodyList.filter((row) => row && (row.weightKg || row.weight)).slice(-12));
+    setBusy(false);
   }, [range, cursor.y, cursor.m]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
@@ -499,7 +493,7 @@ function TrendChart({ values, color }) {
 
 function styleFactory(c) {
   return {
-  title: { color: c.text, fontSize: 26, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase", marginBottom: 14 },
+  title: { color: c.text, fontSize: 28, fontWeight: "800", letterSpacing: -0.6, marginBottom: 14 },
   monthRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
   nav: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" },
   month: { color: c.text, fontWeight: "800", fontSize: 16 },
@@ -513,16 +507,16 @@ function styleFactory(c) {
   dotToday: { borderWidth: 1, borderColor: c.red },
   dayTxt: { color: c.muted2, fontWeight: "700", fontSize: 13 },
   dayTxtOn: { color: "#fff" },
-  session: { flexDirection: "row", alignItems: "center", backgroundColor: c.surface, borderRadius: 16, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: c.line },
+  session: { flexDirection: "row", alignItems: "center", backgroundColor: c.surface, borderRadius: 16, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: "transparent" },
   sessionName: { color: c.text, fontWeight: "800" },
   sessionMeta: { color: c.muted, fontSize: 12, marginTop: 3 },
   grow: { flex: 1 },
   chips: { flexDirection: "row", flexWrap: "wrap", marginTop: 8 },
   stats: { flexDirection: "row", gap: 8, marginBottom: 8 },
-  stat: { flex: 1, backgroundColor: c.surface, borderRadius: 14, paddingVertical: 14, alignItems: "center", borderWidth: 1, borderColor: c.line },
+  stat: { flex: 1, backgroundColor: c.surface, borderRadius: 14, paddingVertical: 14, alignItems: "center", borderWidth: 1, borderColor: "transparent" },
   statN: { color: c.text, fontWeight: "800", fontSize: 20 },
   statL: { color: c.muted, fontSize: 11, marginTop: 4, textTransform: "uppercase", fontWeight: "700" },
-  section: { color: c.muted, fontSize: 11, fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase", marginTop: 14, marginBottom: 10 },
+  section: { color: c.text, fontSize: 17, fontWeight: "700", letterSpacing: -0.2, marginTop: 14, marginBottom: 10 },
   block: { marginTop: 20, marginBottom: 10 },
   blockT: { color: c.muted, fontSize: 11, fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 6 },
   hint: { color: c.muted, fontSize: 13, lineHeight: 18 },
@@ -534,7 +528,7 @@ function styleFactory(c) {
   insight: { flexDirection: "row", gap: 8, marginTop: 16 },
   insightK: { color: c.muted, fontSize: 11, fontWeight: "700", textTransform: "uppercase" },
   insightV: { color: c.text, fontWeight: "800", fontSize: 18, marginTop: 4 },
-  hero: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 18, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: c.line },
+  hero: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 18, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: "transparent" },
   heroK: { color: c.red, fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.5 },
   heroT: { color: c.text, fontWeight: "800", fontSize: 20, marginTop: 2 },
   heroS: { color: c.muted, fontSize: 13, marginTop: 4, lineHeight: 18 },
@@ -545,7 +539,7 @@ function styleFactory(c) {
   muscleFill: { height: 10, backgroundColor: c.red, borderRadius: 6 },
   muscleVol: { color: c.muted2, fontSize: 12, fontWeight: "800" },
   muscleKg: { color: c.muted, width: 40, textAlign: "right", fontSize: 12, fontWeight: "700" },
-  card: { backgroundColor: c.surface, borderRadius: 18, padding: 14, borderWidth: 1, borderColor: c.line },
+  card: { backgroundColor: c.surface, borderRadius: 18, padding: 14, borderWidth: 1, borderColor: "transparent" },
   weightHead: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   weightN: { color: c.text, fontWeight: "800", fontSize: 32, marginTop: 2 },
   weightDelta: { color: c.muted2, fontSize: 13, fontWeight: "700", marginTop: 4 },
@@ -556,7 +550,7 @@ function styleFactory(c) {
   trend: { height: 88, marginTop: 8, marginBottom: 4 },
   cardLink: { color: c.red, fontWeight: "800", fontSize: 13, marginTop: 6 },
   prRow: { gap: 10, paddingRight: 8 },
-  prCard: { width: 148, backgroundColor: c.surface, borderRadius: 18, padding: 12, borderWidth: 1, borderColor: c.line },
+  prCard: { width: 148, backgroundColor: c.surface, borderRadius: 18, padding: 12, borderWidth: 1, borderColor: "transparent" },
   prName: { color: c.text, fontWeight: "800", fontSize: 13, marginTop: 10, minHeight: 34 },
   prN: { color: c.text, fontWeight: "800", fontSize: 28, marginTop: 4 },
   prU: { color: c.muted, fontSize: 11, fontWeight: "700", textTransform: "uppercase", marginBottom: 8 },
@@ -570,6 +564,6 @@ function styleFactory(c) {
   rankN: { color: c.red, fontWeight: "900", width: 28 },
   rankVol: { color: c.text, fontWeight: "800" },
   link: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 14 },
-  linkTxt: { color: c.text, fontWeight: "800", letterSpacing: 0.3, textTransform: "uppercase", fontSize: 13 }
+  linkTxt: { color: c.text, fontWeight: "600", fontSize: 15 }
 };
 }

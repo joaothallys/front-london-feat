@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Alert, View } from "react-native";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { BiometricService } from "@shared/services/account/BiometricService.js";
 import { confirmDeleteAccount } from "@shared/services/account/deleteAccountFlow.js";
 import { Cell, Group, Screen, Section, Segmented, Stepper, TopBar } from "../src/components/ui.js";
-import { HapticPressable } from "../src/components/HapticPressable.js";
 import { useAppState } from "../src/state/AppState.js";
 import { useTheme } from "../src/theme.js";
-import { setRestSoundOn } from "../src/session/restAlert.js";
+import { playRestAlertNow, setRestSoundOn } from "../src/session/restAlert.js";
 
 const THEMES = [
   ["system", "Sistema"],
@@ -15,9 +14,15 @@ const THEMES = [
   ["dark", "Escuro"]
 ];
 
+const LEVELS = [
+  ["iniciante", "Iniciante"],
+  ["intermediario", "Intermediário"],
+  ["avancado", "Avançado"]
+];
+
 export default function Settings() {
   const { state, refresh } = useAppState();
-  const { colors, preference, setPreference } = useTheme();
+  const { preference, setPreference } = useTheme();
   const [faceOn, setFaceOn] = useState(false);
   const [faceLabel, setFaceLabel] = useState("Face ID");
   const [faceOk, setFaceOk] = useState(false);
@@ -52,6 +57,8 @@ export default function Settings() {
     if (ok) setFaceOn(true);
   }
 
+  const rest = Number(state.profile.restDefault) || 90;
+
   function sync() {
     if (SessionService.hasToken()) SessionService.pushProfile(state).catch(() => {});
     refresh();
@@ -65,6 +72,17 @@ export default function Settings() {
       <Group>
         <View style={{ padding: 6 }}>
           <Segmented options={THEMES} value={preference} onChange={setPreference} />
+        </View>
+      </Group>
+
+      <Section>Seu nível</Section>
+      <Group>
+        <View style={{ padding: 6 }}>
+          <Segmented
+            options={LEVELS}
+            value={state.profile.level || "intermediario"}
+            onChange={(level) => { state.profile.level = level; sync(); }}
+          />
         </View>
       </Group>
 
@@ -82,6 +100,7 @@ export default function Settings() {
           switchOn={state.profile.sound !== false}
           onSwitch={(on) => {
             setRestSoundOn(on);
+            if (on) playRestAlertNow();
             sync();
           }}
         />
@@ -91,26 +110,28 @@ export default function Settings() {
           subtitle="Pausa padrão entre séries"
           right={(
             <Stepper
-              value={state.profile.restDefault}
+              value={rest}
               suffix="s"
-              onMinus={() => { state.profile.restDefault = Math.max(30, state.profile.restDefault - 15); sync(); }}
-              onPlus={() => { state.profile.restDefault = state.profile.restDefault + 15; sync(); }}
+              onMinus={() => { state.profile.restDefault = Math.max(30, rest - 15); sync(); }}
+              onPlus={() => { state.profile.restDefault = Math.min(300, rest + 15); sync(); }}
             />
           )}
         />
       </Group>
 
       {loggedIn ? (
-        <View style={{ marginTop: 40, marginBottom: 12, alignItems: "center" }}>
-          <HapticPressable
-            onPress={() => confirmDeleteAccount({ deleting, setDeleting, refresh })}
-            disabled={deleting}
-          >
-            <Text style={{ color: colors.muted, fontSize: 13 }}>
-              {deleting ? "Excluindo conta…" : "Excluir conta"}
-            </Text>
-          </HapticPressable>
-        </View>
+        <>
+          <Section>Conta</Section>
+          <Group>
+            <Cell
+              last
+              danger
+              title="Excluir minha conta"
+              subtitle={deleting ? "Excluindo conta…" : "Apaga a conta e os dados pessoais. Essa ação é permanente."}
+              onPress={() => confirmDeleteAccount({ deleting, setDeleting, refresh })}
+            />
+          </Group>
+        </>
       ) : null}
     </Screen>
   );

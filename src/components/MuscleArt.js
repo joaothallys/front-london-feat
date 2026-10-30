@@ -18,7 +18,7 @@ export function MuscleArt({ id, width = 88, height = 88, compact, color }) {
   const art = muscleArt(id);
   const focus = (art && FOCUS[art.id]) || FOCUS.peito;
   const groups = focus.view === "back" ? POSTERIOR : ANTERIOR;
-  const body = scheme === "light" ? "#c8d2d5" : "#3a4e53";
+  const body = scheme === "light" ? "#D4D4D8" : "#3F3F46";
   const hot = color || colors.red;
   const viewBox = compact && focus.crop
     ? focus.crop
@@ -34,7 +34,7 @@ export function MuscleArt({ id, width = 88, height = 88, compact, color }) {
               key={group.muscle + "-" + i}
               points={toPoints(pts)}
               fill={fill}
-              stroke={scheme === "light" ? "#eef2f3" : "#001013"}
+              stroke={scheme === "light" ? "#F7F7F8" : "#09090B"}
               strokeWidth="0.35"
             />
           ));

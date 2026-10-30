@@ -2,6 +2,7 @@ import { storageGet, storageSet, storageRemove } from "../platform/storage.js";
 import { apiBaseUrl, clientDevice } from "../platform/env.js";
 
 const TOKEN_KEY = "london-fitness-tokens";
+const DEFAULT_TIMEOUT_MS = 20000;
 const DEVICE = clientDevice();
 
 function baseUrl() {
@@ -83,9 +84,11 @@ async function refreshAccess() {
     let json = null;
     try { json = await res.json(); } catch (e) { json = null; }
     if (!res.ok) {
-      clearTokens();
+      // Só descarta a sessão quando o servidor recusou o token; erro 5xx é passageiro.
+      if (res.status === 400 || res.status === 401 || res.status === 403) clearTokens();
       return false;
     }
+    json = json || {};
     writeTokens({
       accessToken: json.accessToken || (json.data && json.data.accessToken),
       refreshToken: json.refreshToken || (json.data && json.data.refreshToken) || refreshToken
@@ -97,7 +100,7 @@ async function refreshAccess() {
 
 async function request(path, opts, retry) {
   const init = Object.assign({ method: "GET" }, opts || {});
-  const timeoutMs = init.timeoutMs;
+  const timeoutMs = init.timeoutMs || DEFAULT_TIMEOUT_MS;
   delete init.timeoutMs;
   const headers = authHeaders(init.headers);
   if (init.body && typeof init.body === "object" && !(init.body instanceof FormData)) {

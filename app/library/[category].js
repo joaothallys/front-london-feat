@@ -129,7 +129,7 @@ function styleFactory(c) {
     filters: { flexDirection: "row", flexWrap: "wrap" },
     count: { color: c.muted, fontSize: 12, marginBottom: 10 },
     grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-    card: { width: "48%", backgroundColor: c.surface, borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: c.line, paddingBottom: 10 },
+    card: { width: "48%", backgroundColor: c.surface, borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: "transparent", paddingBottom: 10 },
     media: { width: "100%", height: 128, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
     img: { width: "100%", height: 128, backgroundColor: "#fff" },
     ph: { width: "100%", height: 128, backgroundColor: "#fff" },

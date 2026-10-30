@@ -3,22 +3,31 @@ import { AppState } from "react-native";
 import { api, unwrap } from "@shared/api/client.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { store } from "@shared/store/local-store.js";
+import { useAppState } from "./AppState.js";
 import { D, exerciseOf } from "../catalog.js";
 import { computeWorkoutStats } from "../workout/stats.js";
+import { keepWorkoutPhoto } from "../workout/pickPhoto.js";
 import { beginRest, restStillRunning } from "../session/restClock.js";
 import { endWorkoutLive, subscribeWorkoutLiveActions, syncWorkoutLive } from "../session/workoutLiveSync.js";
+import { anySetDone, countedSets, finishBody } from "../session/finishPayload.js";
+import { shareItem } from "../session/shareLink.js";
+import { workoutName } from "@shared/domain/history.js";
+import { flushPendingSessions, isRetryable, queueSession } from "../session/pendingSync.js";
 
 const Ctx = createContext(null);
 
 function buildItems(items, restDefault) {
   return items.filter((it) => exerciseOf(it.id)).map((it) => {
     const e = exerciseOf(it.id);
+    const kg = Number(it.kg || e.kg) || 0;
+    const reps = Number(it.reps || e.reps) || 10;
+    const count = Math.max(1, Number(it.sets || e.sets) || 3);
     const sets = [];
-    sets.push({ type: "W", kg: Math.max(0, Math.round((it.kg || e.kg) * 0.5)), reps: 12, done: false });
-    for (let i = 0; i < (it.sets || e.sets); i += 1) {
-      sets.push({ type: "N", kg: it.kg || e.kg, reps: it.reps || e.reps, done: false });
+    sets.push({ type: "W", kg: Math.max(0, Math.round(kg * 0.5)), reps: 12, done: false });
+    for (let i = 0; i < count; i += 1) {
+      sets.push({ type: "N", kg, reps, done: false });
     }
-    return { id: it.id, rest: it.rest || e.rest || restDefault, sets };
+    return { id: it.id, rest: Number(it.rest || e.rest || restDefault) || 90, sets };
   });
 }
 
@@ -51,6 +60,11 @@ function completeExercises(live) {
   }));
 }
 
+function resolveId(id) {
+  const e = exerciseOf(id);
+  return (e && e.id) || id;
+}
+
 function musclesOf(live) {
   const muscles = {};
   (live.items || []).forEach((it) => {
@@ -69,7 +83,17 @@ function normalizeLive(live) {
   return Object.assign({}, live, { rest: null });
 }
 
+// Séries realmente feitas, no formato do link compartilhado (lumenfit-web /t/<id>).
+function completedShareItems(live) {
+  const anyDone = anySetDone(live);
+  return ((live && live.items) || [])
+    .map((it) => ({ it, sets: countedSets(it, anyDone) }))
+    .filter((row) => row.sets.length)
+    .map((row) => shareItem(row.it.id, row.sets, row.it.rest));
+}
+
 export function LiveSessionProvider({ children }) {
+  const { state, refresh, tick } = useAppState();
   const [live, setLive] = useState(() => {
     try {
       return normalizeLive(store.get().liveSession || null);
@@ -92,7 +116,8 @@ export function LiveSessionProvider({ children }) {
     } catch (err) {}
   }, [live]);
 
-  const push = useCallback((next) => {
+  const push = useCallback((value) => {
+    const next = typeof value === "function" ? value(liveRef.current) : value;
     liveRef.current = next;
     setLive(next);
     if (!next || !next.apiId || !SessionService.hasToken()) return;
@@ -174,13 +199,23 @@ export function LiveSessionProvider({ children }) {
   }, [live, skipRest, goToNext, completeCurrentSet]);
 
   useEffect(() => {
+    flushPendingSessions().then((n) => { if (n) refresh(); }).catch(() => {});
     const sub = AppState.addEventListener("change", (status) => {
       if (status !== "active") return;
       const cur = liveRef.current;
       if (cur && cur.rest && !restStillRunning(cur.rest)) skipRest();
+      flushPendingSessions().then((n) => { if (n) refresh(); }).catch(() => {});
     });
     return () => sub.remove();
-  }, [skipRest]);
+  }, [skipRest, refresh]);
+
+  useEffect(() => {
+    if (!state.session && liveRef.current) {
+      liveRef.current = null;
+      setLive(null);
+      setSummary(null);
+    }
+  }, [state, tick]);
 
   const start = useCallback((name, items, meta) => {
     const S = store.get();
@@ -221,40 +256,38 @@ export function LiveSessionProvider({ children }) {
     let rec = {
       id: "local-" + Date.now(),
       date: new Date().toISOString(),
-      name: live.name,
+      name: workoutName(live.name),
       duration: stats.duration,
       volume: stats.volume,
       calories: stats.calories,
-      exercises: stats.exerciseCount,
-      sets: stats.totalSets,
+      exercises: stats.completedCount,
+      sets: stats.doneSets,
       totalReps: stats.reps,
       muscles: stats.muscleLabels,
       lines: stats.lines,
-      photo: (extras && extras.photo) || null
+      photo: await keepWorkoutPhoto(extras && extras.photo),
+      shareItems: completedShareItems(live)
     };
 
     if (SessionService.hasToken()) {
-      const body = {
-        name: live.name,
-        sourceType: (live.meta && live.meta.sourceType) || "custom",
-        sourceId: (live.meta && live.meta.sourceId) || null,
-        durationMin: stats.duration,
-        muscles,
-        saveAsWorkout: false,
-        exercises: completeExercises(live)
-      };
-      if (live.apiId) body.sessionId = live.apiId;
-      const data = unwrap(await api.sessions.finish(body)) || {};
-      const mapped = SessionService.mapHistory(data);
-      rec = Object.assign({}, rec, mapped, {
-        volume: mapped.volume || rec.volume,
-        calories: mapped.calories || rec.calories,
-        duration: mapped.duration || rec.duration,
-        photo: rec.photo,
-        totalReps: rec.totalReps,
-        muscles: rec.muscles,
-        lines: rec.lines
-      });
+      const body = finishBody(live, { durationMin: stats.duration, muscles, resolveId });
+      try {
+        const data = unwrap(await api.sessions.finish(body)) || {};
+        const mapped = SessionService.mapHistory(data);
+        rec = Object.assign({}, rec, mapped, {
+          id: mapped.id || rec.id,
+          volume: mapped.volume || rec.volume,
+          calories: mapped.calories || rec.calories,
+          duration: mapped.duration || rec.duration,
+          exercises: mapped.exercises || rec.exercises,
+          sets: mapped.sets || rec.sets
+        });
+      } catch (err) {
+        if (isRetryable(err)) {
+          rec.pendingSync = true;
+          queueSession(rec.id, body);
+        }
+      }
     }
 
     S.history = [rec].concat((S.history || []).filter((row) => row.id !== rec.id));

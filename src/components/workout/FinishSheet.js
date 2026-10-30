@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Alert, Image, Modal, Pressable, Text, View } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -15,13 +15,18 @@ export function FinishSheet({ visible, live, busy, onClose, onConfirm }) {
   const [duration, setDuration] = useState(() => computeWorkoutStats(live).duration);
   const stats = useMemo(() => computeWorkoutStats(live, duration), [live, duration]);
 
+  // A folha fica montada desde o início do treino; recalcula a duração ao abrir.
+  useEffect(() => {
+    if (visible && live) setDuration(computeWorkoutStats(live).duration);
+  }, [visible]);
+
   function editDuration() {
     Alert.prompt("Duração", "Minutos do treino", [
       { text: "Cancelar", style: "cancel" },
       {
         text: "OK",
         onPress: (value) => {
-          const n = Math.max(1, Math.round(Number(value) || duration));
+          const n = Math.max(1, Math.min(600, Math.round(Number(String(value).replace(",", ".")) || duration)));
           setDuration(n);
         }
       }
@@ -154,8 +159,8 @@ function styleFactory(c) {
     metric: { flex: 1, alignItems: "center", gap: 4 },
     metricVal: { color: c.text, fontWeight: "900", fontSize: 20 },
     metricLbl: { color: c.muted, fontSize: 11, textAlign: "center" },
-    cta: { height: 52, borderRadius: 26, backgroundColor: c.red, alignItems: "center", justifyContent: "center" },
-    ctaTxt: { color: "#fff", fontWeight: "900", letterSpacing: 0.8, textTransform: "uppercase" },
+    cta: { height: 52, borderRadius: 16, backgroundColor: c.red, alignItems: "center", justifyContent: "center" },
+    ctaTxt: { color: "#fff", fontWeight: "700", fontSize: 16, letterSpacing: -0.2 },
     opt: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface2, borderRadius: 16, padding: 16, marginBottom: 10 },
     optTxt: { color: c.text, fontWeight: "800", fontSize: 15 }
   };

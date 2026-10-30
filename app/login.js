@@ -287,7 +287,7 @@ function styleFactory(c) {
   h: { color: c.text, fontSize: 26, fontWeight: "800" },
   muted: { color: c.muted, marginTop: 6, textAlign: "center" },
   tabs: { flexDirection: "row", gap: 8, marginBottom: 16 },
-  tab: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: c.line, backgroundColor: c.surface, alignItems: "center" },
+  tab: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: "transparent", backgroundColor: c.surface, alignItems: "center" },
   tabOn: { backgroundColor: c.redSoft, borderColor: c.red },
   tabTxt: { color: c.muted, fontWeight: "700", fontSize: 15 },
   tabTxtOn: { color: c.text },
@@ -296,7 +296,7 @@ function styleFactory(c) {
   gymLabel: { color: c.muted, fontSize: 12, fontWeight: "600", marginBottom: 6 },
   gymHint: { color: c.muted, fontSize: 12, lineHeight: 17, marginBottom: 10 },
   gymRow: { flexDirection: "row", gap: 8 },
-  gymCard: { flex: 1, backgroundColor: c.surface, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 12 },
+  gymCard: { flex: 1, backgroundColor: c.surface, borderWidth: 1, borderColor: "transparent", borderRadius: 14, padding: 12 },
   gymCardOn: { borderColor: c.red, backgroundColor: c.redSoft },
   gymTag: { color: c.red, fontSize: 10, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase", marginBottom: 4 },
   gymTitle: { color: c.text, fontWeight: "800", fontSize: 15 },
@@ -319,7 +319,7 @@ function styleFactory(c) {
   appleTxtDark: { color: "#1f1f1f", fontWeight: "700", fontSize: 13 },
   appleTxtLight: { color: "#ffffff", fontWeight: "700", fontSize: 13 },
   toastWrap: { position: "absolute", left: 16, right: 16, bottom: 28, alignItems: "center" },
-  toast: { backgroundColor: c.surface3, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, maxWidth: 360 },
+  toast: { backgroundColor: c.surface3, borderWidth: 1, borderColor: "transparent", borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, maxWidth: 360 },
   toastTxt: { color: c.text, fontWeight: "700", fontSize: 14, textAlign: "center" }
 };
 }

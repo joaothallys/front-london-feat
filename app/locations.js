@@ -76,7 +76,7 @@ function styleFactory(c) {
     cardOn: { borderColor: c.red, backgroundColor: c.redSoft },
     locTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 },
     type: { color: c.red, fontSize: 12, fontWeight: "700", letterSpacing: 0.8, textTransform: "uppercase" },
-    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: c.surface2, borderWidth: 1, borderColor: c.line },
+    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: c.surface2, borderWidth: 1, borderColor: "transparent" },
     badgeOn: { backgroundColor: c.red, borderColor: c.red },
     badgeTxt: { color: c.muted2, fontSize: 11, fontWeight: "700" },
     badgeTxtOn: { color: "#ffffff" },

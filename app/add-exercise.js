@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, InteractionManager, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -59,11 +59,17 @@ export default function AddExercise() {
       return;
     }
     setLoading(true);
-    const task = InteractionManager.runAfterInteractions(() => {
+    // InteractionManager saiu do RN 0.86: adia o filtro para depois da transição de tela.
+    const run = () => {
       setList(loadRows(tab, q, muscle));
       setLoading(false);
-    });
-    return () => task.cancel();
+    };
+    if (typeof requestIdleCallback === "function") {
+      const id = requestIdleCallback(run, { timeout: 300 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = setTimeout(run, 0);
+    return () => clearTimeout(id);
   }, [tab, q, muscle, showMuscles]);
 
   function changeTab(id) {
@@ -218,7 +224,7 @@ function styleFactory(c) {
   check: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, borderColor: c.muted, alignItems: "center", justifyContent: "center" },
   checkOn: { backgroundColor: c.red, borderColor: c.red },
   empty: { color: c.muted, textAlign: "center", marginTop: 32 },
-  cta: { position: "absolute", left: 16, right: 16, bottom: 18, height: 52, borderRadius: 26, backgroundColor: c.red, alignItems: "center", justifyContent: "center" },
-  ctaTxt: { color: "#fff", fontWeight: "900", letterSpacing: 0.6, textTransform: "uppercase" }
+  cta: { position: "absolute", left: 16, right: 16, bottom: 18, height: 52, borderRadius: 16, backgroundColor: c.red, alignItems: "center", justifyContent: "center" },
+  ctaTxt: { color: "#fff", fontWeight: "700", fontSize: 16, letterSpacing: -0.2 }
 };
 }

@@ -6,7 +6,7 @@ import { Button, Screen, TopBar } from "../../src/components/ui.js";
 import { ExerciseThumb } from "../../src/components/ExerciseThumb.js";
 import { HapticPressable } from "../../src/components/HapticPressable.js";
 import { useAppState } from "../../src/state/AppState.js";
-import { useLive } from "../../src/state/LiveSession.js";
+import { useStartWorkout } from "../../src/session/useStartWorkout.js";
 import { exerciseOf } from "../../src/catalog.js";
 import { useStyles, useTheme } from "../../src/theme.js";
 
@@ -15,7 +15,7 @@ export default function SavedWorkout() {
   const styles = useStyles(styleFactory);
   const { id } = useLocalSearchParams();
   const { state } = useAppState();
-  const { start } = useLive();
+  const startWorkout = useStartWorkout();
   const workout = (state.custom || []).find((row) => String(row.id) === String(id));
 
   if (!workout) {
@@ -30,8 +30,7 @@ export default function SavedWorkout() {
   const items = workout.items || [];
 
   function begin() {
-    const live = start(workout.name, items, { sourceType: "custom", sourceId: workout.id });
-    if (live) router.push("/session");
+    startWorkout(workout.name, items, { sourceType: "custom", sourceId: workout.id });
   }
 
   return (

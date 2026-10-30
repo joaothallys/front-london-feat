@@ -142,7 +142,7 @@ function styleFactory(c) {
     lineHeight: 34
   },
   footer: { paddingBottom: 8 },
-  choice: { backgroundColor: c.surface, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: c.line, marginBottom: 10 },
+  choice: { backgroundColor: c.surface, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "transparent", marginBottom: 10 },
   choiceOn: { borderColor: c.red, backgroundColor: c.redSoft },
   choiceT: { color: c.text, fontWeight: "800", fontSize: 16 },
   choiceD: { color: c.muted, marginTop: 4 }

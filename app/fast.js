@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { View } from "react-native";
-import { router } from "expo-router";
 import { Button, Chip, Screen, Section, Segmented, TopBar } from "../src/components/ui.js";
-import { useLive } from "../src/state/LiveSession.js";
+import { useStartWorkout } from "../src/session/useStartWorkout.js";
 import { D } from "../src/catalog.js";
 
 export default function Fast() {
-  const { start } = useLive();
+  const startWorkout = useStartWorkout();
   const [sel, setSel] = useState([]);
   const [dur, setDur] = useState(30);
 
@@ -22,8 +21,7 @@ export default function Fast() {
     const items = D.exercises.filter((e) => mus.indexOf(e.muscle) >= 0).slice(0, n).map((e) => ({
       id: e.id, sets: 3, reps: e.reps, kg: e.kg, rest: 45
     }));
-    const live = start("Rápido · " + mus.join(" + "), items, { sourceType: "fast" });
-    if (live) router.push("/session");
+    startWorkout("Rápido · " + mus.join(" + "), items, { sourceType: "fast" });
   }
 
   return (
