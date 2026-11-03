@@ -16,19 +16,7 @@ import { MUSCLE_ART } from "../domain/muscle-art.js";
     name: "Ana Costa",
     email: "aluno@londonfitness.com",
     phone: "(11) 98888-1200",
-    code: "LF-2024-1847",
-    plan: "Mensal Premium",
-    status: "ativa",
-    startedAt: "2026-07-19",
-    expiresAt: "2026-09-18",
-    nextPayment: "2026-09-18",
-    amount: 149.9,
-    unit: "Unidade Centro",
-    payments: [
-      { date: "2026-07-19", value: 149.9, status: "Pago" },
-      { date: "2026-08-18", value: 149.9, status: "Pago" },
-      { date: "2026-09-18", value: 149.9, status: "Em aberto" }
-    ]
+    unit: "Unidade Centro"
   };
 
   const data = {

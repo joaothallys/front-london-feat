@@ -32,7 +32,7 @@ export default function Splash() {
           style={[styles.logo, { opacity, transform: [{ scale }] }]}
         />
         <Text style={styles.h1}>LUMEN<Text style={styles.red}>FIT</Text></Text>
-        <Text style={styles.p}>Treino, matrícula e evolução. Feito para a sua academia.</Text>
+        <Text style={styles.p}>Treino e evolução. Gratuito, sem assinatura.</Text>
       </View>
       <Button
         label="Começar"

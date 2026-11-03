@@ -267,14 +267,9 @@ export const api = {
   },
 
   membership: {
-    get() { return request("/api/membership"); },
-    create(body) { return request("/api/membership", { method: "POST", body }); },
-    payments() { return request("/api/membership/payments"); },
-    addPayment(body) { return request("/api/membership/payments", { method: "POST", body }); },
-    updatePayment(id, body) { return request("/api/membership/payments/" + id, { method: "PUT", body }); }
+    get() { return request("/api/membership"); }
   },
   gymUnits() { return request("/api/gym-units"); },
-  membershipPlans() { return request("/api/membership-plans"); },
 
   locations: {
     list() { return request("/api/locations"); },

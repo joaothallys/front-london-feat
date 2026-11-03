@@ -90,7 +90,6 @@ export default function Profile() {
       <Row title="Medidas corporais" subtitle="Altura, peso e meta" onPress={() => router.push("/measures")} />
       <Row title="Nível e treino" subtitle={LEVELS[state.profile.level] || "Ajustar nível e descanso"} onPress={() => router.push("/settings")} />
       <Row title="Locais de treino" subtitle={(state.locations || []).length + " locais"} onPress={() => router.push("/locations")} />
-      <Row title="Matrícula" subtitle={state.member.plan || "Ver plano e pagamentos"} onPress={() => router.push("/membership")} />
       <Section>Preferências</Section>
       <Group>
         <Cell

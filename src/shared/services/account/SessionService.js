@@ -76,7 +76,6 @@ function asList(value) {
   if (Array.isArray(value.workouts)) return value.workouts;
   if (Array.isArray(value.sessions)) return value.sessions;
   if (Array.isArray(value.favorites)) return value.favorites;
-  if (Array.isArray(value.payments)) return value.payments;
   if (Array.isArray(value.plans)) return value.plans;
   if (Array.isArray(value.history)) return value.history;
   return [];
@@ -132,26 +131,12 @@ function mapPlan(raw) {
 function mapMembership(raw, profile, email) {
   const root = unwrap(raw) || {};
   const membership = root.membership || root;
-  const plan = root.plan || membership.plan || {};
   const unit = root.unit || membership.unit || {};
-  const payments = asList(root.payments || membership.payments).map((row) => ({
-    date: first(row, ["paidAt", "dueDate", "date", "paid_at", "due_date"], ""),
-    value: Number(first(row, ["amount", "value"], 0)) || 0,
-    status: first(row, ["status"], "")
-  }));
   return {
     name: first(profile, ["name"], first(membership, ["name"], "")),
     email: email || first(membership, ["email"], ""),
     phone: first(profile, ["phone"], first(membership, ["phone"], "")),
-    code: first(membership, ["memberCode", "member_code", "code"], ""),
-    plan: first(plan, ["name"], first(membership, ["planName", "plan"], "")),
-    status: first(membership, ["status"], "ativa"),
-    startedAt: first(membership, ["startedAt", "started_at"], ""),
-    expiresAt: first(membership, ["expiresAt", "expires_at"], ""),
-    nextPayment: first(membership, ["nextPaymentAt", "next_payment_at", "nextPayment"], ""),
-    amount: Number(first(plan, ["amount"], first(membership, ["amount"], 0))) || 0,
-    unit: first(unit, ["name"], first(membership, ["unitName", "unit"], "")),
-    payments
+    unit: first(unit, ["name"], first(membership, ["unitName", "unit"], ""))
   };
 }
 
