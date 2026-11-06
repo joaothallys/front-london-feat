@@ -8,21 +8,13 @@ import { BiometricService } from "@shared/services/account/BiometricService.js";
 import { useGoogleSignIn } from "@shared/services/account/GoogleAuthService.js";
 import { signInWithApple } from "@shared/services/account/AppleAuthService.js";
 import { isAuthCanceled, isExistingSocialAccount, passwordAuthMessage, socialAuthMessage } from "@shared/services/account/socialAuth.js";
+import { isValidEmail, isValidName, isValidPhone, maskEmail, maskName, maskPhone } from "@shared/domain/masks.js";
 import { applyGymChoice, LONDON_FIT_ID } from "@shared/domain/locations.js";
 import { store } from "@shared/store/local-store.js";
 import { Button, Field } from "../src/components/ui.js";
 import { HapticPressable } from "../src/components/HapticPressable.js";
 import { useAppState } from "../src/state/AppState.js";
 import { useStyles, useTheme } from "../src/theme.js";
-
-function maskPhone(value) {
-  const d = String(value || "").replace(/\D/g, "").slice(0, 11);
-  if (!d) return "";
-  if (d.length <= 2) return "(" + d;
-  if (d.length <= 6) return "(" + d.slice(0, 2) + ") " + d.slice(2);
-  if (d.length <= 10) return "(" + d.slice(0, 2) + ") " + d.slice(2, 6) + "-" + d.slice(6);
-  return "(" + d.slice(0, 2) + ") " + d.slice(2, 7) + "-" + d.slice(7);
-}
 
 export default function Login() {
   const { scheme } = useTheme();
@@ -65,15 +57,13 @@ export default function Login() {
       setFaceLabel(label);
       const can = await BiometricService.canUse();
       const on = await BiometricService.isEnabled();
-      const creds = await BiometricService.credentials();
-      if (!live || !can || !on || !creds) return;
+      const canResume = await BiometricService.canResume();
+      if (!live || !can || !on || !canResume) return;
       if (!BiometricService.consumeAutoLogin()) return;
       setBusy("face");
       try {
-        const ok = await BiometricService.authenticate("Entrar no LumenFit com " + label);
+        const ok = await SessionService.unlockWithBiometrics("Entrar no LumenFit com " + label);
         if (!live || !ok) return;
-        await SessionService.login(creds.email, creds.password);
-        if (!live) return;
         await afterAuth();
       } catch (err) {
         if (live) setError(passwordAuthMessage(err));
@@ -86,12 +76,24 @@ export default function Login() {
 
   async function submit() {
     setError("");
+    if (isReg && !isValidName(name)) {
+      setError("Informe seu nome.");
+      return;
+    }
     if (!email.trim() || !password) {
       setError("Informe e-mail e senha.");
       return;
     }
+    if (isReg && !isValidEmail(email)) {
+      setError("Informe um e-mail válido.");
+      return;
+    }
     if (isReg && password.length < 6) {
       setError("A senha precisa ter no mínimo 6 caracteres.");
+      return;
+    }
+    if (isReg && phone && !isValidPhone(phone)) {
+      setError("Informe um telefone válido com DDD.");
       return;
     }
     setBusy("email");
@@ -114,7 +116,6 @@ export default function Login() {
       refresh();
       const go = () => router.replace(state.onboardingDone ? "/(tabs)/home" : "/onboarding");
       if (await BiometricService.isEnabled()) {
-        await BiometricService.rememberLogin(email.trim(), password);
         go();
         return;
       }
@@ -125,7 +126,7 @@ export default function Login() {
           {
             text: "Ativar",
             onPress: async () => {
-              await BiometricService.enable(email.trim(), password);
+              await BiometricService.enable();
               go();
             }
           }
@@ -195,10 +196,10 @@ export default function Login() {
             </Pressable>
           </View>
 
-          {isReg ? <Field label="Nome" value={name} onChangeText={setName} autoCapitalize="words" placeholder="Seu nome" /> : null}
-          <Field label="E-mail" value={email} onChangeText={setEmail} keyboardType="email-address" placeholder="seu@email.com" autoComplete="email" />
+          {isReg ? <Field label="Nome" value={name} onChangeText={(v) => setName(maskName(v))} autoCapitalize="words" placeholder="Seu nome" /> : null}
+          <Field label="E-mail" value={email} onChangeText={(v) => setEmail(isReg ? maskEmail(v) : v)} keyboardType="email-address" placeholder="seu@email.com" autoComplete="email" autoCorrect={false} />
           <Field label="Senha" value={password} onChangeText={setPassword} secureTextEntry placeholder={isReg ? "Mínimo 6 caracteres" : "Sua senha"} autoComplete={isReg ? "new-password" : "password"} />
-          {isReg ? <Field label="Telefone" value={phone} onChangeText={(v) => setPhone(maskPhone(v))} keyboardType="phone-pad" placeholder="(11) 99999-9999" maxLength={16} /> : null}
+          {isReg ? <Field label="Telefone" value={phone} onChangeText={(v) => setPhone(maskPhone(v))} keyboardType="phone-pad" placeholder="(11) 99999-9999" /> : null}
           {isReg ? (
             <View style={styles.gymBlock}>
               <Text style={styles.gymLabel}>Academia</Text>

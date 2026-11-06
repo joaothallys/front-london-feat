@@ -2,14 +2,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setStorageBackend, seedStorageCache } from "@shared/platform/storage.js";
 import { store } from "@shared/store/local-store.js";
 import { ExerciseCache } from "@shared/services/cache/ExerciseCache.js";
+import { BiometricService } from "@shared/services/account/BiometricService.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { applyApiUrl } from "./config.js";
 import { registerCatalog } from "./catalog.js";
 import { hydrateGifCache } from "./media/GifCache.js";
+import { loadTokens, removeTokens, saveTokens } from "./tokenVault.js";
 
+const TOKEN_KEY = "london-fitness-tokens";
 const KEYS = [
   "london-fitness-v2",
-  "london-fitness-tokens",
   "london-fitness-exercise-cache"
 ];
 
@@ -26,6 +28,8 @@ export async function bootNative() {
     pairs.forEach(([key, value]) => {
       if (value != null) cache[key] = value;
     });
+    const tokens = await loadTokens(TOKEN_KEY);
+    if (tokens != null) cache[TOKEN_KEY] = tokens;
     seedStorageCache(cache);
     setStorageBackend({
       get(key) {
@@ -33,11 +37,13 @@ export async function bootNative() {
       },
       set(key, value) {
         cache[key] = value;
-        AsyncStorage.setItem(key, value).catch(() => {});
+        if (key === TOKEN_KEY) saveTokens(key, value);
+        else AsyncStorage.setItem(key, value).catch(() => {});
       },
       remove(key) {
         delete cache[key];
-        AsyncStorage.removeItem(key).catch(() => {});
+        if (key === TOKEN_KEY) removeTokens(key);
+        else AsyncStorage.removeItem(key).catch(() => {});
       }
     });
     try { store.rehydrate(); } catch (err) {}
@@ -45,6 +51,8 @@ export async function bootNative() {
     try { registerCatalog(); } catch (err) {}
     hydrateGifCache().catch(() => {});
     if (SessionService.hasToken()) {
+      // Com a sessão ativa a senha antiga já não serve para nada.
+      BiometricService.purgeLegacyPassword().catch(() => {});
       try {
         await SessionService.hydrate(store.get());
         store.persist();

@@ -332,11 +332,39 @@ export const SessionService = {
 
   async logout() {
     const { refreshToken } = readTokens();
-    try {
-      if (refreshToken) await api.auth.logout(refreshToken);
-    } catch (err) {}
+    const locked = await BiometricService.lockSession(refreshToken);
+    if (!locked) {
+      try {
+        if (refreshToken) await api.auth.logout(refreshToken);
+      } catch (err) {}
+    }
     BiometricService.suppressAutoLogin();
     clearTokens();
+  },
+
+  // Devolve false quando a pessoa cancelou a biometria.
+  async unlockWithBiometrics(prompt) {
+    const legacy = await BiometricService.legacyCredentials();
+    if (legacy) {
+      if (!(await BiometricService.authenticate(prompt))) return false;
+      await api.auth.login({ email: legacy.email, password: legacy.password });
+      await BiometricService.purgeLegacyPassword();
+      return true;
+    }
+    const refreshToken = await BiometricService.unlockSession(prompt);
+    if (!refreshToken) return false;
+    try {
+      await api.auth.refresh(refreshToken);
+    } catch (err) {
+      if (err && err.status === 401) {
+        await BiometricService.clearLockedSession();
+        throw new Error("Sua sessão expirou. Entre com sua senha.");
+      }
+      throw err;
+    }
+    // O token acabou de ser trocado; reenviá-lo seria tratado como roubo.
+    await BiometricService.clearLockedSession();
+    return true;
   },
 
   async deleteAccount() {

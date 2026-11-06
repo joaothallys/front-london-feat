@@ -53,7 +53,7 @@ export default function Settings() {
       setFaceOn(false);
       return;
     }
-    const ok = await BiometricService.enable(state.profile.email || "", "");
+    const ok = await BiometricService.enable();
     if (ok) setFaceOn(true);
   }
 
