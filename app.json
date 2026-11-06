@@ -2,7 +2,7 @@
   "expo": {
     "name": "LumenFit",
     "slug": "lumenfit",
-    "version": "1.0.10",
+    "version": "1.0.11",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": [
@@ -16,7 +16,7 @@
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.londonfitness.app",
       "appleTeamId": "2572AZCAGV",
-      "buildNumber": "19",
+      "buildNumber": "20",
       "entitlements": {
         "com.apple.security.application-groups": [
           "group.com.londonfitness.app"

@@ -2,14 +2,22 @@ import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 
 const ENABLED = "lumen.bio.enabled";
-const EMAIL = "lumen.bio.email";
-const PASSWORD = "lumen.bio.password";
+const LOCKED = "lumen.bio.locked";
+const SESSION = "lumen.bio.session";
+// Versões antigas guardavam a senha. Só lemos para migrar e apagar.
+const LEGACY_EMAIL = "lumen.bio.email";
+const LEGACY_PASSWORD = "lumen.bio.password";
+
+const KEYCHAIN = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
+// O próprio iOS exige a biometria para liberar este item, e ele deixa de valer
+// se o cadastro de biometria do aparelho mudar.
+const VAULT = Object.assign({ requireAuthentication: true }, KEYCHAIN);
 
 let skipAutoLogin = false;
 
 async function read(key) {
   try {
-    return (await SecureStore.getItemAsync(key)) || "";
+    return (await SecureStore.getItemAsync(key, KEYCHAIN)) || "";
   } catch (err) {
     return "";
   }
@@ -17,8 +25,8 @@ async function read(key) {
 
 async function write(key, value) {
   try {
-    if (!value) await SecureStore.deleteItemAsync(key);
-    else await SecureStore.setItemAsync(key, value);
+    if (!value) await SecureStore.deleteItemAsync(key, KEYCHAIN);
+    else await SecureStore.setItemAsync(key, value, KEYCHAIN);
   } catch (err) {}
 }
 
@@ -48,11 +56,53 @@ export const BiometricService = {
     return (await read(ENABLED)) === "1";
   },
 
-  async credentials() {
-    const email = await read(EMAIL);
-    const password = await read(PASSWORD);
+  async canResume() {
+    if ((await read(LOCKED)) === "1") return true;
+    return !!(await this.legacyCredentials());
+  },
+
+  async legacyCredentials() {
+    const email = await read(LEGACY_EMAIL);
+    const password = await read(LEGACY_PASSWORD);
     if (!email || !password) return null;
     return { email, password };
+  },
+
+  async purgeLegacyPassword() {
+    await write(LEGACY_EMAIL, "");
+    await write(LEGACY_PASSWORD, "");
+  },
+
+  // "Sair" com biometria ligada guarda a sessão no cofre em vez de encerrá-la.
+  // Devolve false quando não deu para guardar: quem chama encerra no servidor.
+  async lockSession(refreshToken) {
+    if (!refreshToken || !(await this.isEnabled())) return false;
+    try {
+      if (!SecureStore.canUseBiometricAuthentication()) return false;
+      await SecureStore.deleteItemAsync(SESSION, VAULT);
+      await SecureStore.setItemAsync(SESSION, refreshToken, VAULT);
+      await write(LOCKED, "1");
+      return true;
+    } catch (err) {
+      return false;
+    }
+  },
+
+  // Cancelar ou errar a biometria devolve "": a tela segue no login manual.
+  async unlockSession(prompt) {
+    try {
+      const options = Object.assign({ authenticationPrompt: prompt }, VAULT);
+      return (await SecureStore.getItemAsync(SESSION, options)) || "";
+    } catch (err) {
+      return "";
+    }
+  },
+
+  async clearLockedSession() {
+    await write(LOCKED, "");
+    try {
+      await SecureStore.deleteItemAsync(SESSION, VAULT);
+    } catch (err) {}
   },
 
   async authenticate(prompt) {
@@ -72,25 +122,17 @@ export const BiometricService = {
     }
   },
 
-  async enable(email, password) {
+  async enable() {
     const ok = await this.authenticate("Confirme para ativar o desbloqueio");
     if (!ok) return false;
     await write(ENABLED, "1");
-    if (email) await write(EMAIL, email);
-    if (password) await write(PASSWORD, password);
     return true;
-  },
-
-  async rememberLogin(email, password) {
-    if (!(await this.isEnabled())) return;
-    if (email) await write(EMAIL, email);
-    if (password) await write(PASSWORD, password);
   },
 
   async disable() {
     await write(ENABLED, "");
-    await write(EMAIL, "");
-    await write(PASSWORD, "");
+    await this.purgeLegacyPassword();
+    await this.clearLockedSession();
   },
 
   suppressAutoLogin() {

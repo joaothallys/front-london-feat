@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Field } from "../src/components/ui.js";
+import { isValidName, maskName } from "@shared/domain/masks.js";
 import { useAppState } from "../src/state/AppState.js";
 import { useStyles, useTheme } from "../src/theme.js";
 
@@ -40,12 +41,13 @@ export default function Onboarding() {
   const [days, setDays] = useState(4);
 
   function finish() {
-    state.profile.name = name;
+    const cleanName = name.trim();
+    state.profile.name = cleanName;
     state.profile.gender = gender;
     state.profile.goal = goal;
     state.profile.level = level;
     state.profile.days = days;
-    state.member.name = name;
+    state.member.name = cleanName;
     refresh();
     router.replace("/ai");
   }
@@ -63,7 +65,7 @@ export default function Onboarding() {
         {step === 0 ? (
           <>
             <Text style={styles.question}>Como podemos te chamar?</Text>
-            <Field label="Nome" value={name} onChangeText={setName} autoCapitalize="words" />
+            <Field label="Nome" value={name} onChangeText={(v) => setName(maskName(v))} autoCapitalize="words" />
           </>
         ) : null}
         {step === 1 ? (
@@ -103,7 +105,7 @@ export default function Onboarding() {
       <View style={styles.footer}>
         <Button
           label={step === 4 ? "Gerar meu plano" : "Continuar"}
-          disabled={step === 1 && !gender}
+          disabled={(step === 0 && !isValidName(name)) || (step === 1 && !gender)}
           onPress={() => (step < 4 ? setStep(step + 1) : finish())}
         />
         {step ? <Button ghost label="Voltar" onPress={() => setStep(step - 1)} /> : null}
