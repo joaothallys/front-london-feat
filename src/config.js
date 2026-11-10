@@ -1,7 +1,7 @@
 import { setApiBaseUrl } from "@shared/platform/env.js";
 
 const PROD = "https://back-lodon-feat-production.up.railway.app";
-const WEB = "https://lumenfit-web.vercel.app";
+const WEB = "https://www.lumenfit.com.br";
 
 export function resolveApiUrl() {
   const env = process.env.EXPO_PUBLIC_API_URL;
