@@ -4,6 +4,7 @@ import { catalog as D } from "../../catalog/index.js";
 import { ChestLibraryService } from "../exercises/ChestLibraryService.js";
 import { defaultLocations, ensurePartnerGyms, isLondonFit } from "../../domain/locations.js";
 import { mergeHistory, workoutName } from "../../domain/history.js";
+import { normalizeWeekdays } from "../../domain/weekdays.js";
 
 const EQUIPMENT_TO_API = { cabo: "polia", nenhum: "peso-corporal" };
 const EQUIPMENT_OK = { halteres: 1, barra: 1, polia: 1, maquina: 1, banco: 1, elastico: 1, kettlebell: 1, "peso-corporal": 1 };
@@ -123,6 +124,7 @@ function mapPlan(raw) {
       id: day.id || null,
       name: day.name || "Treino",
       focus: asList(day.focus || day.muscles),
+      weekdays: normalizeWeekdays(day.weekdays),
       items: mapItems(day.exercises || day.items)
     }))
   };
