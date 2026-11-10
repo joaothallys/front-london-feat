@@ -5,7 +5,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { api, unwrap } from "@shared/api/client.js";
 import { Empty, Screen, TopBar } from "../../src/components/ui.js";
 import { HapticPressable } from "../../src/components/HapticPressable.js";
+import { openWorkoutShare } from "../../src/session/presentSummary.js";
 import { useAppState } from "../../src/state/AppState.js";
+import { useLive } from "../../src/state/LiveSession.js";
 import { exerciseOf } from "../../src/catalog.js";
 import { useStyles, useTheme } from "../../src/theme.js";
 
@@ -28,6 +30,7 @@ export default function HistoryDetail() {
   const styles = useStyles(styleFactory);
   const { id } = useLocalSearchParams();
   const { state } = useAppState();
+  const { setSummary } = useLive();
   const local = (state.history || []).find((row) => String(row.id) === String(id)) || null;
   const [row, setRow] = useState(local);
 
@@ -61,9 +64,21 @@ export default function HistoryDetail() {
         }
       />
       {row ? (
-        <Text style={styles.meta}>
-          {(row.durationMin || row.duration || 0) + " min · " + Math.round(row.volumeKg || row.volume || 0) + " kg · " + (row.calories || 0) + " kcal"}
-        </Text>
+        <>
+          <Text style={styles.meta}>
+            {(row.durationMin || row.duration || 0) + " min · " + Math.round(row.volumeKg || row.volume || 0) + " kg · " + (row.calories || 0) + " kcal"}
+          </Text>
+          <HapticPressable
+            style={styles.share}
+            onPress={() => {
+              const local = (state.history || []).find((item) => String(item.id) === String(id)) || null;
+              openWorkoutShare(local, row, setSummary);
+            }}
+          >
+            <Ionicons name="share-outline" size={18} color="#fff" />
+            <Text style={styles.shareTxt}>Compartilhar</Text>
+          </HapticPressable>
+        </>
       ) : null}
       {exercises.length ? exercises.map((ex, i) => {
         const title = ex.name || nameOf(ex.exerciseId || ex.id);
@@ -89,6 +104,8 @@ function styleFactory(c) {
     card: { backgroundColor: c.surface, borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: "transparent" },
     name: { color: c.text, fontWeight: "800", marginBottom: 8 },
     set: { color: c.muted2, marginTop: 4 },
-    editBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" }
+    editBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.surface, alignItems: "center", justifyContent: "center" },
+    share: { height: 48, borderRadius: 16, backgroundColor: c.red, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 16 },
+    shareTxt: { color: "#fff", fontWeight: "800", fontSize: 15 }
   };
 }
