@@ -1,6 +1,7 @@
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { api } from "@shared/api/client.js";
 import { muscleArt } from "@shared/domain/muscle-art.js";
+import { buildPlanDays } from "@shared/domain/weekdays.js";
 import { exerciseOf } from "./catalog.js";
 
 export function ensureDay(state) {
@@ -105,6 +106,18 @@ function emptyPlan() {
   return { name: "Meu Plano", source: "custom", split: [] };
 }
 
+export function replacePlanDays(state, nextDays) {
+  if (!state.plan) state.plan = emptyPlan();
+  const split = buildPlanDays(nextDays);
+  if (!split.length) return;
+  state.plan.split = split;
+  state.plan.days = split.length;
+  if (state.profile) state.profile.days = split.length;
+  const current = Number(state.planDay) || 0;
+  if (current >= split.length) state.planDay = split.length - 1;
+  persistPlan(state);
+}
+
 export function removePlanDay(state, index) {
   if (!state.plan || !Array.isArray(state.plan.split) || !state.plan.split[index]) return;
   state.plan.split.splice(index, 1);
@@ -112,6 +125,8 @@ export function removePlanDay(state, index) {
     removePlan(state);
     return;
   }
+  state.plan.days = state.plan.split.length;
+  if (state.profile) state.profile.days = state.plan.split.length;
   const current = Number(state.planDay) || 0;
   if (current >= state.plan.split.length) state.planDay = state.plan.split.length - 1;
   else if (current > index) state.planDay = current - 1;
@@ -129,10 +144,14 @@ export function removePlan(state) {
 
 export function persistPlan(state) {
   if (SessionService.hasToken() && state.plan && state.plan.id) {
+    const split = Array.isArray(state.plan.split) ? state.plan.split : [];
     api.plans.update(state.plan.id, {
-      days: state.plan.split.map((day) => ({
+      daysPerWeek: split.length,
+      days: split.map((day, index) => ({
+        position: index,
         name: day.name,
         focus: day.focus || [],
+        weekdays: day.weekdays || [],
         exercises: SessionService.payloadItems(day.items)
       }))
     }).catch(() => {});

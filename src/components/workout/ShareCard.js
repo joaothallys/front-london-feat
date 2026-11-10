@@ -8,6 +8,12 @@ import { fmtDuration, fmtInt } from "../../workout/stats.js";
 export const CARD_W = 360;
 export const CARD_H = 640;
 
+// Faixas que o Instagram cobre nos Stories: no topo, a barra de progresso, o
+// @ do perfil e a música; embaixo, o campo "Enviar mensagem". A Meta pede
+// ~250 px de 1920 livres em cada ponta, o que dá ~84 pt aqui.
+const SAFE_TOP = 92;
+const SAFE_BOTTOM = 96;
+
 export const TEMPLATES = [
   { id: "hero", label: "Destaque" },
   { id: "list", label: "Exercícios" },
@@ -45,7 +51,7 @@ function Backdrop({ photo, template }) {
               <Stop offset="1" stopColor="#000" stopOpacity="0.92" />
             </LinearGradient>
           </Defs>
-          <Rect x="0" y="0" width={CARD_W} height="150" fill="url(#top)" />
+          <Rect x="0" y="0" width={CARD_W} height={SAFE_TOP + 130} fill="url(#top)" />
           <Rect x="0" y={heavy ? 200 : 300} width={CARD_W} height={heavy ? 440 : 340} fill="url(#bottom)" />
         </Svg>
       </>
@@ -216,13 +222,13 @@ const styles = {
   fill: { position: "absolute", top: 0, left: 0, width: CARD_W, height: CARD_H },
   watermark: { position: "absolute", width: 300, height: 300, borderRadius: 150, right: -90, top: 120, opacity: 0.08 },
 
-  top: { position: "absolute", top: 26, left: 24, right: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  top: { position: "absolute", top: SAFE_TOP, left: 24, right: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   brand: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "rgba(0,0,0,0.35)", paddingVertical: 6, paddingLeft: 6, paddingRight: 12, borderRadius: 20 },
   brandLogo: { width: 22, height: 22, borderRadius: 11 },
   brandTxt: { color: WHITE, fontWeight: "900", letterSpacing: 2, fontSize: 11 },
   date: { color: WHITE, fontWeight: "800", letterSpacing: 1.5, fontSize: 11 },
 
-  bottom: { position: "absolute", left: 24, right: 24, bottom: 26 },
+  bottom: { position: "absolute", left: 24, right: 24, bottom: SAFE_BOTTOM },
   kicker: { color: RED, fontWeight: "900", letterSpacing: 2, fontSize: 11, marginBottom: 6 },
   name: { color: WHITE, fontWeight: "900", fontSize: 32, lineHeight: 36, letterSpacing: -0.5 },
   muscles: { color: SOFT, fontWeight: "600", fontSize: 13, marginTop: 6 },

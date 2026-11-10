@@ -8,12 +8,15 @@ import { Empty, Row } from "../../src/components/ui.js";
 import { ExerciseThumb } from "../../src/components/ExerciseThumb.js";
 import { HapticPressable } from "../../src/components/HapticPressable.js";
 import Swipeable from "../../src/components/Swipeable.js";
+import { openWorkoutShare } from "../../src/session/presentSummary.js";
 import { useAppState } from "../../src/state/AppState.js";
+import { useLive } from "../../src/state/LiveSession.js";
 import { useStartWorkout } from "../../src/session/useStartWorkout.js";
 import { D, exerciseOf } from "../../src/catalog.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { api } from "@shared/api/client.js";
 import { removePlan, removePlanDay } from "../../src/plan.js";
+import { weekdaySummary } from "@shared/domain/weekdays.js";
 import { fmtInt } from "../../src/workout/stats.js";
 import { useStyles, useTheme } from "../../src/theme.js";
 
@@ -23,6 +26,13 @@ const TABS = [
   ["plans", "Planos"],
   ["programs", "Programas"]
 ];
+
+function planDaySubtitle(day) {
+  const count = (day.items || []).length;
+  const exercises = count + " exercício" + (count === 1 ? "" : "s");
+  const when = weekdaySummary(day);
+  return when ? when + " · " + exercises : exercises;
+}
 
 function fmtDate(iso) {
   if (!iso) return "—";
@@ -53,6 +63,7 @@ export default function Workouts() {
   const styles = useStyles(styleFactory);
   const params = useLocalSearchParams();
   const { state, refresh } = useAppState();
+  const { setSummary } = useLive();
   const startWorkout = useStartWorkout();
   const [tab, setTab] = useState(params.open === "saved" ? "saved" : "done");
   const saved = state.custom || [];
@@ -92,6 +103,7 @@ export default function Workouts() {
         style: "destructive",
         onPress: () => {
           removePlanDay(state, index);
+          if (SessionService.hasToken()) SessionService.pushProfile(state).catch(() => {});
           refresh();
         }
       }
@@ -184,6 +196,14 @@ export default function Workouts() {
                         ) : null}
                       </View>
                     </HapticPressable>
+                    <HapticPressable
+                      style={styles.editBtn}
+                      onPress={() => openWorkoutShare(h, null, setSummary)}
+                      hitSlop={8}
+                      accessibilityLabel="Compartilhar treino"
+                    >
+                      <Ionicons name="share-outline" size={16} color={colors.muted} />
+                    </HapticPressable>
                     <EditBtn
                       styles={styles}
                       colors={colors}
@@ -271,7 +291,7 @@ export default function Workouts() {
                 >
                   <Row
                     title={d.name}
-                    subtitle={(d.items || []).length + " exercício" + ((d.items || []).length === 1 ? "" : "s")}
+                    subtitle={planDaySubtitle(d)}
                     thumb={<ExerciseThumb exercise={exerciseOf(d.items && d.items[0] && d.items[0].id)} />}
                     onPress={() => startSplit(d, i)}
                     right={

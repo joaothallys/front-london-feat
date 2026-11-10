@@ -2,7 +2,7 @@
   "expo": {
     "name": "LumenFit",
     "slug": "lumenfit",
-    "version": "1.0.11",
+    "version": "1.0.12",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": [
@@ -16,7 +16,7 @@
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.londonfitness.app",
       "appleTeamId": "2572AZCAGV",
-      "buildNumber": "20",
+      "buildNumber": "21",
       "entitlements": {
         "com.apple.security.application-groups": [
           "group.com.londonfitness.app"
@@ -33,6 +33,7 @@
         "NSFaceIDUsageDescription": "O LumenFit usa o Face ID para desbloquear o app no iPhone.",
         "NSLocalNetworkUsageDescription": "O LumenFit usa a rede local para carregar o app a partir do computador de desenvolvimento.",
         "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["instagram-stories", "instagram"],
         "NSSupportsLiveActivities": true,
         "NSSupportsLiveActivitiesFrequentUpdates": true,
         "UIRequiresFullScreen": true,

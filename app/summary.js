@@ -1,6 +1,7 @@
-import React, { useMemo, useRef, useState } from "react";
-import { Alert, Linking, ScrollView, Share, Text, View, useWindowDimensions } from "react-native";
-import { router } from "expo-router";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Alert, Linking, Platform, ScrollView, Share, Text, View, useWindowDimensions } from "react-native";
+import RNShare from "react-native-share";
+import { router, useLocalSearchParams } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,10 +9,12 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import * as Sharing from "expo-sharing";
 import { captureRef } from "react-native-view-shot";
+import { api, unwrap } from "@shared/api/client.js";
 import { store } from "@shared/store/local-store.js";
 import { HapticPressable } from "../src/components/HapticPressable.js";
+import { presentSummary } from "../src/session/presentSummary.js";
 import { CARD_H, CARD_W, ShareCard, TEMPLATES } from "../src/components/workout/ShareCard.js";
-import { INSTAGRAM_HANDLE, resolveStoreUrl } from "../src/config.js";
+import { FACEBOOK_APP_ID, INSTAGRAM_HANDLE, resolveStoreUrl } from "../src/config.js";
 import { createShareLink, shareUrl } from "../src/session/shareLink.js";
 import { SessionService } from "@shared/services/account/SessionService.js";
 import { useAppState } from "../src/state/AppState.js";
@@ -25,16 +28,24 @@ function cancelled(err) {
   return msg.indexOf("User did not share") >= 0 || msg.indexOf("cancel") >= 0;
 }
 
+function one(value) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export default function Summary() {
   const { colors } = useTheme();
   const styles = useStyles(styleFactory);
   const win = useWindowDimensions();
+  const params = useLocalSearchParams();
+  const historyId = String(one(params.history) || "");
   const { summary, setSummary } = useLive();
   const { state, refresh } = useAppState();
   const exportRef = useRef(null);
-  const [photo, setPhoto] = useState(() => (summary && summary.photo) || null);
+  const matches = !historyId || (summary && String(summary.id) === historyId);
+  const [photo, setPhoto] = useState(() => (matches && summary && summary.photo) || null);
   const [tpl, setTpl] = useState(0);
   const [busy, setBusy] = useState("");
+  const [missing, setMissing] = useState(false);
 
   // Prévia: o mesmo card de 360×640, só que em escala.
   const previewH = Math.min(win.height * 0.5, (win.width - 72) * (CARD_H / CARD_W));
@@ -59,6 +70,37 @@ export default function Summary() {
 
   const count = ((state.history || []).length) || 1;
   const template = TEMPLATES[tpl] || TEMPLATES[0];
+  const replay = !!historyId;
+
+  // Quando o treino aberto muda, a foto passa a ser a dele.
+  const shownId = matches && summary ? summary.id : null;
+  const [photoFor, setPhotoFor] = useState(shownId);
+  if (photoFor !== shownId) {
+    setPhotoFor(shownId);
+    setPhoto((summary && summary.photo) || null);
+  }
+
+  useEffect(() => {
+    if (!historyId) return undefined;
+    let cancelled = false;
+    (async () => {
+      const local = (store.get().history || []).find((row) => String(row.id) === historyId) || null;
+      if (local) setSummary(presentSummary(local, null));
+      let remote = null;
+      try {
+        remote = unwrap(await api.history.get(historyId));
+      } catch (err) {
+        remote = null;
+      }
+      if (cancelled) return;
+      if (!local && !remote) {
+        setMissing(true);
+        return;
+      }
+      setSummary(presentSummary(local, remote));
+    })();
+    return () => { cancelled = true; };
+  }, [historyId, setSummary]);
 
   function cycleTpl(dir) {
     setTpl((n) => (n + dir + TEMPLATES.length) % TEMPLATES.length);
@@ -71,6 +113,10 @@ export default function Summary() {
 
   function done() {
     refresh();
+    if (replay) {
+      router.back();
+      return;
+    }
     router.replace("/(tabs)/home");
   }
 
@@ -162,8 +208,20 @@ export default function Summary() {
     }
   }
 
-  // Só a imagem: o Instagram abre direto em Stories/Feed a partir da folha do iOS.
+  // Abre o editor de Stories do Instagram com a imagem já como fundo. A
+  // extensão do Instagram na folha do iOS não consegue abrir o app sozinha
+  // (escolher Stories/Reels ali não faz nada), por isso ela fica só de reserva.
   const postStory = () => run("story", async (uri) => {
+    if (Platform.OS === "ios" && FACEBOOK_APP_ID && (await Linking.canOpenURL("instagram-stories://share"))) {
+      await RNShare.shareSingle({
+        social: RNShare.Social.INSTAGRAM_STORIES,
+        appId: FACEBOOK_APP_ID,
+        backgroundImage: uri,
+        backgroundTopColor: "#000000",
+        backgroundBottomColor: "#000000"
+      });
+      return;
+    }
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(uri, { mimeType: "image/png", UTI: "public.png", dialogTitle: "Postar nos Stories" });
     } else {
@@ -203,13 +261,15 @@ export default function Summary() {
     }
   });
 
-  if (!summary || !stats) {
+  if (!matches || !summary || !stats) {
     return (
       <SafeAreaView style={[styles.safe, styles.empty]}>
-        <Text style={styles.emptyTxt}>Nenhum treino para mostrar.</Text>
-        <HapticPressable onPress={done} style={styles.primary}>
-          <Text style={styles.primaryTxt}>Voltar ao início</Text>
-        </HapticPressable>
+        <Text style={styles.emptyTxt}>{missing ? "Não foi possível abrir este treino." : "Abrindo o treino…"}</Text>
+        {missing ? (
+          <HapticPressable onPress={done} style={styles.primary}>
+            <Text style={styles.primaryTxt}>Voltar</Text>
+          </HapticPressable>
+        ) : null}
       </SafeAreaView>
     );
   }
@@ -218,11 +278,11 @@ export default function Summary() {
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <View style={styles.head}>
         <View style={styles.headText}>
-          <Text style={styles.kicker}>SEU {count}º TREINO</Text>
-          <Text style={styles.title}>Bom trabalho! 🎉</Text>
+          <Text style={styles.kicker}>{replay ? "COMPARTILHAR" : "SEU " + count + "º TREINO"}</Text>
+          <Text style={styles.title} numberOfLines={1}>{replay ? stats.name : "Bom trabalho! 🎉"}</Text>
         </View>
         <HapticPressable onPress={done} hitSlop={10} style={styles.doneBtn} accessibilityLabel="Concluir">
-          <Text style={styles.doneTxt}>Concluir</Text>
+          <Text style={styles.doneTxt}>{replay ? "Voltar" : "Concluir"}</Text>
         </HapticPressable>
       </View>
 

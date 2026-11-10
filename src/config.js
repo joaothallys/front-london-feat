@@ -28,5 +28,10 @@ export function resolveStoreUrl() {
   return resolveWebUrl();
 }
 
+// App ID da Meta (developers.facebook.com). O Instagram só abre o editor de
+// Stories com a imagem pronta quando recebe esse ID; sem ele o app usa a
+// folha de compartilhar do sistema.
+export const FACEBOOK_APP_ID = (process.env.EXPO_PUBLIC_FACEBOOK_APP_ID || "").trim();
+
 // Perfil do Instagram que reposta os treinos.
 export const INSTAGRAM_HANDLE = (process.env.EXPO_PUBLIC_INSTAGRAM_HANDLE || "londonfitness").replace(/^@/, "");

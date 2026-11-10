@@ -44,7 +44,9 @@ import { shareTitle } from "../../src/share.js";
 import { createShareLink, shareItem } from "../../src/session/shareLink.js";
 import { NumberPad } from "../../src/components/NumberPad.js";
 import Swipeable from "../../src/components/Swipeable.js";
-import { applyLoadToDay, dayMuscles, ensureDay, persistPlan, removeExerciseFromDay, updateDayItem } from "../../src/plan.js";
+import { PlanDaysSheet } from "../../src/components/workout/PlanDaysSheet.js";
+import { applyLoadToDay, dayMuscles, ensureDay, persistPlan, removeExerciseFromDay, replacePlanDays, updateDayItem } from "../../src/plan.js";
+import { dayChipLabel } from "@shared/domain/weekdays.js";
 import { computeWorkoutStats } from "../../src/workout/stats.js";
 import { finishBody } from "../../src/session/finishPayload.js";
 import { isRetryable, queueSession } from "../../src/session/pendingSync.js";
@@ -61,6 +63,7 @@ export default function Home() {
   const [loadEdit, setLoadEdit] = useState(null);
   const [iaBusy, setIaBusy] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [daysEdit, setDaysEdit] = useState(false);
   const iaRetry = !!(state.plan && state.plan.iaFailed);
   const days = (state.plan && state.plan.split) || [];
   const dayIndex = days.length ? Math.max(0, Math.min(state.planDay || 0, days.length - 1)) : 0;
@@ -302,15 +305,23 @@ export default function Home() {
             const on = idx === dayIndex;
             return (
               <HapticPressable
-                key={idx}
+                key={(d.id || d.name || "dia") + "-" + idx}
                 style={[styles.dayTab, on && styles.dayTabOn]}
                 onPress={() => { state.planDay = idx; refresh(); }}
               >
-                <Text style={[styles.dayTxt, on && styles.dayTxtOn]}>DIA {idx + 1}</Text>
+                <Text style={[styles.dayTxt, on && styles.dayTxtOn]} numberOfLines={1}>{dayChipLabel(d, idx)}</Text>
                 {d.name ? <Text style={[styles.dayName, on && styles.dayNameOn]} numberOfLines={1}>{shortDayName(d.name)}</Text> : null}
               </HapticPressable>
             );
           })}
+          <HapticPressable
+            style={[styles.dayTab, styles.dayEdit]}
+            onPress={() => setDaysEdit(true)}
+            accessibilityLabel="Editar dias do plano"
+          >
+            <Ionicons name="pencil" size={14} color={colors.muted2} />
+            <Text style={styles.dayName}>Editar</Text>
+          </HapticPressable>
         </ScrollView>
       ) : null}
 
@@ -465,11 +476,28 @@ export default function Home() {
 
       <GifPreview visible={!!gif} uri={gif && gif.uri} title={gif && gif.title} exerciseId={gif && gif.id} onClose={() => setGif(null)} />
 
+      <PlanDaysSheet
+        visible={daysEdit}
+        days={days}
+        onClose={() => setDaysEdit(false)}
+        onSave={(next) => {
+          replacePlanDays(state, next);
+          if (SessionService.hasToken()) SessionService.pushProfile(state).catch(() => {});
+          refresh();
+          setDaysEdit(false);
+        }}
+      />
+
       {menu && menu.type === "list" ? (
       <DismissSheet onClose={() => setMenu(null)}>
         <View style={styles.sheetHead}>
           <Text style={styles.sheetTitle}>{(day && day.name) || "Meu Plano"}</Text>
         </View>
+        <SheetRow
+          icon="calendar-outline"
+          label="Editar dias"
+          onPress={() => { setMenu(null); setDaysEdit(true); }}
+        />
         <SheetRow
           icon="bookmark-outline"
           label="Salvar treino"
@@ -692,7 +720,8 @@ function styleFactory(c) {
   days: { gap: 8, paddingBottom: 12 },
   dayTab: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, backgroundColor: c.surface, borderWidth: 1, borderColor: "transparent", minWidth: 64 },
   dayTabOn: { backgroundColor: c.redSoft, borderColor: c.red },
-  dayTxt: { color: c.muted, fontWeight: "800", fontSize: 11, letterSpacing: 0.6 },
+  dayEdit: { alignItems: "center", justifyContent: "center", minWidth: 72 },
+  dayTxt: { color: c.muted, fontWeight: "800", fontSize: 11, letterSpacing: 0.6, maxWidth: 132 },
   dayTxtOn: { color: c.text },
   dayName: { color: c.muted, fontSize: 12, fontWeight: "600", marginTop: 2, maxWidth: 140 },
   dayNameOn: { color: c.muted2 },
